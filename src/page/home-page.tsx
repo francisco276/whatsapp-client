@@ -38,38 +38,37 @@ export default function HomePage() {
 
   return (
     <>
-
       <Flex className='w-screen h-screen' justify='center' align='center' >
         {isLoadingWorkspace && <Loader size="large" />}
         {isErrorWorkspace && <FormWorkspace workspaceId={workspaceId} />}
+        {!isErrorWorkspace && (
+          <SessionProvider>
+            <Box>
+              <Flex align='stretch' className='min-h-screen'>
+                <SessionSidebar
+                  workspaceId={workspaceId}
+                  sessions={data?.sessions || []}
+                  isLoading={isLoading}
+                  error={isError}
+                />
+                {isError && <Flex align='center' justify='center' className='mx-auto' ><Error errorMessage={ERROR_SERVER_ERROR} /></Flex>}
+
+                {(!isError && !isLoading) &&
+                  (
+                    <ChatProvider>
+                      <>
+                        <ChatsSidebar workspaceId={workspaceId} />
+                        <Chat workspaceId={workspaceId} />
+                      </>
+                    </ChatProvider>
+                  )
+                }
+              </Flex>
+            </Box>
+          </SessionProvider>
+        )
+        }
       </Flex>
-      {!isErrorWorkspace && (
-        <SessionProvider>
-          <Box>
-            <Flex align='stretch' className='min-h-screen'>
-              <SessionSidebar
-                workspaceId={workspaceId}
-                sessions={data?.sessions || []}
-                isLoading={isLoading}
-                error={isError}
-              />
-              {isError && <Flex align='center' justify='center' className='mx-auto' ><Error errorMessage={ERROR_SERVER_ERROR} /></Flex>}
-
-              (!isError && !isLoading) &&
-              (
-              <ChatProvider>
-                <>
-                  <ChatsSidebar workspaceId={workspaceId} />
-                  <Chat workspaceId={workspaceId} />
-                </>
-              </ChatProvider>
-              )
-            </Flex>
-          </Box>
-        </SessionProvider>
-      )
-      }
     </>
-
   )
 }
