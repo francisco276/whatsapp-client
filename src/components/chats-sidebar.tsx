@@ -21,7 +21,7 @@ const ChatsSidebar = ({ workspaceId }: ChatsSidebarProps) => {
   const [chatsSidebarOpen, setChatsSidebarOpen] = useState(true)
 
   const { data, isLoading, isSuccess, isPending, isError } = useQuery({
-    queryKey: ['getSessions', session],
+    queryKey: ['getChats', session],
     queryFn: () => getChats({ workspaceId, sessionId: session }),
     enabled: !!session
   })
