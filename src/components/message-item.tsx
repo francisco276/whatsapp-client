@@ -33,14 +33,17 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
   const { data: contact } = useQuery({
     queryKey: ['getContact', participant],
     queryFn: () => getContact({ id: participant, workspaceId, sessionId }),
-    enabled: isAGroup
+    enabled: isAGroup,
+    refetchOnWindowFocus: false,
+    staleTime: 1440 * 60 * 1000
   })
-
 
   const { data: mediaUrl } = useQuery({
     queryKey: ['getMedia', message],
     queryFn: () => downloadMedia({ workspaceId, sessionId, message: originalMessage }),
     enabled: (isImage || isVideo || isSticker),
+    refetchOnWindowFocus: false,
+    staleTime: 1440 * 60 * 1000
   })
 
 

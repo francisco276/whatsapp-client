@@ -42,7 +42,9 @@ export const Chat = ({ workspaceId }: ChatProps) => {
   const { data: contact } = useQuery({
     queryKey: ['getContact', chat],
     queryFn: () => getContact({ id: chat, workspaceId, sessionId: session }),
-    enabled: !!chat
+    enabled: !!chat,
+    refetchOnWindowFocus: false,
+    staleTime: 1440 * 60 * 1000
   })
 
   const allMessages = groupMessagesByDate((messagesData?.pages.flatMap(page => page.data) ?? [])
