@@ -72,8 +72,9 @@ export const AddSession = ({ isToggle, workspaceId, disabled }: { isToggle: bool
       <Modal
         id="modal-basic-small"
         show={isOpen}
-        size="small"
+        size="medium"
         onClose={handleClose}
+        alertModal
       >
         <ModalBasicLayout>
           <ModalHeader
