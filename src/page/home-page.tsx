@@ -44,7 +44,7 @@ export default function HomePage() {
         {!isErrorWorkspace && (
           <SessionProvider>
             <Box>
-              <Flex align='stretch' className='min-h-screen'>
+              <Flex align='stretch' className='min-h-screen w-screen'>
                 <SessionSidebar
                   workspaceId={workspaceId}
                   sessions={data?.sessions || []}
