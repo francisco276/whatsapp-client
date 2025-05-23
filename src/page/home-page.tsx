@@ -41,7 +41,7 @@ export default function HomePage() {
       <Flex className='w-screen h-screen' justify='center' align='center' >
         {isLoadingWorkspace && <Loader size="large" />}
         {isErrorWorkspace && <FormWorkspace workspaceId={workspaceId} />}
-        {!isErrorWorkspace && (
+        {(!isErrorWorkspace && !isLoadingWorkspace) && (
           <SessionProvider>
             <Box>
               <Flex align='stretch' className='min-h-screen w-screen'>
