@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Button, Avatar } from '@vibe/core'
 import { getProfile } from '../lib/services/profile'
 import { PersonRound } from '@vibe/icons'
+import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 
 type SessionButtonProps = {
-  workspaceId: string
   sessionId: string
   isSelected: boolean
   onClick: () => void
@@ -12,12 +12,12 @@ type SessionButtonProps = {
 }
 
 export const SessionButton = ({
-  workspaceId,
   sessionId,
   isSelected,
   onClick,
   isToggle
 }: SessionButtonProps) => {
+  const workspaceId = useWorkspaceId()
   const { data: session } = useQuery({
     queryKey: [sessionId],
     queryFn: () => getProfile({ workspaceId, sessionId }),

@@ -15,7 +15,6 @@ type Session = {
 
 type SessionSidebarProps = {
   sessions: Session[],
-  workspaceId: string
   isLoading?: boolean
   error?: boolean
 }
@@ -43,7 +42,6 @@ const SessionSidebar = ({ workspaceId, sessions = [], isLoading = false, error }
       { isLoading && <SideBarList /> }
       {!isLoading && sessions.map(session => (
         <SessionButton
-          workspaceId={workspaceId}
           sessionId={session.id}
           key={session.id}
           onClick={() => setSession(session.id)}
