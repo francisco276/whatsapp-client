@@ -30,3 +30,20 @@ export const getContact = async ({ workspaceId, sessionId, id }: { workspaceId: 
     throw new Error('Error on fetch contact')
   }
 }
+
+export const isValidContact = async ({ workspaceId, sessionId, id }: { workspaceId: string, sessionId: string, id: string }) => {
+  try {
+    const response = await api
+      .post(
+        `${workspaceId}/${sessionId}${ROUTE}/valid`,
+        { id },
+        { timeout: 0 }
+      )
+
+    const { isValid } = response.data as { isValid: boolean }
+
+    return isValid
+  } catch (error) {
+    throw new Error('Error on fetch contact')
+  }
+}
