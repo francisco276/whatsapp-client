@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addSession } from '../lib/services/sessions'
 
 import { Button, Flex, Skeleton, Toast, ToastType } from "@vibe/core"
@@ -7,8 +7,11 @@ import { Modal, ModalHeader, ModalContent, ModalFooter, ModalBasicLayout } from 
 import { Add } from '@vibe/icons'
 import { SocketClient } from '../lib/socket'
 import { handlerUpdateQrCode, handlerConnection } from '../lib/socket-handlers/session'
+import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 
-export const AddSession = ({ isToggle, workspaceId, disabled }: { isToggle: boolean, workspaceId: string, disabled?: boolean }) => {
+export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled?: boolean }) => {
+  const queryClient = useQueryClient()
+  const workspaceId = useWorkspaceId()
   const [socket, setSocket] = useState<SocketClient | null>()
   const [qrCode, setQrCode] = useState<string | null>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -40,6 +43,7 @@ export const AddSession = ({ isToggle, workspaceId, disabled }: { isToggle: bool
       handlerConnection(socket, ({ error, message, insert }) => {
         if (insert) {
           setToast({ type: 'positive', message })
+          queryClient.invalidateQueries({ queryKey: ['getSessions', workspaceId] })
         }
 
         if (error) {
