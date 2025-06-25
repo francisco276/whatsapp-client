@@ -26,3 +26,18 @@ export const getSessions = async ({ workspaceId }: { workspaceId: string }) => {
     throw new Error('Error on fetch sessions')
   }
 }
+
+export const deleteSession = async ({ workspaceId, sessionId }: { workspaceId: string, sessionId: string }) => {
+  try {
+    const response = await api.delete(`${ROUTE}`, {
+      data: {
+        workspaceId,
+        sessionId
+      }
+    })
+
+    return response.data as { sessions: { id: string }[] }
+  } catch (error) {
+    throw new Error('Error on delete sessions')
+  }
+}
