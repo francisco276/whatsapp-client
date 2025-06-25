@@ -1,11 +1,21 @@
 import mondaySdk, { MondayClientSdk } from 'monday-sdk-js'
+import { MondayQuery } from './query'
+import { MondayRequest } from './request'
 import { MONDAY_API_VERSION } from '../../config/constants'
+import { MondayListenResponse } from '@/types/monday'
+import { MondayMutation } from './mutations'
 
 export class MondayApi {
   private monday: MondayClientSdk
+  private requestor: MondayRequest
+  public query: MondayQuery
+  public mutation: MondayMutation
 
   constructor() {
     this.monday = mondaySdk({ apiVersion: MONDAY_API_VERSION })
+    this.requestor = new MondayRequest(this.monday)
+    this.query = new MondayQuery(this.requestor)
+    this.mutation = new MondayMutation(this.requestor)
   }
 
   async getContext() {
