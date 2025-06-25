@@ -3,9 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChatContext } from '../providers/chat/chat-context'
 import { SessionContext } from '../providers/session/session-context'
 import { sendMessage } from '../../lib/services/messages'
-import { Button } from '@vibe/core'
+import { Flex, IconButton, TextArea } from '@vibe/core'
+import { Send } from '@vibe/icons'
 
-export const MessageInput = () => {
+export const MessageInput = ({ workspaceId }: { workspaceId: string }) => {
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
   const queryClient = useQueryClient()
@@ -13,20 +14,18 @@ export const MessageInput = () => {
 
   const { mutate } = useMutation({
     mutationFn: sendMessage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mesages', session, chat] })
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
   })
 
-  function handleSubmit(event: MouseEvent<HTMLButtonElement>) {
+  function handleSubmit(event: MouseEvent) {
     try {
       event.preventDefault()
       if (message) {
         mutate({
           chatId: chat,
           sessionId: session,
-          workspaceId: '1234',
-          message
+          workspaceId,
+          message: message.trim()
         })
         setMessage('')
       }
@@ -35,23 +34,27 @@ export const MessageInput = () => {
     }
   }
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+  function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     setMessage(event.target.value)
   }
   return (
-    <div className='flex'>
-      <input
-        type="text"
-        placeholder="Type a message..."
+    <Flex align='center' gap={20}>
+      <TextArea
+        size='small'
+        placeholder='Escribe tu mensaje'
         value={message}
         onChange={handleChange}
-        className="w-full p-2 border rounded"
+        resize={false}
+        allowExceedingMaxLength
+        rows={1}
       />
-      <Button
+      <IconButton
+        ariaLabel='Enviar mensaje'
+        kind='primary'
+        icon={Send}
         onClick={handleSubmit}
-      >
-        Send message
-      </Button>
-    </div>
+        disabled={message === ''}
+      />
+    </Flex>
   )
 }
