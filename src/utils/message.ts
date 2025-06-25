@@ -3,7 +3,7 @@ export const ADITIONAL_SPACE_CHAT = 46
 const ADITIONAL_SPACE_CHAT_GROUP = 66
 import { isWhatsAppGroup } from '../utils/whatsapp'
 import type { Message, MessageContent } from '../types/message'
-
+import { getFormatedDateToChat } from "./time"
 
 export const groupMessagesByDate = (messages: MessageItem[]): MessageItem[] => {
   const result: MessageItem[] = []
@@ -15,22 +15,16 @@ export const groupMessagesByDate = (messages: MessageItem[]): MessageItem[] => {
     const dayKey = date.toDateString()
 
     if (dayKey !== lastDate) {
-      const label = new Intl.DateTimeFormat(undefined, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
 
-      const labelFormated = label.charAt(0).toUpperCase() + label.slice(1)
+      const label = getFormatedDateToChat({ date })
 
       result.push({
-        id: labelFormated,
+        id: label,
         isAGroup: false,
         isMyMessage: false,
         timestamp: date,
         message: {
-          text: labelFormated,
+          text: label,
           isImage: false,
           isVideo: false,
           isDocument: false,
