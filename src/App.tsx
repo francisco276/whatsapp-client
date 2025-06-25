@@ -1,9 +1,12 @@
+import { Route, Switch } from 'wouter'
 import HomePage from './page/home-page'
 
 function App() {
   return (
     <>
-      <HomePage></HomePage>
+      <Switch>
+        <Route path="/" component={HomePage} />
+      </Switch>
     </>
   )
 }
