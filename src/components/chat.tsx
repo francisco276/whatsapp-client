@@ -66,7 +66,7 @@ export const Chat = ({ workspaceId }: ChatProps) => {
       {isError && <Flex align='center' justify='center' className='m-auto w-max-[80%]' ><Error errorMessage={ERROR_SERVER_ERROR} /></Flex>}
       {
         !isError && (
-          <div className="p-4 flex-1 flex">
+          <div className="flex flex-1">
             {
               <MessagesList
                 messages={allMessages}
@@ -77,8 +77,8 @@ export const Chat = ({ workspaceId }: ChatProps) => {
           </div>
         )
       }
-      <div className="p-4 border-t">
-        <MessageInput />
+      <div className="bg-white border-t border-gray-200 px-6 py-4">
+        <MessageInput workspaceId={workspaceId} />
       </div>
     </div>
   )
