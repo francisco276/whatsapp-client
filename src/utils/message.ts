@@ -192,8 +192,11 @@ export const formatMessage = ({ message, jid }: { message: string, jid: string }
 }
 
 export const getMessageSize = (message: MessageItem): number => {
-  let aditionalSpace = (message.isAGroup && !message.isMyMessage) ? ADITIONAL_SPACE_CHAT_GROUP : ADITIONAL_SPACE_CHAT
-  const charsPerLine = 50
+  let aditionalSpace = (message.isAGroup && !message.isMyMessage)
+    ? ADITIONAL_SPACE_CHAT_GROUP
+    : ADITIONAL_SPACE_CHAT
+
+  const charsPerLine = 51
 
   if (message.originalMessage) {
     const {
@@ -202,28 +205,37 @@ export const getMessageSize = (message: MessageItem): number => {
       isVideo,
       isDocument,
       isSticker,
-      // type,
       isForwarded
     } = getMessageAsString(message.originalMessage.message as WMessage)
 
-
-    if (isForwarded) {
-      aditionalSpace = aditionalSpace + 24
-    }
-
-    if (isSticker || isImage || isVideo) {
-      aditionalSpace = aditionalSpace + 200
-    }
-
-    if (isDocument) {
-      aditionalSpace = aditionalSpace + 50
-    }
+    if (isForwarded) aditionalSpace += 24
+    if (isSticker || isImage || isVideo) aditionalSpace += 200
+    if (isDocument) aditionalSpace += 50
 
     const lineHeight = text ? 24 : 1
-    const lines = Math.ceil((text?.length || 1) / charsPerLine)
+    const lines = text.split(/\r\n|\n|\r/)
+    let totalLines = 0
 
-    return aditionalSpace + (lines * lineHeight)
+    for (const line of lines) {
+      const words = line.split(' ')
+      let currentLineLength = 0
+      let lineCount = 1
+
+      for (const word of words) {
+        const wordLength = word.length + 1 // include space
+        if (currentLineLength + wordLength > charsPerLine) {
+          lineCount++
+          currentLineLength = wordLength
+        } else {
+          currentLineLength += wordLength
+        }
+      }
+
+      totalLines += lineCount
+    }
+
+    return aditionalSpace + (totalLines * lineHeight)
   }
 
-  return aditionalSpace + 24
+  return aditionalSpace + 8
 }
