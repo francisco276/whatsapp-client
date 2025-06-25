@@ -30,7 +30,13 @@ export type SessionAddedData = {
   insert?: boolean,
 }
 
-type EventData = QrUpdateData | SessionAddedData
+export type NotificationEvent = {
+  id: string
+  conversationTimestamp: number
+  unreadCount: number
+}
+
+type EventData = QrUpdateData | SessionAddedData | NotificationEvent
 
 type SocketStatus =
   'success' |
