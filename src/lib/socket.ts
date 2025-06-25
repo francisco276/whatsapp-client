@@ -19,6 +19,7 @@ export class SocketClient {
         workspaceId,
         sessionId
       },
+      multiplex: false
     })
   }
 
