@@ -4,7 +4,9 @@ import { isValidContact } from "@/lib/services/contacts"
 import { getColumnById } from '@/utils/utils'
 import { PublicError } from '@/errors/PublicError'
 import { ERROR_PHONE_NUMBER_INVALID, ERROT_ITEM_NOT_FOUNT } from '@/config/errors'
+import { ColumnValue } from '@/types/monday'
 
+type ColumnValuesResponse = { items: { column_values: ColumnValue[] } }
 
 export async function getSingleChatInformation({
   monday,
@@ -14,7 +16,7 @@ export async function getSingleChatInformation({
   itemId
 }: { monday: MondayApi, workspaceId: string, sessionId: string, phoneColumnId: string, itemId: string }) {
   try {
-    const { data } = await monday.query.getPhoneColumnsByIdsForItem(itemId)
+    const { data } = await monday.query.getPhoneColumnsByIdsForItem<ColumnValuesResponse>(itemId)
     const item = data.items[0]
 
     const columnValues = item['column_values']
