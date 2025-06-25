@@ -10,7 +10,7 @@ import { SideBarList } from './skeletons/sidebar-list'
 import { ChatList } from './list/chats-list'
 import { Error } from './error'
 import { ERROR_SERVER_ERROR } from '../config/errors'
-
+import { useRegisterNewMessage } from '@/hooks/useRegisterNewMessage'
 
 type ChatsSidebarProps = {
   workspaceId: string
@@ -26,9 +26,10 @@ const ChatsSidebar = ({ workspaceId }: ChatsSidebarProps) => {
     enabled: !!session
   })
 
+  useRegisterNewMessage({ workspaceId, chats: data?.chats })
+
   return (
-    <div className={`bg-gray-100 border-r border-r-gray-200 transition-all duration-300 flex flex-col ${chatsSidebarOpen ? 'w-64' : 'w-16'
-      }`}>
+    <div className={`bg-gray-100 border-r border-r-gray-200 transition-all duration-300 flex flex-col ${chatsSidebarOpen ? 'w-70' : 'w-20'}`}>
       <div className="p-4 flex justify-between items-center">
         <h2 className={`font-bold ${!chatsSidebarOpen && 'hidden'}`}>Chats</h2>
         <IconButton
@@ -47,9 +48,9 @@ const ChatsSidebar = ({ workspaceId }: ChatsSidebarProps) => {
             icon={Info}
           />
         )}
-        { isLoading && <SideBarList /> }
-        { isError && <Error errorMessage={ERROR_SERVER_ERROR} /> }
-        { isSuccess && <ChatList chats={data.chats} isToggle={chatsSidebarOpen} workspaceId={workspaceId} /> }
+        {isLoading && <SideBarList />}
+        {isError && <Error errorMessage={ERROR_SERVER_ERROR} />}
+        {isSuccess && <ChatList chats={data.chats} isToggle={chatsSidebarOpen} workspaceId={workspaceId} />}
       </div>
     </div>
   )
