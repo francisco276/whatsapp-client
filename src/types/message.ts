@@ -43,9 +43,64 @@ export type WMessage = {
     mimetype: string
     caption?: string
     title: string,
+    fileName: string
     contextInfo: {
       isForwarded: boolean
       forwardingScore: number
+    }
+  },
+  documentWithCaptionMessage: {
+    message: {
+      documentMessage: {
+        url: string
+        mimetype: string
+        caption?: string
+        title: string,
+        fileName: string,
+        contextInfo: {
+          isForwarded: boolean
+          forwardingScore: number
+        }
+      }
+    }
+  }
+  interactiveMessage?: {
+    body: {
+      text: string
+    },
+    header: {
+      hasMediaAttachment: boolean
+      imageMessage: {
+        url: string
+      }
+    }
+  },
+  templateMessage?: {
+    interactiveMessageTemplate: {
+      body: {
+        text: string
+      },
+      header: {
+        hasMediaAttachment: boolean
+        imageMessage: {
+          url: string
+        }
+      }
+    },
+    hydratedFourRowTemplate: {
+      hydratedContentText: string
+      imageMessage: {
+        url: string
+      }
+    }
+  },
+  editedMessage: {
+    message: {
+      protocolMessage: {
+        editedMessage: {
+          conversation: string
+        }
+      }
     }
   }
 }
