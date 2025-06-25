@@ -33,6 +33,7 @@ export const MessagesList = ({ messages = [], isLoading = false, onScroll }: Mes
       const lastMessageId = messagesElements[messagesElements.length - 1]?.id
       if (lastMessageId) setScrollToId(lastMessageId)
     }
+    if (isLoading && messages.length === 0) setScrollToId('')
   }, [messages, isLoading])
 
   const itemRenderer = useCallback((item: VirtualizedListItem, index: number, style: CSSProperties) => {
@@ -77,8 +78,7 @@ export const MessagesList = ({ messages = [], isLoading = false, onScroll }: Mes
   }, [])
 
   return (
-    <div className='w-full h-full flex flex-col'>
-      {scrollToId}
+    <div className='w-full flex flex-col'>
       <Flex justify='center'>
         {isLoading && <Loader size="small" />}
       </Flex>
