@@ -128,15 +128,53 @@ export const getMessageAsString = (message: WMessage): MessageContent => {
     }
   }
 
-  if (message.documentMessage) {
+  if (message.documentMessage || message.documentWithCaptionMessage) {
+    const documentMessage = message.documentMessage || message?.documentWithCaptionMessage?.message.documentMessage
+
     messageObject = {
       ...messageObject,
-      text: message.documentMessage.caption || '',
-      url: message.documentMessage.url,
-      documentTitle: message.documentMessage.title,
-      type: message.documentMessage.mimetype.split('/')[1],
+      text: documentMessage.caption || '',
+      url: documentMessage.url,
+      documentTitle: documentMessage.fileName,
+      type: documentMessage.mimetype.split('/')[1],
       isDocument: true,
-      isForwarded: message.documentMessage.contextInfo?.isForwarded
+      isForwarded: documentMessage.contextInfo?.isForwarded
+    }
+  }
+  if (message.interactiveMessage) {
+    messageObject = {
+      ...messageObject,
+      text: message.interactiveMessage.body.text,
+      isImage: message.interactiveMessage?.header?.hasMediaAttachment || false,
+      url: message.interactiveMessage?.header?.imageMessage.url || ''
+    }
+  }
+
+  if (message.templateMessage) {
+    if (message.templateMessage.interactiveMessageTemplate) {
+      messageObject = {
+        ...messageObject,
+        text: message.templateMessage.interactiveMessageTemplate.body.text,
+        isImage: message.templateMessage.interactiveMessageTemplate.header.hasMediaAttachment,
+        url: message.templateMessage.interactiveMessageTemplate.header.imageMessage.url
+      }
+    }
+
+    if (message.templateMessage.hydratedFourRowTemplate) {
+      messageObject = {
+        ...messageObject,
+        text: message.templateMessage.hydratedFourRowTemplate.hydratedContentText,
+        isImage: !!message.templateMessage.hydratedFourRowTemplate?.imageMessage?.url,
+        url: message.templateMessage.hydratedFourRowTemplate?.imageMessage?.url
+      }
+    }
+  }
+
+  if (message.editedMessage) {
+    const editedMessage = message.editedMessage
+    messageObject = {
+      ...messageObject,
+      text: editedMessage.message.protocolMessage.editedMessage.conversation
     }
   }
 
