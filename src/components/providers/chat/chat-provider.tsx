@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ChatContext } from './chat-context'
 
-export const ChatProvider = ({ children }: { children: React.ReactElement }) => {
-  const [chat, setChat] = useState<string>('')
+export const ChatProvider = ({ children, chatId }: { children: React.ReactElement, chatId?: string }) => {
+  const [chat, setChat] = useState<string>(chatId ?? '')
 
   const value = { chat, setChat }
 
