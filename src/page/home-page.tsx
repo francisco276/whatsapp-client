@@ -12,11 +12,14 @@ import { Error } from '../components/error'
 import { ERROR_SERVER_ERROR } from '../config/errors'
 import { getWorkspace } from '../lib/services/workspaces.ts'
 import { FormWorkspace } from '../components/form-workspace.tsx'
+import { WithAuthorization } from '@/components/with-authorization.tsx'
+import { WorkspaceProvider } from '@/components/providers/workspace/workspace-provider.tsx'
+
 
 export default function HomePage() {
   const monday = new MondayApi()
   const { context } = useContext({ monday })
-  const { workspaceId } = context
+  const { workspaceId, userId } = context
 
   const {
     isError: isErrorWorkspace,
@@ -29,46 +32,61 @@ export default function HomePage() {
   const {
     data,
     isError,
-    isLoading,
+    isLoading
   } = useQuery({
-    queryKey: ['getSessions'],
+    queryKey: ['getSessions', workspaceId],
     queryFn: () => getSessions({ workspaceId }),
     enabled: !!workspaceId,
   })
 
+  if (isLoadingWorkspace) {
+    return (
+      <Flex className='w-screen h-screen' justify='center' align='center' >
+        <Loader size="large" />
+      </Flex>
+    )
+  }
+
+  if (isErrorWorkspace) {
+    return (
+      <Flex className='w-screen h-screen' justify='center' align='center' >
+        <FormWorkspace workspaceId={workspaceId} />
+      </Flex>
+    )
+  }
+
   return (
     <>
-      <Flex className='w-screen h-screen' justify='center' align='center' >
-        {isLoadingWorkspace && <Loader size="large" />}
-        {isErrorWorkspace && <FormWorkspace workspaceId={workspaceId} />}
-        {(!isErrorWorkspace && !isLoadingWorkspace) && (
-          <SessionProvider>
-            <Box>
-              <Flex align='stretch' className='min-h-screen w-screen'>
-                <SessionSidebar
-                  workspaceId={workspaceId}
-                  sessions={data?.sessions || []}
-                  isLoading={isLoading}
-                  error={isError}
-                />
-                {isError && <Flex align='center' justify='center' className='mx-auto' ><Error errorMessage={ERROR_SERVER_ERROR} /></Flex>}
+      <WorkspaceProvider workspaceId={workspaceId}>
+        <WithAuthorization userId={userId}>
+          <Flex className='w-screen h-screen' justify='center' align='center' >
+            <SessionProvider>
+              <Box>
+                <Flex align='stretch' className='min-h-screen w-screen'>
+                  <SessionSidebar
+                    sessions={data?.sessions || []}
+                    isLoading={isLoading}
+                    error={isError}
+                  />
+                  {isError && <Flex align='center' justify='center' className='mx-auto' ><Error errorMessage={ERROR_SERVER_ERROR} /></Flex>}
 
-                {(!isError && !isLoading) &&
-                  (
-                    <ChatProvider>
-                      <>
-                        <ChatsSidebar workspaceId={workspaceId} />
-                        <Chat workspaceId={workspaceId} />
-                      </>
-                    </ChatProvider>
-                  )
-                }
-              </Flex>
-            </Box>
-          </SessionProvider>
-        )
-        }
-      </Flex>
+                  {(!isError && !isLoading) &&
+                    (
+                      <ChatProvider>
+                        <>
+                          <ChatsSidebar workspaceId={workspaceId} />
+                          <Chat workspaceId={workspaceId} />
+                        </>
+                      </ChatProvider>
+                    )
+                  }
+                </Flex>
+              </Box>
+            </SessionProvider>
+          </Flex>
+        </WithAuthorization>
+      </WorkspaceProvider>
+
     </>
   )
 }
