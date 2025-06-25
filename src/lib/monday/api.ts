@@ -12,10 +12,14 @@ export class MondayApi {
   public mutation: MondayMutation
 
   constructor() {
-    this.monday = mondaySdk({ apiVersion: MONDAY_API_VERSION })
+    this.monday = mondaySdk({ apiVersion: MONDAY_API_VERSION, apiToken: 'eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjQ5MDc3NDM5NiwiYWFpIjoxMSwidWlkIjo2ODc0Mzc3MCwiaWFkIjoiMjAyNS0wMy0yNVQyMTowNDowNi4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MjA0NDE5OTIsInJnbiI6InVzZTEifQ.8OVSd52cG3-O--c0dfb4iAt6Le5b8ekbumKTPeR5Ne4' })
     this.requestor = new MondayRequest(this.monday)
     this.query = new MondayQuery(this.requestor)
     this.mutation = new MondayMutation(this.requestor)
+  }
+
+  async listen<T>(event: 'settings', callback: (data: MondayListenResponse<T>) => void) {
+    return this.monday.listen<T>(event, (res) => callback(res as MondayListenResponse<T>))
   }
 
   async getContext() {
@@ -28,6 +32,10 @@ export class MondayApi {
       type,
       timeout,
     })
+  }
+
+  async execute(event: string, params: { [id: string]: number | string }) {
+    return this.monday.execute(event, params)
   }
 
   async errorNotice(message: string, timeout: number = 5000) {
