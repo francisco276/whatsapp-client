@@ -5,16 +5,21 @@ import { SessionContext } from '../providers/session/session-context'
 import { sendMessage } from '../../lib/services/messages'
 import { Flex, IconButton, TextArea } from '@vibe/core'
 import { Send } from '@vibe/icons'
+import { useNotifications } from '@/hooks/useNotifications'
 
 export const MessageInput = ({ workspaceId }: { workspaceId: string }) => {
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
   const queryClient = useQueryClient()
   const [message, setMessage] = useState<string>('')
+  const { sendNotifications } = useNotifications()
 
   const { mutate } = useMutation({
     mutationFn: sendMessage,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
+      sendNotifications()
+    }
   })
 
   function handleSubmit(event: MouseEvent) {
