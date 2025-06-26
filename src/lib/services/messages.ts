@@ -32,6 +32,10 @@ export const sendMessage = async ({ workspaceId, sessionId, chatId, message }: {
       , { timeout: 0 }
     )
 
+    if (response.data.error) {
+      throw new Error('Error on send message')
+    }
+
     return response.data
   } catch (error) {
     throw new Error('Error on send message')
