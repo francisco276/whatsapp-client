@@ -9,7 +9,7 @@ import { WorkspaceProvider } from '@/components/providers/workspace/workspace-pr
 const ConfigurationPage = () => {
   const monday = new MondayApi()
   const { context } = useContext({ monday })
-  const { workspaceId } = context
+  const { accountId: workspaceId } = context
   const [page, setPage] = useState('account')
 
   return (

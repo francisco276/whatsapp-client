@@ -24,7 +24,7 @@ const SingleChatPage = () => {
 
   const monday = useMemo(() => new MondayApi(), [])
   const { context } = useMondayContex({ monday })
-  const { itemId, workspaceId, userId } = useMemo(() => context, [context])
+  const { itemId, accountId: workspaceId, userId } = useMemo(() => context, [context])
 
   // Get setting from context
   useEffect(() => {

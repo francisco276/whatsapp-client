@@ -19,7 +19,7 @@ import { WorkspaceProvider } from '@/components/providers/workspace/workspace-pr
 export default function HomePage() {
   const monday = new MondayApi()
   const { context } = useContext({ monday })
-  const { workspaceId, userId } = context
+  const { userId, accountId: workspaceId } = context
 
   const {
     isError: isErrorWorkspace,
