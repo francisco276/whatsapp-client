@@ -9,7 +9,7 @@ interface WorkspaceFormElement extends HTMLFormElement {
   readonly elements: FormElements
 }
 
-export const FormWorkspace = ({ workspaceId }: { workspaceId: string }) => {
+export const FormWorkspace = ({ workspaceId, userId }: { workspaceId: string, userId: string }) => {
   const queryClient = useQueryClient()
   const { mutate, isPending } = useMutation({
     mutationFn: addWorkspace,
@@ -24,7 +24,8 @@ export const FormWorkspace = ({ workspaceId }: { workspaceId: string }) => {
 
     mutate({
       name: form.name.value,
-      workspaceId
+      workspaceId,
+      userId
     })
   }
 

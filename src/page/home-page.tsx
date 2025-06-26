@@ -50,7 +50,7 @@ export default function HomePage() {
   if (isErrorWorkspace) {
     return (
       <Flex className='w-screen h-screen' justify='center' align='center' >
-        <FormWorkspace workspaceId={workspaceId} />
+        <FormWorkspace workspaceId={workspaceId} userId={userId} />
       </Flex>
     )
   }
