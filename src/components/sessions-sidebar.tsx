@@ -25,7 +25,7 @@ const SessionSidebar = ({ sessions = [], isLoading = false, error }: SessionSide
   const [sessionsSidebarOpen, setSessionsSidebarOpen] = useState(true)
 
   function handleOpenModal() {
-    monday.execute("openAppFeatureModal", { urlPath: '/config', width: 400 })
+    monday.execute("openAppFeatureModal", { urlPath: '/config', width: 800 })
   }
 
   return <div className={`transition-all duration-300 flex flex-col ${sessionsSidebarOpen ? 'w-64' : 'w-16'
