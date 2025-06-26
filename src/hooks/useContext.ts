@@ -12,6 +12,7 @@ export const useContext = ({ monday }: ContextProps) => {
     itemId: '',
     userId: '',
     boardId: '',
+    accountId: '',
     idleItemId: '',
     userPunchesBoardID: '',
     version: '',
@@ -38,6 +39,7 @@ export const useContext = ({ monday }: ContextProps) => {
         userId: context?.data?.user.id,
         theme: context?.data?.theme,
         version: `${context?.data?.appVersion.versionData.major}.${context?.data?.appVersion.versionData.minor}`,
+        accountId: context?.data?.account.id
       }
     })
   }
