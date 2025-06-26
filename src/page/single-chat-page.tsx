@@ -55,7 +55,7 @@ const SingleChatPage = () => {
     <WorkspaceProvider workspaceId={workspaceId}>
       <WithAuthorization userId={userId} >
         <SessionProvider>
-          <ChatProvider>
+          <ChatProvider chatId={data?.chatId}>
             <Flex align='stretch' direction="column" className='min-h-screen w-screen'>
               {state.error && <div className="flex justify-center items-center h-screen w-screen px-5"><Error errorMessage={state.error} /></div>}
               {
