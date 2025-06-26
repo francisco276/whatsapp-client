@@ -11,6 +11,7 @@ export type AppContext = {
   userPunchesBoardID: string
   version: string
   theme: string
+  accountId: string
 }
 
 export type MondayError = {
