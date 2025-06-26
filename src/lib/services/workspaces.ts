@@ -2,11 +2,12 @@ import { api } from '../axios'
 
 const ROUTE = '/workspaces'
 
-export const addWorkspace = async ({ workspaceId, name }: { workspaceId: string, name: string }) => {
+export const addWorkspace = async ({ workspaceId, name, userId }: { workspaceId: string, name: string, userId: string }) => {
   try {
     const response = await api.post(`${ROUTE}/add`, {
       workspaceId,
-      name
+      name,
+      userId
     })
 
     return response.data as { ok: boolean, message: string }
