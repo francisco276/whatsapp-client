@@ -1,6 +1,7 @@
 import { api } from "../axios"
 import type { MessageList, Message } from "../../types/message"
 import { formatMessage } from "../../utils/message"
+import type { SelectedFile } from "@/hooks/useFileSelector"
 
 const ROUTE = '/messages'
 
@@ -23,18 +24,21 @@ export const getMessages = async ({ workspaceId, sessionId, chatId, offset }: { 
   }
 }
 
-export const sendMessage = async ({ workspaceId, sessionId, chatId, message }: { workspaceId: string, sessionId: string, chatId: string, message: string }) => {
-  const formatedMessage = formatMessage({ jid: chatId, message })
-  try {
-    const response = await api.post(
-      `${workspaceId}/${sessionId}${ROUTE}/send`,
-      formatedMessage
-      , { timeout: 0 }
-    )
+export const sendMessage = async ({ workspaceId, sessionId, chatId, message, files }: { workspaceId: string, sessionId: string, chatId: string, message: string, files?: SelectedFile[] }) => {
 
-    if (response.data.error) {
-      throw new Error('Error on send message')
-    }
+  const formData = new FormData()
+
+  formData.append('jid', chatId)
+  formData.append('message', message)
+
+  files?.forEach((file) => {
+    formData.append('files', file.file)
+  })
+
+  try {
+    const response = await api.post(`${workspaceId}/${sessionId}${ROUTE}/send`, formData, {
+      timeout: 0
+    })
 
     return response.data
   } catch (error) {
