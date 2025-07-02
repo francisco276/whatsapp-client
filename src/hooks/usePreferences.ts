@@ -9,7 +9,8 @@ export const usePreferences = ({ userId }: { userId: string }) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ['preferences', userId],
-    queryFn: () => getConfigurationByUser({ workspaceId, userId })
+    queryFn: () => getConfigurationByUser({ workspaceId, userId }),
+    enabled: !!workspaceId && !!userId
   })
 
   const { mutate, isPending } = useMutation({
