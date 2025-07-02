@@ -1,6 +1,5 @@
 import { api } from "../axios"
 import type { MessageList, Message } from "../../types/message"
-import { formatMessage } from "../../utils/message"
 import type { SelectedFile } from "@/hooks/useFileSelector"
 
 const ROUTE = '/messages'
