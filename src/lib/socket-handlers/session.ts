@@ -1,5 +1,5 @@
 import { SocketClient } from "../socket"
-import type { SocketSuccessResponse, SocketErrorResponse, QrUpdateData, SessionAddedData } from '../../types/socket'
+import type { SocketSuccessResponse, SocketErrorResponse, QrUpdateData, SessionAddedData, SyncNotification } from '../../types/socket'
 
 export const handlerUpdateQrCode = (socket: SocketClient, callback: (qr: string) => void | Promise<void>) => {
   socket.on('qrcode.updated', (event) => {
@@ -22,6 +22,17 @@ export const handlerConnection = (socket: SocketClient, callback: (params: { mes
       const { data } = event as SocketSuccessResponse
       const { insert } = data.data as SessionAddedData
       callback({ message: 'Connection success', insert })
+    }
+  })
+}
+
+export const handlerUpdateSession = (socket: SocketClient, callback: (isSynced: boolean) => void | Promise<void>) => {
+  socket.on('messaging-history.set', (event) => {
+    const { data: eventData } = event
+    if (eventData.status !== 'error') {
+      const { data } = event as SocketSuccessResponse
+      const { isSynced } = data.data as SyncNotification
+      callback(isSynced)
     }
   })
 }
