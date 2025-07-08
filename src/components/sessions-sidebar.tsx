@@ -10,7 +10,8 @@ import { SideBarList } from './skeletons/sidebar-list'
 import { MondayApi } from '../lib/monday/api'
 
 type Session = {
-  id: string
+  id: string,
+  isSynced: boolean
 }
 
 type SessionSidebarProps = {
@@ -50,6 +51,7 @@ const SessionSidebar = ({ sessions = [], isLoading = false, error }: SessionSide
           key={session.id}
           onClick={() => setSession(session.id)}
           isSelected={currentSession === session.id}
+          isSynced={session.isSynced}
           isToggle={sessionsSidebarOpen}
         />
       ))}
