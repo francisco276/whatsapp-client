@@ -21,7 +21,7 @@ export const getSessions = async ({ workspaceId }: { workspaceId: string }) => {
   try {
     const response = await api.get(`${ROUTE}/${workspaceId}`)
 
-    return response.data as { sessions: { id: string }[] }
+    return response.data as { sessions: { id: string, isSynced: boolean }[] }
   } catch (error) {
     throw new Error('Error on fetch sessions')
   }
