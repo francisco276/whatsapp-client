@@ -36,7 +36,11 @@ export type NotificationEvent = {
   unreadCount: number
 }
 
-type EventData = QrUpdateData | SessionAddedData | NotificationEvent
+export type SyncNotification = {
+  isSynced: boolean
+}
+
+type EventData = QrUpdateData | SessionAddedData | NotificationEvent | SyncNotification
 
 type SocketStatus =
   'success' |
