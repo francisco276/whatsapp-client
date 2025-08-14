@@ -17,3 +17,5 @@ export type UserPreferencesConfig = {
     onMessageSend: boolean
   }
 }
+
+export type Session = { id: string, isSynced: boolean }
