@@ -1,3 +1,4 @@
+import { SuccessDataResponse } from "@/types/response"
 import { api } from "../axios"
 
 const ROUTE = '/contacts'
@@ -13,14 +14,14 @@ export type Contact = {
 
 export const getContact = async ({ workspaceId, sessionId, id }: { workspaceId: string, sessionId: string, id: string }) => {
   try {
-    const response = await api
-      .post(
+    const { data: response } = await api
+      .post<SuccessDataResponse<{ contacts: Contact[] }>>(
         `${workspaceId}/${sessionId}${ROUTE}`,
         { id },
         { timeout: 0 }
       )
 
-    const { contacts } = response.data as { contacts: Contact[] }
+    const { contacts } = response.data
     if (!contacts || contacts.length === 0) {
       return {} as Contact
     }
@@ -33,14 +34,14 @@ export const getContact = async ({ workspaceId, sessionId, id }: { workspaceId: 
 
 export const isValidContact = async ({ workspaceId, sessionId, id }: { workspaceId: string, sessionId: string, id: string }) => {
   try {
-    const response = await api
-      .post(
+    const { data: response } = await api
+      .post<SuccessDataResponse<{ isValid: boolean }>>(
         `${workspaceId}/${sessionId}${ROUTE}/valid`,
         { id },
         { timeout: 0 }
       )
 
-    const { isValid } = response.data as { isValid: boolean }
+    const { isValid } = response.data
 
     return isValid
   } catch (error) {

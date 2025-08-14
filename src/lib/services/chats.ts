@@ -1,3 +1,4 @@
+import { SuccessDataResponse } from "@/types/response"
 import { api } from "../axios"
 
 const ROUTE = '/chats'
@@ -14,9 +15,9 @@ export type Chat = {
 
 export const getChats = async ({ workspaceId, sessionId }: { workspaceId: string, sessionId: string }) => {
   try {
-    const response = await api.get(`/${workspaceId}/${sessionId}${ROUTE}`, { timeout: 0 })
+    const { data: response } = await api.get<SuccessDataResponse<{ chats: Chat[] }>>(`/${workspaceId}/${sessionId}${ROUTE}`, { timeout: 0 })
 
-    return response.data as { chats: Chat[] }
+    return response.data
   } catch (error) {
     throw new Error('Error on fetch chats')
   }
@@ -24,14 +25,13 @@ export const getChats = async ({ workspaceId, sessionId }: { workspaceId: string
 
 export const updateReadChat = async ({ workspaceId, sessionId, id }: { workspaceId: string, sessionId: string, id: string }) => {
   try {
-    const response = await api.post(
+    const { data: response } = await api.post<SuccessDataResponse<{ chats: Chat[] }>>(
       `/${workspaceId}/${sessionId}${ROUTE}/read`,
       {
         id
       },
     )
-
-    return response.data as { chats: Chat[] }
+    return response.data
   } catch (error) {
     throw new Error('Error on fetch chats')
   }
