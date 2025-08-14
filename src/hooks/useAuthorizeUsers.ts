@@ -18,12 +18,14 @@ export const useAuthorizeUsers = ({ authorized, search }: UseAuthorizedUserProps
 
   const { data: authorizedUsersResponse } = useQuery({
     queryKey: ['authorizeUsers'],
-    queryFn: () => getAuthorizationUsers({ workspaceId })
+    queryFn: () => getAuthorizationUsers({ workspaceId }),
+    enabled: !!workspaceId
   })
 
   const { data: userResponse, isLoading: isUserLoading } = useQuery({
     queryKey: ['users'],
-    queryFn: () => monday.query.getUsers()
+    queryFn: () => monday.query.getUsers(),
+    enabled: !!workspaceId
   })
 
   const authorizedUserIds = useMemo(() => authorizedUsersResponse?.authorizations.map(user => user.userId) ?? [], [authorizedUsersResponse])
