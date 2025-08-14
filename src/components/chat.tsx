@@ -1,21 +1,17 @@
-import { Flex } from '@vibe/core'
 import { useContext, useCallback } from "react"
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import { SessionContext } from './providers/session/session-context'
 import { ChatContext } from "./providers/chat/chat-context"
 import { getMessages } from "../lib/services/messages"
 import { MessagesList } from "./messages/messages-list"
-import { MessageInput } from "./messages/message-input"
-import { getContact } from "../lib/services/contacts"
 import { Error } from '../components/error'
-import { ERROR_SERVER_ERROR } from '../config/errors'
+import { ERROR_LOAD_MESSAGES_HISTORY } from '../config/errors'
 import { mapMessageToElement, groupMessagesByDate } from '../utils/message'
+import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { Chat as ChatWrapper } from "@/components/layout/chat"
 
-type ChatProps = {
-  workspaceId: string
-}
-
-export const Chat = ({ workspaceId }: ChatProps) => {
+export const Chat = () => {
+  const workspaceId = useWorkspaceId()
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
 
@@ -39,47 +35,32 @@ export const Chat = ({ workspaceId }: ChatProps) => {
     getNextPageParam: (lastPage) => lastPage.offset,
   })
 
-  const { data: contact } = useQuery({
-    queryKey: ['getContact', chat],
-    queryFn: () => getContact({ id: chat, workspaceId, sessionId: session }),
-    enabled: !!chat,
-    refetchOnWindowFocus: false,
-    staleTime: 1440 * 60 * 1000
-  })
-
-  const allMessages = groupMessagesByDate((messagesData?.pages.flatMap(page => page.data) ?? [])
-    .map(message => mapMessageToElement(message)).reverse())
-
   const handleScroll = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
       await fetchNextPage()
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
+  if (isError) {
+    return (
+      <ChatWrapper>
+        <Error title={ERROR_LOAD_MESSAGES_HISTORY.title} errorMessage={ERROR_LOAD_MESSAGES_HISTORY.description} />
+      </ChatWrapper>
+    )
+  }
+
+  const allMessages = groupMessagesByDate((messagesData?.pages.flatMap(page => page.data) ?? [])
+    .map(message => mapMessageToElement(message)).reverse())
+
   return (
-    <div className="flex-1 flex flex-col">
-      <div className="bg-white p-4 shadow">
-        <h1 className="font-bold">
-          {contact?.name}
-        </h1>
+    <ChatWrapper>
+      <div className="flex flex-1 bg-slate-100">
+        <MessagesList
+          messages={allMessages}
+          isLoading={isFetching || isFetchingNextPage}
+          onScroll={handleScroll}
+        />
       </div>
-      {isError && <Flex align='center' justify='center' className='m-auto w-max-[80%]' ><Error errorMessage={ERROR_SERVER_ERROR} /></Flex>}
-      {
-        !isError && (
-          <div className="flex flex-1">
-            {
-              <MessagesList
-                messages={allMessages}
-                isLoading={isFetching || isFetchingNextPage}
-                onScroll={handleScroll}
-              />
-            }
-          </div>
-        )
-      }
-      <div className="bg-white border-t border-gray-200 px-6 py-4">
-        <MessageInput workspaceId={workspaceId} />
-      </div>
-    </div>
+    </ChatWrapper>
   )
 }
