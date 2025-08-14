@@ -19,3 +19,7 @@ export type UserPreferencesConfig = {
 }
 
 export type Session = { id: string, isSynced: boolean }
+
+export type AuthorizationUser = {
+  authorizations: User[]
+}
