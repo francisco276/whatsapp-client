@@ -2,9 +2,9 @@ import { Skeleton, VirtualizedList } from '@vibe/core'
 
 export const SideBarList = ({ elements = 10 }: { elements?: number }) => {
   const arrayOfElements = Array.from({ length: elements }).map((_, index) => ({
-    height: 40,
+    height: 58,
     id: index.toString(),
-    size: 40,
+    size: 58,
     value: index.toString()
   }))
   return (
@@ -15,8 +15,8 @@ export const SideBarList = ({ elements = 10 }: { elements?: number }) => {
         getItemSize={() => 40}
         items={arrayOfElements}
         itemRenderer={() => (
-          <div className='!mt-2 !px-0'>
-            <Skeleton fullWidth={true} height={40} type='rectangle' />
+          <div className='p-4'>
+            <Skeleton fullWidth={true} height={48} type='rectangle' />
           </div>
         )}
         layout="vertical"
