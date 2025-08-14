@@ -1,13 +1,14 @@
 import { api } from "../axios"
 import type { MessageList, Message } from "../../types/message"
 import type { SelectedFile } from "@/hooks/useFileSelector"
+import { SuccessDataResponse } from "@/types/response"
 
 const ROUTE = '/messages'
 
 
 export const getMessages = async ({ workspaceId, sessionId, chatId, offset }: { workspaceId: string, sessionId: string, chatId: string, cursor?: number | string, offset?: number | string }) => {
   try {
-    const response = await api.get(
+    const { data: response } = await api.get<SuccessDataResponse<MessageList>>(
       `${workspaceId}/${sessionId}${ROUTE}/list/${chatId}`,
       {
         params: {
@@ -17,7 +18,7 @@ export const getMessages = async ({ workspaceId, sessionId, chatId, offset }: { 
       }
     )
 
-    return response.data as MessageList
+    return response.data
   } catch (error) {
     throw new Error('Error on fetch messages')
   }
