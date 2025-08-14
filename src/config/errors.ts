@@ -6,3 +6,21 @@ export const DEFAULT_ERROR =
 export const ERROT_ITEM_NOT_FOUNT = 'An error ocurred. The item was not found'
 export const ERROR_PHONE_NUMBER_INVALID = 'An error ocurred. The phone number is invalid. Please check the phone number format and try again.'
 export const ERROR_PHONE_COLUMN_CONFIGURATION = 'An error ocurred. The phone column is not configured correctly. Please check the column settings and try again'
+export const ERROR_LOAD_SESSIONS = {
+  title: 'Sesiones no disponibles',
+  description: 'Algo salió mal al cargar la información de las sesiones. Intenta refrescar la vista o revisa si hay problemas en el sistema.'
+}
+
+export const ERROR_LOAD_CONTACT = {
+  title: 'Contactos no disponibles',
+  description: 'Algo salió mal al cargar la información de los. Intenta refrescar la vista o revisa si hay problemas en el sistema.'
+}
+
+export const ERROR_LOAD_MESSAGES_HISTORY = {
+  title: 'Historial de conversasion no disponible',
+  description: 'Algo salió mal al cargar el historial de conversasion. Intenta refrescar la vista o revisa si hay problemas en el sistema.'
+}
+
+export const ERROR_LOAD_QR = {
+  description: 'Algo salió mal al cargar el qr. Intenta refrescar la vista o contacta soporte tecnico si el error continua.'
+}
