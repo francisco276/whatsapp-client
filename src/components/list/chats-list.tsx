@@ -13,15 +13,15 @@ type ChatListProps = {
 export const ChatList = ({ chats = [], isToggle, workspaceId }: ChatListProps) => {
 
   const chatsElementes = chats.map(chat => ({
-    height: 48,
+    height: 64,
     id: chat.pkId,
-    size: 48,
+    size: 58,
     value: chat.id
   }))
 
   const itemRenderer = useCallback((item: VirtualizedListItem, _: number, style: CSSProperties) => {
     return (
-      <div key={item.value as string} style={style} className='mt-2'>
+      <div key={item.value as string} style={{ ...style }} className='p-4 pb-0'>
         <ContactItem
           workspaceId={workspaceId}
           contactId={item.value as string}
