@@ -1,15 +1,9 @@
-import { Button, Flex, TextField } from '@vibe/core'
+import { Box, Button, Flex, Heading, Text } from '@vibe/core'
+import { MoveArrowRight } from '@vibe/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addWorkspace } from '../lib/services/workspaces'
 
-interface FormElements extends HTMLFormControlsCollection {
-  name: HTMLInputElement
-}
-interface WorkspaceFormElement extends HTMLFormElement {
-  readonly elements: FormElements
-}
-
-export const FormWorkspace = ({ workspaceId, userId }: { workspaceId: string, userId: string }) => {
+export const FormWorkspace = ({ workspaceId }: { workspaceId: string }) => {
   const queryClient = useQueryClient()
   const { mutate, isPending } = useMutation({
     mutationFn: addWorkspace,
@@ -18,35 +12,28 @@ export const FormWorkspace = ({ workspaceId, userId }: { workspaceId: string, us
     }
   })
 
-  function onSubmit(e: React.FormEvent<WorkspaceFormElement>) {
-    e.preventDefault()
-    const form = e.currentTarget.elements
-
+  function onSubmit() {
     mutate({
-      name: form.name.value,
-      workspaceId,
-      userId
+      name: 'Espacio de trabajo',
+      workspaceId
     })
   }
 
-
-  return <>
-    <form onSubmit={onSubmit}>
-      <Flex
-        direction='column'
-        gap={20}
+  return (
+    <Box>
+      <Flex gap={40} align='center' justify='center' direction='column'>
+      <Heading className='text-8xl! text-slate-500!' type='h1' weight='bold' align='center'>Bienvenido</Heading>
+      <Text className='text-3xl!' align='center'>Descubre una nueva forma de trabajar y colaborar</Text>
+      <Button
+        kind='primary'
+        className='w-full bg-[#0DACC8]! text-white hover:bg-[#0B8AA0]!'
+        rightIcon={MoveArrowRight}
+        disabled={isPending}
+        onClick={onSubmit}
       >
-        <TextField
-          id='name'
-          placeholder='Nombre del espacio'
-          title='Nombre del espacio'
-          required
-          size='medium'
-          controlled={false}
-        />
-        <Button type='submit' disabled={isPending} >Crear un nuevo espacio</Button>
+        Comenzar
+      </Button>
       </Flex>
-    </form>
-
-  </>
+    </Box>
+  )
 }
