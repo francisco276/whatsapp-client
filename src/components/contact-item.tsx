@@ -33,23 +33,12 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
   })
 
   const isSelected = useMemo(() => chat === contactId, [chat, contactId])
-  const Icon = useMemo(() => {
-    if (isLoading) {
-      return () => (<Skeleton type="circle" size="p" />)
-    }
-    return () => (
-      <div >
-        {contact?.image ? <Avatar size={isToggle ? 'medium' : 'small'} type="img" src={contact.image} withoutBorder={true} /> : <Avatar size={isToggle ? 'medium' : 'small'} type="icon" icon={Comment} withoutBorder={true} />}
-      </div>
-    )
-  }, [isLoading, contact, isToggle])
 
 
   const button = <Button
     className={`w-full border-1! border-[#A3E7F3]! ${isToggle ? 'justify-start!' : ''}  ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
     size='large'
     kind='secondary'
-    leftIcon={Icon}
     onClick={() => {
       setChat(contactId)
       if (unread) {
