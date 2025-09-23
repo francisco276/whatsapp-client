@@ -46,7 +46,8 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
 
 
   const button = <Button
-    className={`w-full ${isToggle ? '!justify-start' : '!pr-[8px]'}  ${isSelected ? '!bg-blue-100' : '!hover:bg-gray-200'} `}
+    className={`w-full border-1! border-[#A3E7F3]! ${isToggle ? 'justify-start!' : ''}  ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
+    size='large'
     kind='secondary'
     leftIcon={Icon}
     onClick={() => {
@@ -66,10 +67,6 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
   </Button>
 
   return (
-    <div className='ml-1'>
-      {
-        unread ? <Badge color='notification' anchor='top-start'> {button} </Badge> : button
-      }
-    </div>
+    unread ? <Badge type='counter' count={unread} anchor='top-start'> {button} </Badge> : button
   )
 }
