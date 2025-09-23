@@ -11,6 +11,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
   const incrementUnreadChat = unreadChatStore((state) => state.incrementUnreadChat)
+  const setInitialData = unreadChatStore((state) => state.setInitialData)
 
   const socket = useMemo(() => new SocketClient({ workspaceId, sessionId: session }), [workspaceId, session])
 
@@ -24,11 +25,9 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     })
   }, [socket])
 
-  useEffect(() => {
-    chats?.forEach((chat) => {
-      if (chat.unreadCount) {
-        incrementUnreadChat(chat.id)
-      }
-    })
-  }, [chats])
+  chats?.forEach((chat) => {
+    if (chat.unreadCount) {
+      setInitialData(chat.id, chat.unreadCount)
+    }
+  })
 }
