@@ -55,39 +55,38 @@ export const MessageInput = () => {
   return (
     <div>
       {selectedFiles.length > 0 && (
-          <div className="mb-4 space-y-2">
-            <div className="text-sm font-medium text-gray-700 mb-2">Selected files:</div>
-            <div className="flex flex-wrap gap-2">
-              {selectedFiles.map((file) => (
-                <div key={file.id} className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-2 max-w-xs">
-                  {file.type === 'image' && file.preview ? (
-                    <img src={file.preview} alt={file.name} className="w-8 h-8 object-cover rounded mr-2" />
-                  ) : (
-                    <div className={`w-8 h-8 rounded flex items-center justify-center mr-2 ${
-                      file.type === 'document' ? 'bg-blue-100 text-blue-600' :
+        <div className="mb-4 space-y-2">
+          <div className="text-sm font-medium text-gray-700 mb-2">Selected files:</div>
+          <div className="flex flex-wrap gap-2">
+            {selectedFiles.map((file) => (
+              <div key={file.id} className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-2 max-w-xs">
+                {file.type === 'image' && file.preview ? (
+                  <img src={file.preview} alt={file.name} className="w-8 h-8 object-cover rounded mr-2" />
+                ) : (
+                  <div className={`w-8 h-8 rounded flex items-center justify-center mr-2 ${file.type === 'document' ? 'bg-blue-100 text-blue-600' :
                       file.type === 'video' ? 'bg-purple-100 text-purple-600' :
                       'bg-gray-100 text-gray-600'
                     }`}>
-                      {file.type === 'document' ? <Icon icon={File} iconType='svg' iconSize={16} /> :
-                       file.type === 'video' ? <Icon icon={Video} iconType='svg' iconSize={16} /> :
-                       <Icon icon={Image} iconType='svg' iconSize={16} />}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">{file.name}</div>
-                    <div className="text-xs text-gray-500">{formatFileSize(file.size)}</div>
+                    {file.type === 'document' ? <Icon icon={File} iconType='svg' iconSize={16} /> :
+                      file.type === 'video' ? <Icon icon={Video} iconType='svg' iconSize={16} /> :
+                        <Icon icon={Image} iconType='svg' iconSize={16} />}
                   </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-gray-900 truncate">{file.name}</div>
+                  <div className="text-xs text-gray-500">{formatFileSize(file.size)}</div>
+                </div>
                 <IconButton
                   onClick={() => removeFile(file.id)}
                   icon={CloseSmall}
                 />
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      )}
       <Flex align='center' gap={20}>
-        <MenuButton component={Attach} disabled={isPending}>
+        <MenuButton className='text-[#0DACC8]!' component={Attach} disabled={isPending}>
           <Menu>
             <MenuItem icon={File} title="Documento" onClick={() => handleFileSelect('document')} />
             <MenuItem icon={Image} title="Imagen" onClick={() => handleFileSelect('image')} />
@@ -104,11 +103,13 @@ export const MessageInput = () => {
           rows={1}
         />
         <IconButton
+          className='bg-[#0DACC8]! text-white hover:bg-[#0B8AA0]!'
           ariaLabel='Enviar mensaje'
           kind='primary'
           icon={Send}
+          iconClassName='text-[#A3E7F3]'
           onClick={handleSubmit}
-          disabled={userCanNotSendMessage ||  isPending}
+          disabled={userCanNotSendMessage || isPending}
         />
       </Flex>
     </div>
