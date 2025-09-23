@@ -7,8 +7,10 @@ import { Flex, Icon, IconButton, Menu, MenuButton, MenuItem, TextArea } from '@v
 import { Attach, Send, File, Image, Video, CloseSmall } from '@vibe/icons'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useFileSelector } from '@/hooks/useFileSelector'
+import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 
-export const MessageInput = ({ workspaceId }: { workspaceId: string }) => {
+export const MessageInput = () => {
+  const workspaceId = useWorkspaceId()
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
   const queryClient = useQueryClient()
