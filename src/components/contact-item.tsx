@@ -28,12 +28,14 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
     staleTime: 1440 * 60 * 1000
   })
 
-  const { mutate } = useMutation({
-    mutationFn: updateReadChat
-  })
-
   const isSelected = useMemo(() => chat === contactId, [chat, contactId])
 
+  if (!contact) {
+    return null
+  }
+
+  const { image, name, verifiedName, notify, id } = contact
+  const displayName = name || verifiedName || notify || jidToFormatedPhone(id)
 
   const button = <Button
     className={`w-full border-1! border-[#A3E7F3]! ${isToggle ? 'justify-start!' : ''}  ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
@@ -47,12 +49,11 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
       }
     }}
   >
-    <div className='ml-2 w-[50%] flex-auto'>
-      {
-        isToggle && <p className='truncate text-left'>{contact?.name || contact?.verifiedName || contact?.notify || jidToFormatedPhone(contact?.id)}</p>
-      }
-    </div>
-
+    <Flex gap={10} justify='start'>
+      {isLoading && <Skeleton type="circle" size="p" />}
+      {!isLoading && (image ? <Avatar size="small" type="img" src={image} /> : <Avatar size='small' type="icon" icon={Comment} withoutBorder={true} />)}
+      {(!isLoading && isToggle && displayName) && <Text type='text1' maxLines={1}>{displayName}</Text>}
+    </Flex>
   </Button>
 
   return (
