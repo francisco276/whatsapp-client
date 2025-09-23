@@ -10,4 +10,16 @@ export const handlerNotifyMessage = (socket: SocketClient, callback: (data: { id
       callback({ id, unreadCount })
     }
   })
+
+  socket.on('chats.update', (event) => {
+    console.log('chats.update')
+    const { data: eventData } = event
+    if (eventData.status === 'success') {
+      const { data } = event as SocketSuccessResponse
+      const { chats: chat } = data.data as { chats: NotificationEvent }
+      if (chat) {
+        callback({ id: chat.id, unreadCount: chat.unreadCount })
+      }
+    }
+  })
 }
