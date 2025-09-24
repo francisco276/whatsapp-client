@@ -16,8 +16,8 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const socket = useMemo(() => new SocketClient({ workspaceId, sessionId: session }), [workspaceId, session])
 
   useEffect(() => {
-    handlerNotifyMessage(socket, ({ id }) => {
-      if (chat !== id) incrementUnreadChat(id)
+    handlerNotifyMessage(socket, ({ id, unreadCount }) => {
+      if (chat !== id && unreadCount) incrementUnreadChat(id)
     })
 
     return (() => {
