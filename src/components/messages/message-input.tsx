@@ -3,11 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChatContext } from '../providers/chat/chat-context'
 import { SessionContext } from '../providers/session/session-context'
 import { sendMessage } from '../../lib/services/messages'
-import { Flex, Icon, IconButton, Menu, MenuButton, MenuItem, TextArea } from '@vibe/core'
-import { Attach, Send, File, Image, Video, CloseSmall } from '@vibe/icons'
+import { Flex, Icon, IconButton, Menu, MenuButton, MenuItem, TextArea, useSwitch } from '@vibe/core'
+import { Attach, Send, File, Image, Video, CloseSmall, Note } from '@vibe/icons'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useFileSelector } from '@/hooks/useFileSelector'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { TemplateSelector } from '@/components/modals/template-selector'
 
 export const MessageInput = () => {
   const workspaceId = useWorkspaceId()
@@ -17,6 +18,7 @@ export const MessageInput = () => {
   const [message, setMessage] = useState<string>('')
   const { sendNotifications } = useNotifications()
   const { handleFileSelect, selectedFiles, removeFile, formatFileSize, clearFiles } = useFileSelector()
+  const { isChecked, onChange } = useSwitch()
 
   const { mutate, isPending } = useMutation({
     mutationFn: sendMessage,
@@ -54,6 +56,7 @@ export const MessageInput = () => {
   }
   return (
     <div>
+      <TemplateSelector onSelect={(message) => setMessage(message)} isChecked={isChecked} onChange={onChange} />
       {selectedFiles.length > 0 && (
         <div className="mb-4 space-y-2">
           <div className="text-sm font-medium text-gray-700 mb-2">Selected files:</div>
@@ -91,6 +94,7 @@ export const MessageInput = () => {
             <MenuItem icon={File} title="Documento" onClick={() => handleFileSelect('document')} />
             <MenuItem icon={Image} title="Imagen" onClick={() => handleFileSelect('image')} />
             <MenuItem icon={Video} title="Video" onClick={() => handleFileSelect('video')} />
+            <MenuItem icon={Note} title="Plantilla" onClick={onChange} />
           </Menu>
         </MenuButton>
         <TextArea
