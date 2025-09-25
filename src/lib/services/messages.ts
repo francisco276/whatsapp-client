@@ -2,6 +2,7 @@ import { api } from "../axios"
 import type { MessageList, Message } from "../../types/message"
 import type { SelectedFile } from "@/hooks/useFileSelector"
 import { SuccessDataResponse } from "@/types/response"
+import { MessageKey } from '@/types/message'
 
 const ROUTE = '/messages'
 
@@ -69,5 +70,13 @@ export async function downloadMedia({ workspaceId, sessionId, message }: { works
     return url
   } catch (error) {
     throw new Error('Error downloading media')
+  }
+}
+
+export async function markMessagesAsRead ({ workspaceId, sessionId, readMessages }: { workspaceId: string, sessionId: string, readMessages: MessageKey[] }) {
+  try {
+    return await api.post(`${workspaceId}/${sessionId}${ROUTE}/markAsRead`, { read_messages: readMessages })
+  } catch {
+    throw new Error('Error to mark messages as read ')
   }
 }
