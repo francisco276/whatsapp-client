@@ -9,6 +9,7 @@ import { ERROR_LOAD_MESSAGES_HISTORY } from '../config/errors'
 import { mapMessageToElement, groupMessagesByDate } from '../utils/message'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { Chat as ChatWrapper } from "@/components/layout/chat"
+import { useSelectChat } from "@/hooks/useSelectChat"
 
 export const Chat = () => {
   const workspaceId = useWorkspaceId()
@@ -34,6 +35,8 @@ export const Chat = () => {
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.offset,
   })
+
+  useSelectChat((messagesData?.pages.flatMap(page => page.data) ?? []))
 
   const handleScroll = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
