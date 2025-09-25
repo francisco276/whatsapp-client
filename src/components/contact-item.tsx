@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { SessionContext } from './providers/session/session-context'
 import { ChatContext } from './providers/chat/chat-context'
 import { getContact } from '../lib/services/contacts'
@@ -7,7 +7,6 @@ import { Button, Avatar, Skeleton, Badge } from '@vibe/core'
 import { Comment } from '@vibe/icons'
 import { useMemo, useContext } from 'react'
 import { unreadChatStore } from '@/stores/unReadChatStore'
-import { updateReadChat } from '@/lib/services/chats'
 import { jidToFormatedPhone } from '@/utils/whatsapp'
 
 type ContactItemProps = {
@@ -18,7 +17,6 @@ type ContactItemProps = {
 
 export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemProps) => {
   const unread = unreadChatStore((state) => state.contacts[contactId])
-  const resetChat = unreadChatStore((state) => state.resetUnreadChat)
   const { session: sessionId } = useContext(SessionContext)
   const { chat, setChat } = useContext(ChatContext)
   const { data: contact, isLoading } = useQuery({
@@ -43,10 +41,6 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
     kind='secondary'
     onClick={() => {
       setChat(contactId)
-      if (unread) {
-        resetChat(contactId)
-        mutate({ id: contactId, workspaceId, sessionId })
-      }
     }}
   >
     <Flex gap={10} justify='start'>
