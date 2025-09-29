@@ -27,8 +27,8 @@ export const ContactItem = ({ contactId, isToggle, workspaceId }: ContactItemPro
 
   const isSelected = useMemo(() => chat === contactId, [chat, contactId])
 
-  if (!contact) {
-    return null
+  if (isLoading) {
+    return <Skeleton fullWidth={true} height={48} type='rectangle' />
   }
 
   const { image, name, verifiedName, notify, id } = contact
