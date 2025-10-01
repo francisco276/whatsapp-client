@@ -4,12 +4,13 @@ import { SuccessDataResponse } from "@/types/response"
 
 const ROUTE = '/preferences/auth'
 
-export const updateAuthorizationUser = async ({ workspaceId, userId, deleted }: { workspaceId: string, userId: string, deleted?: boolean }) => {
+export const updateAuthorizationUser = async ({ workspaceId, userId, deleted, role }: { workspaceId: string, userId: string, deleted?: boolean, role?: string }) => {
   try {
     const response = await api.post(`${ROUTE}`, {
       workspaceId,
       userId,
-      deleted
+      deleted,
+      role
     })
 
     return response.data
