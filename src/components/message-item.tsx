@@ -58,8 +58,8 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
     >
       <div
         className={`max-w-xs md:max-w-md rounded-lg text-wrap text-ellipsis whitespace-pre-line
-          ${(isMyMessage && !isDateSeprator) && '!bg-blue-500 !text-white rounded-br-none px-4 py-2'}
-          ${(!isMyMessage && !isDateSeprator) && '!bg-gray-200 !rounded-bl-none px-4 py-2'}
+          ${(isMyMessage && !isDateSeprator) && 'bg-[#0DACC8] text-white rounded-br-none px-4 py-2'}
+          ${(!isMyMessage && !isDateSeprator) && 'bg-white text-slate-900 border border-slate-200 rounded-bl-none px-4 py-2'}
         `}
       >
         {!isMyMessage && isAGroup && (
