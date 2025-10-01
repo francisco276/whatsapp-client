@@ -5,13 +5,14 @@ import { useSessionId } from './useSessionId'
 import { jidToFormatedPhone } from '@/utils/whatsapp'
 import { useMemo } from 'react'
 
-export const useGetContact = ({ contactId }: { contactId: string }) => {
+export const useGetContact = ({ contactId, enabled = true }: { contactId: string, enabled?: boolean }) => {
   const sessionId = useSessionId()
   const workspaceId = useWorkspaceId()
 
   const query = useQuery({
       queryKey: ['getContact', contactId],
       queryFn: () => getContact({ id: contactId, workspaceId, sessionId }),
+      enabled,
       refetchOnWindowFocus: false,
       staleTime: 1440 * 60 * 1000
     })
