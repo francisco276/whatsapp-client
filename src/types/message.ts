@@ -100,7 +100,8 @@ export type WMessage = {
         editedMessage: {
           conversation: string
         }
-      }
+      },
+      conversation?: string
     }
   }
 }
