@@ -172,9 +172,11 @@ export const getMessageAsString = (message: WMessage): MessageContent => {
 
   if (message.editedMessage) {
     const editedMessage = message.editedMessage
+
+    const text = editedMessage.message.protocolMessage?.editedMessage.conversation || editedMessage.message.conversation || ''
     messageObject = {
       ...messageObject,
-      text: editedMessage.message.protocolMessage.editedMessage.conversation
+      text
     }
   }
 
