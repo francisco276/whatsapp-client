@@ -1,4 +1,4 @@
-type MessageKey = {
+export type MessageKey = {
   id: string
   fromMe: boolean
   remoteJid: string
