@@ -6,3 +6,9 @@ export const AUTHORIZATION_TYPES = {
   'Authorized': 'Autorizados',
   'Unauthorized': 'No autorizados'
 }
+
+export const USER_TYPES = {
+  'admin': 'Administrador',
+  'user': 'Usuario',
+  'reader': 'Lector'
+}
