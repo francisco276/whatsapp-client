@@ -32,7 +32,7 @@ export const DeleteButtonModal = ({ title, description, buttonClassName, loading
 
   return (
     <>
-      <IconButton className={buttonClassName} color="negative" icon={Delete} onClick={() => setShow(true)} loading={loading} />
+      <IconButton size='small' className={buttonClassName} color="negative" icon={Delete} onClick={() => setShow(true)} loading={loading} />
       <Modal
         id="modal-basic"
         show={show}
@@ -51,6 +51,7 @@ export const DeleteButtonModal = ({ title, description, buttonClassName, loading
           primaryButton={{
             text: "Confirm",
             onClick: handlerConfirm,
+            className: 'bg-[#0DACC8]! text-white hover:bg-[#0B8AA0]!'
           }}
           secondaryButton={{
             text: "Cancel",
