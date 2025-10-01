@@ -25,3 +25,12 @@ export type Session = { id: string, isSynced: boolean }
 export type AuthorizationUser = {
   authorizations: User[]
 }
+
+export type AccessUser = Omit<User, 'role'> & {
+  grantedBy: string
+  sessionId: string
+}
+
+export type SessionAccessUser = {
+  users: AccessUser[]
+}
