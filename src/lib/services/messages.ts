@@ -20,7 +20,7 @@ export const getMessages = async ({ workspaceId, sessionId, chatId, offset }: { 
     )
 
     return response.data
-  } catch (error) {
+  } catch {
     throw new Error('Error on fetch messages')
   }
 }
@@ -42,7 +42,7 @@ export const sendMessage = async ({ workspaceId, sessionId, chatId, message, fil
     })
 
     return response.data
-  } catch (error) {
+  } catch {
     throw new Error('Error on send message')
   }
 }
@@ -68,7 +68,7 @@ export async function downloadMedia({ workspaceId, sessionId, message }: { works
     const url = URL.createObjectURL(blob)
 
     return url
-  } catch (error) {
+  } catch {
     throw new Error('Error downloading media')
   }
 }
