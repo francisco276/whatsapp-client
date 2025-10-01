@@ -1,8 +1,12 @@
 import { useDeleteSession, useSessionInformation } from "@/hooks/useSession"
 import { ListItem, ListItemAvatar, Skeleton } from "@vibe/core"
 import { DeleteButtonModal } from "../delete/delete-button-modal"
+import { useContext } from "react"
+import { SessionContext } from "../providers/session/session-context"
+import { cn } from "@/utils/utils"
 
 export const DeleteSessionItem = ({ id, workspaceId }: { id: string, workspaceId: string }) => {
+  const { session, setSession } = useContext(SessionContext)
   const { data, isError, isLoading } = useSessionInformation({ workspaceId, sessionId: id })
   const { mutate, isPending } = useDeleteSession()
 
@@ -18,8 +22,17 @@ export const DeleteSessionItem = ({ id, workspaceId }: { id: string, workspaceId
     mutate({ workspaceId, sessionId: id })
   }
 
+  function handlerClick(event: React.MouseEvent | React.KeyboardEvent) {
+    if (event instanceof MouseEvent) {
+      event.preventDefault()
+    }
+    setSession(id)
+  }
+
+  const isSelected = session === id
+
   return (
-    <ListItem size="large" className="!px-0 !bg-transparent !cursor-default" component="div">
+    <ListItem size="large" className={cn('!px-0 !cursor-default')} selected={isSelected} component="div" onClick={handlerClick}>
       <ListItemAvatar src={data?.user.image} />
       {data?.user.name}
       <DeleteButtonModal
