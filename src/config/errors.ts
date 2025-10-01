@@ -24,3 +24,8 @@ export const ERROR_LOAD_MESSAGES_HISTORY = {
 export const ERROR_LOAD_QR = {
   description: 'Algo salió mal al cargar el qr. Intenta refrescar la vista o contacta soporte tecnico si el error continua.'
 }
+
+export const ERROR_LOAD_SESSION = {
+  title: 'Fallo de Autenticación',
+  description: 'Algo salió mal al cargar la sesión. Intenta refrescar la vista o revisa si hay problemas en el sistema.'
+}
