@@ -2,6 +2,7 @@ export type User = {
   id: string,
   userId: string,
   workspaceId: string
+  role: string
 }
 
 export type AuthorizedUser = {
@@ -10,6 +11,7 @@ export type AuthorizedUser = {
   name: string
   workspaceId: string
   authorized: boolean
+  role: string
 }
 
 export type UserPreferencesConfig = {
