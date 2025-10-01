@@ -13,7 +13,8 @@ export const getMessages = async ({ workspaceId, sessionId, chatId, offset }: { 
       `${workspaceId}/${sessionId}${ROUTE}/list/${chatId}`,
       {
         params: {
-          offset
+          offset,
+          limit: 100
         },
         timeout: 0
       }
