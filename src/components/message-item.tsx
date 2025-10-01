@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { getContact } from "../lib/services/contacts"
 import type { MessageItem } from "../types/message"
 import { downloadMedia } from "../lib/services/messages"
 import { MessageImageComponent } from './messages/formats/image'
@@ -8,6 +7,7 @@ import { Icon, Loader } from '@vibe/core'
 import { Forward } from '@vibe/icons'
 import { MessageVideoComponent } from './messages/formats/video'
 import { getTime } from '@/utils/time'
+import { useGetContact } from '@/hooks/useGetContact'
 
 export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
   const {
@@ -31,13 +31,7 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
     originalMessage
   } = message
 
-  const { data: contact } = useQuery({
-    queryKey: ['getContact', participant],
-    queryFn: () => getContact({ id: participant, workspaceId, sessionId }),
-    enabled: isAGroup,
-    refetchOnWindowFocus: false,
-    staleTime: 1440 * 60 * 1000
-  })
+  const { contact } = useGetContact({ contactId: participant, enabled: isAGroup })
 
   const { data: mediaUrl, isLoading: isLoadingMedia } = useQuery({
     queryKey: ['getMedia', message],
@@ -46,7 +40,6 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
     refetchOnWindowFocus: false,
     staleTime: 1440 * 60 * 1000
   })
-
 
   return (
     <div
@@ -63,7 +56,7 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
         `}
       >
         {!isMyMessage && isAGroup && (
-          <div className="text-sm">{contact?.name || message.pushName}</div>
+          <div className="text-sm text-[#FDB602]">{contact?.displayName}</div>
         )}
 
         {isForwarded && <p className="text-gray-500 flex gap-2 items-center"><Icon iconType="svg" icon={Forward} iconLabel="forwarded" iconSize={16} />Forwarded</p>}
@@ -82,7 +75,6 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
           )
         }
         {!isDateSeprator && messageString}
-
 
         <div className={`text-xs mt-1 text-right ${isMyMessage ? '!text-blue-100' : '!text-gray-500'}`}>
           {!isDateSeprator && getTime({ date: timestamp })}
