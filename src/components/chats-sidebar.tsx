@@ -42,7 +42,7 @@ const ChatsSidebar = ({ chats, loading, error }: ChatSidebarProps) => {
             <ChatList
               chats={chats}
               isToggle={chatsSidebarOpen}
-              workspaceId={'1234'} />
+              />
           )
           }
         </Box>

@@ -7,10 +7,9 @@ import { ContactItem } from '../contact-item'
 type ChatListProps = {
   chats: Chat[]
   isToggle: boolean
-  workspaceId: string
 }
 
-export const ChatList = ({ chats = [], isToggle, workspaceId }: ChatListProps) => {
+export const ChatList = ({ chats = [], isToggle }: ChatListProps) => {
 
   const chatsElementes = chats.map(chat => ({
     height: 64,
@@ -23,7 +22,6 @@ export const ChatList = ({ chats = [], isToggle, workspaceId }: ChatListProps) =
     return (
       <div key={item.value as string} style={{ ...style }} className='p-4 pb-0'>
         <ContactItem
-          workspaceId={workspaceId}
           contactId={item.value as string}
           isToggle={isToggle}
         />
