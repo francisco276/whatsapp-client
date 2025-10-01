@@ -29,6 +29,7 @@ export const useAuthorizeUsers = ({ authorized, search }: UseAuthorizedUserProps
   })
 
   const authorizedUserIds = useMemo(() => authorizedUsersResponse?.authorizations.map(user => user.userId) ?? [], [authorizedUsersResponse])
+  const roleByUser = useMemo(() => Object.fromEntries(authorizedUsersResponse?.authorizations.map(({ userId, role }) => [userId, role]) ?? []), [authorizedUsersResponse])
 
   function passSearch(user: AuthorizedUser) {
     if (!search) return true
@@ -52,7 +53,8 @@ export const useAuthorizeUsers = ({ authorized, search }: UseAuthorizedUserProps
         name: user.name,
         image: user.photo_thumb,
         authorized: authorizedUserIds.includes(user.id),
-        workspaceId: workspaceId
+        workspaceId: workspaceId,
+        role: roleByUser[user.id]
       }
     }).filter((user: AuthorizedUser) => passesFilter(user) && passSearch(user))
   }, [userResponse, authorizedUserIds, authorized, search])
