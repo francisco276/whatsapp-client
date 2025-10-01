@@ -8,7 +8,7 @@ export const MessageDocumentComponent = ({
     <Flex
       align='center'
       gap={10}
-      className='bg-blue-400 rounded-sm p-2 bg-blend-soft-light'
+      className='bg-[#0B8AA0] rounded-sm p-2 bg-blend-soft-light'
     >
       <Icon icon={Doc} />
       <p className='text-sm'>{name}</p>
