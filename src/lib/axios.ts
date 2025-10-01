@@ -5,4 +5,12 @@ const api = axios.create({
   timeout: 0
 })
 
+api.interceptors.request.use((config) => {
+  const authorizationToken = localStorage.getItem('auth_token')
+  if (authorizationToken) {
+    config.headers.Authorization = `Bearer ${authorizationToken}`
+  }
+  return config
+}, error => Promise.reject(error?.response?.data?.message || error))
+
 export { api }
