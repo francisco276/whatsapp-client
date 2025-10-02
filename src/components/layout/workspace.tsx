@@ -24,10 +24,11 @@ export default function Workspace({ children }: WorkspaceProps) {
   const { isLoading: isLoadingToken, isError: isErrorToken } = useQuery({
     queryKey: ['getToken', workspaceId, userId],
     queryFn: () => getToken({ workspaceId, userId }),
-    enabled: !!workspaceId && !!userId && !!localStorage.getItem('auth_token')
+    enabled: !!workspaceId && !!userId
   })
 
   const {
+    data: workspace,
     isError,
     isLoading
   } = useQuery({
@@ -42,7 +43,7 @@ export default function Workspace({ children }: WorkspaceProps) {
     )
   }
 
-  if (isError) {
+  if (isError || !workspace) {
     return (
       <Flex className='w-screen h-screen' justify='center' align='center' >
         <FormWorkspace workspaceId={workspaceId} />
