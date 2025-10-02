@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Button, Avatar } from '@vibe/core'
+import { Button, Avatar, Flex, Icon, Text } from '@vibe/core'
 import { getProfile } from '../lib/services/profile'
 import { PersonRound } from '@vibe/icons'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
@@ -24,7 +24,7 @@ export const SessionButton = ({
   isSynced
 }: SessionButtonProps) => {
   const workspaceId = useWorkspaceId()
-  const { data: session } = useQuery({
+  const { data: session, isError, refetch } = useQuery({
     queryKey: [sessionId],
     queryFn: () => getProfile({ workspaceId, sessionId }),
     refetchOnWindowFocus: false,
@@ -39,6 +39,7 @@ export const SessionButton = ({
 
     handlerUpdateSession(socket, (isSynced) => {
       debounceSync(isSynced)
+      refetch()
     })
 
     return () => {
@@ -46,22 +47,25 @@ export const SessionButton = ({
     }
   }, [])
 
-  const Icon = session?.user?.image ? () => <Avatar size="small" className={!isToggle ? '!size-4 !px-0' : ''} type="img" src={session.user?.image} /> : PersonRound
+  if (isError || !session) {
+    return null
+  }
+
+  const { image, name } = session.user
+
   return (
     <Button
-      kind='secondary'
-      leftIcon={Icon}
+      kind="secondary"
+      className={`w-full border-1! border-[#A3E7F3]! ${isToggle ? 'justify-start!' : ''} ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
       onClick={onClick}
-      className={`w-full flex items-center gap-2 p-2 mt-2 rounded ${isSelected ? '!bg-blue-600 !text-neutral-50 !font-black' : 'hover:bg-gray-700'
-        }`}
+      size='large'
       disabled={sync}
     >
-      {isToggle && !sync && <span>{session?.user?.name}</span>}
-      {isToggle && sync && (
-        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-          Sincronizando
-        </span>
-      )}
+      <Flex gap={10} >
+        {image ? <Avatar size="small" type="img" src={image} /> : <Icon icon={PersonRound} iconSize={32} />}
+        {(isToggle && !sync && name) && <Text type='text1' maxLines={1}>{name}</Text>}
+        {isToggle && sync && (<span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full"> Sincronizando </span>)}
+      </Flex>
     </Button>
   )
 }
