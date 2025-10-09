@@ -49,12 +49,12 @@ export const DeleteButtonModal = ({ title, description, buttonClassName, loading
         </ModalBasicLayout>
         <ModalFooter
           primaryButton={{
-            text: "Confirm",
+            text: "Confirmar",
             onClick: handlerConfirm,
             className: 'bg-[#0DACC8]! text-white hover:bg-[#0B8AA0]!'
           }}
           secondaryButton={{
-            text: "Cancel",
+            text: "Cancelar",
             onClick: handlerCancel,
           }}
         />
