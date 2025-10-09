@@ -1,11 +1,12 @@
 import Workspace from "@/components/layout/workspace"
 import { TemplateForm } from "@/components/templetes/template-form"
-import { Heading, Box, Text, Flex, Button, useSwitch } from "@vibe/core"
+import { Heading, Box, Text, Flex, Button, useSwitch, IconButton } from "@vibe/core"
 import { Modal, ModalHeader, ModalContent, ModalBasicLayout } from '@vibe/core/next'
-import { Add } from '@vibe/icons'
+import { Add, NavigationChevronLeft } from '@vibe/icons'
 import { Templates } from "@/components/layout/templates"
 import Authorization from "@/components/layout/authorization"
 import MondayContex from "@/components/layout/monday-context";
+import { Link } from "wouter"
 
 export default function TemplatesPage() {
   const { isChecked, onChange } = useSwitch()
@@ -15,6 +16,9 @@ export default function TemplatesPage() {
       <Authorization>
         <Workspace>
               <Box padding="xxxl">
+                <Link href="/">
+                  <IconButton size='small' kind='tertiary' icon={NavigationChevronLeft}  />
+                </Link>
                 <Box>
                   <Heading className="font-medium! text-slate-700!">Plantillas de Mensajes</Heading>
                   <Text className="text-sm! text-slate-500!">Gestiona y organiza todas tus plantillas de mensajes</Text>
