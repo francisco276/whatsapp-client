@@ -1,3 +1,4 @@
+import { SuccessDataResponse } from "@/types/response"
 import { api } from "../axios"
 import type { UserPreferencesConfig } from '@/types'
 
@@ -23,7 +24,7 @@ export const updateConfigurationByUser = async ({ workspaceId, userId, config }:
 
 export const getConfigurationByUser = async ({ workspaceId, userId }: GetConfigurationParasm) => {
   try {
-    const response = await api.post<UserPreferencesConfig>(`${ROUTE}`, {
+    const { data: response } = await api.post<SuccessDataResponse<UserPreferencesConfig>>(`${ROUTE}`, {
       workspaceId,
       userId
     })
