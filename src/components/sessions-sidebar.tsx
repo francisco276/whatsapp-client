@@ -2,7 +2,7 @@ import { ERROR_LOAD_SESSIONS } from '@/config/errors'
 import { Session } from '@/types'
 import { cn } from '@/utils/utils'
 import { Box, Flex, Heading, IconButton } from '@vibe/core'
-import { NavigationChevronLeft, NavigationChevronRight, Settings } from '@vibe/icons'
+import { ContentDirectory, NavigationChevronLeft, NavigationChevronRight, Settings } from '@vibe/icons'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import { MondayApi } from '../lib/monday/api'
 import { AddSession } from './add-session'
@@ -10,6 +10,7 @@ import { Error } from './error'
 import { SessionContext } from './providers/session/session-context'
 import { SessionsList } from './sessions/sessions-list'
 import { SideBarList } from './skeletons/sidebar-list'
+import { Link } from 'wouter'
 
 type SessionSidebarProps = {
   type?: 'small' | 'full'
@@ -49,6 +50,12 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
           <Flex direction='column' align='start' gap={10}>
             {
               !isSmallVersion && <Flex gap={10} className='ml-auto transition-all duration-300'>
+                {sessionsSidebarOpen && (
+                  <Link href="/templates">
+                    <IconButton size='small' kind='tertiary' color='fixed-light' icon={ContentDirectory}  />
+                  </Link>
+                  )
+                }
                 <IconButton size='small' kind='tertiary' color='fixed-light' icon={Settings} onClick={handleOpenModal} />
                 {!sessionsSidebarOpen && <IconButton size='small' kind='tertiary' color='fixed-light' icon={NavigationChevronLeft} onClick={() => setSessionsSidebarOpen(true)} />}
                 {sessionsSidebarOpen && <IconButton size='small' kind='tertiary' color='fixed-light' icon={NavigationChevronRight} onClick={() => setSessionsSidebarOpen(false)} />}
