@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios'
 import { api } from '../axios'
 
 const ROUTE = '/workspaces'
@@ -20,7 +21,10 @@ export const getWorkspace = async ({ workspaceId }: { workspaceId: string }) => 
     const response: { ok?: boolean, data: { data?: string, name?: string, error?: string } } = await api.get(`${ROUTE}/${workspaceId}`)
 
     return response.data as { id: string, name: string }
-  } catch {
+  } catch (e) {
+    if (e instanceof AxiosError && e.response?.status === 404) {
+      return null
+    }
     throw new Error('Error on fetch workspaces')
   }
 }
