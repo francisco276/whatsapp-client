@@ -30,7 +30,12 @@ export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled
     setIsOpen(false)
     reset()
     setQrCode(null)
+    if (socket) {
+      socket.disconnect()
+      setSocket(null)
+    }
   }
+
   const handleOpen = () => {
     const sessionId = Date.now().toString()
     setQrCode(null)
@@ -40,37 +45,38 @@ export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled
       mutate({ workspaceId, sessionId })
     }
 
-    const socket = new SocketClient({ workspaceId, sessionId })
-    setSocket(socket)
+    if (!workspaceId) return
+    const socketConnection = new SocketClient({ workspaceId, sessionId })
+    setSocket(socketConnection)
   }
 
   useEffect(() => {
-    if (socket) {
+    if (!socket) return
+    
+    handlerUpdateQrCode(socket, (qr) => {
+      console.log({ qr }, 'updated qr')
+      setQrCode(null)
+      setTimeout(() => { setQrCode(qr) }, 1000)
+    })
 
-      handlerUpdateQrCode(socket, (qr) => {
-        setQrCode(null)
-        setTimeout(() => { setQrCode(qr) }, 1000)
-      })
+    handlerConnection(socket, ({ error, insert }) => {
+      if (insert) {
+        setToast({ type: 'positive', message: 'Conexión establecida correctamente.' })
+        queryClient.invalidateQueries({ queryKey: ['getSessions', workspaceId] })
+      }
 
-      handlerConnection(socket, ({ error, message, insert }) => {
-        if (insert) {
-          setToast({ type: 'positive', message })
-          queryClient.invalidateQueries({ queryKey: ['getSessions', workspaceId] })
-        }
-
-        if (error) {
-          socket.disconnect()
-          setToast({ type: 'negative', message: message })
-        }
-        setIsOpen(false)
-        setTimeout(() => { setToast({ message: '', type: '' }) }, 2000)
-      })
-    }
+      if (error) {
+        socket.disconnect()
+        setToast({ type: 'negative', message: 'Ha pasado demasiado tiempo. Inicia una nueva sesión para continuar.' })
+      }
+      setIsOpen(false)
+      setTimeout(() => { setToast({ message: '', type: '' }) }, 2000)
+    })
 
     return () => {
-      socket?.disconnect()
+      socket.disconnect()
     }
-  }, [socket])
+  }, [socket, queryClient, workspaceId])
 
   const qr = useMemo(() => qrCode ?? data?.qr, [qrCode, data])
 
