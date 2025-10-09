@@ -50,7 +50,7 @@ export const formatPhoneToWhatsAppJID = (phoneNumber: string, countryShortName: 
 export const jidToFormatedPhone = (jid: string = '') => {
   if (!jid.endsWith('@s.whatsapp.net')) return null
 
-  let raw = jid.replace('@s.whatsapp.net', '')
+  let raw = jid.replace(/:.*|@s\.whatsapp\.net/g, '')
 
   // México 🇲🇽: remove the 1 after +52
   if (raw.startsWith('521') && raw.length === 13) {
