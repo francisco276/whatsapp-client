@@ -1,38 +1,22 @@
-import { useState, useEffect } from "react"
 import { MondayApi } from "../lib/monday/api"
 import type { AppContext } from "../types/monday"
+import { useQuery } from '@tanstack/react-query'
 
-type ContextProps = {
-  monday: MondayApi
-}
+const monday = new MondayApi()
 
-export const useContext = ({ monday }: ContextProps) => {
-  const [contextState, setContextState] = useState<AppContext>({
-    workspaceId: '',
-    itemId: '',
-    userId: '',
-    boardId: '',
-    accountId: '',
-    idleItemId: '',
-    userPunchesBoardID: '',
-    version: '',
-    theme: ''
+export const useContext = () => {
+
+  const query = useQuery<AppContext>({
+    queryKey: ['getContext'],
+    queryFn: () => getContext(),
+    enabled: !!monday,
   })
 
   const getContext = async () => {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const context: any = await monday.getContext()
 
-    return context
-  }
-
-
-  const loadContext = async () => {
-    const context = await getContext()
-
-    setContextState((state) => {
-      return {
-        ...state,
+    return {
         workspaceId: context?.data?.workspaceId,
         itemId: context?.data?.itemId,
         boardId: context?.data?.boardId,
@@ -40,15 +24,8 @@ export const useContext = ({ monday }: ContextProps) => {
         theme: context?.data?.theme,
         version: `${context?.data?.appVersion.versionData.major}.${context?.data?.appVersion.versionData.minor}`,
         accountId: context?.data?.account.id
-      }
-    })
+      } as AppContext
   }
 
-  useEffect(() => {
-    loadContext()
-  }, [])
-
-  return {
-    context: contextState
-  }
+  return query
 }
