@@ -7,6 +7,7 @@ import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { handlerUpdateSession } from '@/lib/socket-handlers/session'
 import { SocketClient } from '@/lib/socket'
 import { useDebounceCallback } from 'usehooks-ts'
+import { jidToFormatedPhone } from '@/utils/whatsapp'
 
 type SessionButtonProps = {
   sessionId: string
@@ -53,7 +54,8 @@ export const SessionButton = ({
     return null
   }
 
-  const { image, name } = session.user
+  const { image, name, id } = session.user
+  const displayName = name ?? jidToFormatedPhone(id)
 
   return (
     <Button
@@ -65,7 +67,7 @@ export const SessionButton = ({
     >
       <Flex gap={10} >
         {image ? <Avatar size="small" type="img" src={image} /> : <Icon icon={PersonRound} iconSize={32} />}
-        {(isToggle && !sync && name) && <Text type='text1' maxLines={1}>{name}</Text>}
+        {(isToggle && !sync && displayName) && <Text type='text1' maxLines={1}>{displayName}</Text>}
         {isToggle && sync && (<span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full"> Sincronizando </span>)}
       </Flex>
     </Button>
