@@ -29,3 +29,8 @@ export const ERROR_LOAD_SESSION = {
   title: 'Fallo de Autenticación',
   description: 'Algo salió mal al cargar la sesión. Intenta refrescar la vista o revisa si hay problemas en el sistema.'
 }
+
+export const ERROR_LOAD_CONTEXT = {
+  title: 'No pudimos obtener los datos desde monday.com',
+  description: 'Por favor, intenta refrescar la página. Si el problema persiste, contacta con nuestro equipo de soporte para ayudarte a resolverlo.'
+}
