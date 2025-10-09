@@ -32,9 +32,11 @@ export const SessionButton = ({
   })
   const [sync, setSync] = useState<boolean>(isSynced)
 
-  const debounceSync = useDebounceCallback((value: boolean) => setSync(value), 15000)
+  const debounceSync = useDebounceCallback((value: boolean) => setSync(value), 500)
 
   useEffect(() => {
+    if (!workspaceId || !sessionId) return
+
     const socket = new SocketClient({ workspaceId, sessionId })
 
     handlerUpdateSession(socket, (isSynced) => {
@@ -45,7 +47,7 @@ export const SessionButton = ({
     return () => {
       socket?.disconnect()
     }
-  }, [])
+  }, [workspaceId, sessionId, refetch, debounceSync])
 
   if (isError || !session) {
     return null
