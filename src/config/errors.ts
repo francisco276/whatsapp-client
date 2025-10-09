@@ -1,7 +1,9 @@
 export const ERROR_SERVER_ERROR =
   'An error occurred on the server. If this issue persists, please reach out to technical support for help.'
-export const DEFAULT_ERROR =
-  'An unexpected error occurred. Please contact support for help.'
+export const DEFAULT_ERROR ={
+  title: 'Algo salió mal',
+  description: 'Por favor, intenta actualizar la aplicación y vuelve a intentarlo.\nSi el problema persiste, contacta con nuestro equipo de soporte para ayudarte a resolverlo.'
+}
 
 export const ERROT_ITEM_NOT_FOUNT = 'An error ocurred. The item was not found'
 export const ERROR_PHONE_NUMBER_INVALID = 'An error ocurred. The phone number is invalid. Please check the phone number format and try again.'
