@@ -1,13 +1,10 @@
 import { Flex, Toggle, Text, useSwitch } from "@vibe/core"
 import { SettingBox } from "./setting-box"
 import { usePreferences } from "@/hooks/usePreferences"
-import { useContext } from '@/hooks/useContext.ts'
-import { MondayApi } from '@/lib/monday/api'
+import { useUserId } from "@/hooks/useUserId"
 
 export const Notifications = () => {
-  const monday = new MondayApi()
-  const { context } = useContext({ monday })
-  const { userId } = context
+  const userId = useUserId()
   const { config, isLoading, mutate } = usePreferences({ userId })
   const { isChecked } = useSwitch({ defaultChecked: false, isChecked: config?.notifications?.onMessageSend })
 
