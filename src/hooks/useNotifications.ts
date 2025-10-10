@@ -6,8 +6,8 @@ import { useContext } from './useContext'
 
 export const useNotifications = () => {
   const monday = new MondayApi()
-  const { context } = useContext({ monday })
-  const { itemId, boardId, userId } = context
+  const { data: context } = useContext()
+  const { itemId, boardId, userId } = context || {}
   const workspaceId = useWorkspaceId()
 
   const { data: authorizedUsersResponse } = useQuery({
@@ -16,9 +16,11 @@ export const useNotifications = () => {
   })
 
   async function sendNotifications() {
+    if (!itemId && !boardId) return
+
     const notifications = authorizedUsersResponse?.authorizations
       .filter(user =>  user.userId !== userId)
-      .map(async (user) => await monday.mutation.createNotification(user.userId, itemId || boardId, "Un mensaje nuevo se ha enviado"))
+      .map(async (user) => await monday.mutation.createNotification(user.userId, (itemId || boardId)!, "Un mensaje nuevo se ha enviado"))
 
     if (Array.isArray(notifications) && notifications.length > 0) {
       await Promise.all(notifications)
