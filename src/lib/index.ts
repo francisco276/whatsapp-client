@@ -1,8 +1,8 @@
 import { MondayApi } from '@/lib/monday/api'
 import { formatPhoneToWhatsAppJID } from "@/utils/whatsapp"
 import { isValidContact } from "@/lib/services/contacts"
-import { getColumnById } from '@/utils/utils'
-import { PublicError } from '@/errors/PublicError'
+import { getPhoneColumnsByColumnId } from '@/utils/utils'
+import { PublicError, ValidationError } from '@/errors/PublicError'
 import { ERROR_PHONE_NUMBER_INVALID, ERROT_ITEM_NOT_FOUNT } from '@/config/errors'
 import { ColumnValue } from '@/types/monday'
 
@@ -16,15 +16,15 @@ export async function getSingleChatInformation({
   itemId
 }: { monday: MondayApi, workspaceId: string, sessionId: string, phoneColumnId: string, itemId: string }) {
   try {
-    const { data } = await monday.query.getPhoneColumnsByIdsForItem<ColumnValuesResponse>(itemId)
+    const { data } = await monday.query.getPhoneColumnsByIdsForItem<ColumnValuesResponse>({ itemId, columnId: phoneColumnId })
     const item = data.items[0]
 
     const columnValues = item['column_values']
     if (!item || !columnValues) throw new PublicError(ERROT_ITEM_NOT_FOUNT)
 
-    const phoneColumn = getColumnById({ columnValues, columnId: phoneColumnId })
-
-    if (!phoneColumn) throw new PublicError(ERROR_PHONE_NUMBER_INVALID)
+    const phoneColumn = getPhoneColumnsByColumnId({ columnValues, columnId: phoneColumnId })
+    if (phoneColumn === null || phoneColumn === undefined) throw new ValidationError(ERROR_PHONE_NUMBER_INVALID.title, ERROR_PHONE_NUMBER_INVALID.description)
+    if (!phoneColumn.phone) throw new ValidationError(ERROR_PHONE_NUMBER_INVALID.title, ERROR_PHONE_NUMBER_INVALID.description)
 
     const id = formatPhoneToWhatsAppJID(phoneColumn.phone!, phoneColumn.country_short_name!)
 
@@ -35,6 +35,8 @@ export async function getSingleChatInformation({
       chatId: id
     }
   } catch (error) {
-    console.log({ error })
+    if (error instanceof Error) {
+      throw error
+    }
   }
 }
