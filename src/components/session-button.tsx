@@ -60,7 +60,7 @@ export const SessionButton = ({
   return (
     <Button
       kind="secondary"
-      className={`w-full border-1! border-[#A3E7F3]! ${isToggle ? 'justify-start!' : ''} ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
+      className={`w-full border-1! border-[#A3E7F3]! mb-4 ${isToggle ? 'justify-start!' : ''} ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
       onClick={onClick}
       size='large'
       disabled={sync}
