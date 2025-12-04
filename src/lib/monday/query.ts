@@ -11,13 +11,14 @@ export class MondayQuery {
     this.requestor = requestor
   }
 
-  async getPhoneColumnsByIdsForItem<T>(itemId: string | number) {
+  async getPhoneColumnsByIdsForItem<T>({ itemId, columnId }: { itemId: string | number, columnId: string }) {
     return this.requestor.request<T>(
       'getPhoneColumnsByItemId',
       getPhoneColumnsByItemId,
       {
         variables: {
-          id: itemId.toString()
+         itemId,
+         columnId
         }
       }
     )
