@@ -1,12 +1,19 @@
 export const getPhoneColumnsByItemId = `
-  query ($id: ID!) {
-    items (ids: [$id]) {
-      column_values (types: [phone]) {
+  query getColumnById ($itemId: ID!, $columnId: String!) {
+    items (ids: [$itemId]) {
+      column_values (ids: [$columnId]) {
         id
         value
+        ... on MirrorValue {
+          value
+          display_value
+          text
+          __typename
+        }
         ... on PhoneValue {
           country_short_name
           phone
+          __typename
         }
       }
     }
