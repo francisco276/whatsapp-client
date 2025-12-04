@@ -6,7 +6,10 @@ export const DEFAULT_ERROR ={
 }
 
 export const ERROT_ITEM_NOT_FOUNT = 'An error ocurred. The item was not found'
-export const ERROR_PHONE_NUMBER_INVALID = 'An error ocurred. The phone number is invalid. Please check the phone number format and try again.'
+export const ERROR_PHONE_NUMBER_INVALID = {
+  title: 'Revisa tu número de teléfono',
+  description: 'Parece que el número que ingresados en la columna no es válido. Asegúrate de incluir todos los dígitos correctos e intenta de nuevo.'
+}
 export const ERROR_PHONE_COLUMN_CONFIGURATION = 'An error ocurred. The phone column is not configured correctly. Please check the column settings and try again'
 export const ERROR_LOAD_SESSIONS = {
   title: 'Sesiones no disponibles',
