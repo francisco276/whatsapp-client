@@ -10,6 +10,7 @@ import { mapMessageToElement, groupMessagesByDate } from '../utils/message'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { Chat as ChatWrapper } from "@/components/layout/chat"
 import { useSelectChat } from "@/hooks/useSelectChat"
+import { useUpdateChat } from "@/hooks/useUpdateChat"
 
 export const Chat = () => {
   const workspaceId = useWorkspaceId()
@@ -35,6 +36,8 @@ export const Chat = () => {
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.offset,
   })
+
+  useUpdateChat({ workspaceId: workspaceId!, chatId: chat!, sessionId: session! })
 
   useSelectChat((messagesData?.pages.flatMap(page => page.data) ?? []))
 
