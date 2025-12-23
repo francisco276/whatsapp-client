@@ -12,7 +12,12 @@ export class MondayApi {
   public mutation: MondayMutation
 
   constructor() {
-    this.monday = mondaySdk({ apiVersion: MONDAY_API_VERSION })
+    const config: { apiVersion: string, token?: string } = { apiVersion: MONDAY_API_VERSION }
+    if (import.meta.env.MODE === 'development' && import.meta.env.VITE_MONDAY_API) {
+      config.token = import.meta.env.VITE_MONDAY_API
+    }
+
+    this.monday = mondaySdk({...config })
     this.requestor = new MondayRequest(this.monday)
     this.query = new MondayQuery(this.requestor)
     this.mutation = new MondayMutation(this.requestor)
