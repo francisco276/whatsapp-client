@@ -10,6 +10,7 @@ import { FullLoader } from '@/components/loading/full-loading'
 import { Error } from '@/components/error'
 import { EmptyState } from "@/components/empty-state"
 import Chats from '@/components/layout/chats'
+import { ValidationError } from '@/errors/PublicError'
 
 type SingleChatProps = {
   phoneColumnId: string
@@ -23,7 +24,7 @@ export function SingleChat({ phoneColumnId }: SingleChatProps) {
   const { data: context } = useMondayContex()
   const { itemId } = useMemo(() => context ?? { itemId: ''}, [context])
   
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['getItem', itemId],
     queryFn: () => getSingleChatInformation({
       monday,
@@ -40,6 +41,10 @@ export function SingleChat({ phoneColumnId }: SingleChatProps) {
   }
 
   if (isError) {
+    if (error instanceof ValidationError) {
+      return <Error title={error.title} errorMessage={error.description} />
+    }
+
     return <Error title={ERROR_LOAD_MESSAGES_HISTORY.title} errorMessage={ERROR_LOAD_MESSAGES_HISTORY.description} />
   }
 
