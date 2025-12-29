@@ -12,7 +12,6 @@ export const handlerNotifyMessage = (socket: SocketClient, callback: (data: { id
   })
 
   socket.on('chats.update', (event) => {
-    console.log('chats.update')
     const { data: eventData } = event
     if (eventData.status === 'success') {
       const { data } = event as SocketSuccessResponse
