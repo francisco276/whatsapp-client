@@ -20,6 +20,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
 
     handlerNotifyMessage(socket, ({ id, unreadCount }) => {
       if (chat !== id && unreadCount) incrementUnreadChat(id)
+      if (chat !== id && (unreadCount === 0)) setInitialData(id, unreadCount)
     })
  
     return () => {
