@@ -25,7 +25,7 @@ export const MessageInput = () => {
     onSuccess: () => {
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
-      }, 50)
+      }, 200)
       sendNotifications()
     }
   })
