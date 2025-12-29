@@ -97,7 +97,7 @@ export const TemplateForm = ({ cancelButton, submitButton, mode = 'create', onDo
           aria-label="Mensaje"
           size="large"
           label="Mensaje"
-          helpText={form.formState.errors.message?.message || 'Tip: Usa variables como {nombre}, {fecha}, {monto} para personalizar tus mensajes.' }
+          helpText={form.formState.errors.message?.message || '' }
           error={!!form.formState.errors.message}
           {...form.register('message')}
         />
