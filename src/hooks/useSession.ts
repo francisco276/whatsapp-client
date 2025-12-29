@@ -23,8 +23,6 @@ export const useSessionInformation = ({ workspaceId, sessionId }: UseSessionInfo
   return useQuery({
     queryKey: [sessionId],
     queryFn: () => getProfile({ workspaceId, sessionId }),
-    refetchOnWindowFocus: false,
-    staleTime: 1440 * 60 * 1000,
     enabled: !!workspaceId && !!sessionId
   })
 }
