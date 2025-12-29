@@ -48,7 +48,7 @@ export const SessionButton = ({
     return () => {
       socket?.disconnect()
     }
-  }, [workspaceId, sessionId, refetch, debounceSync])
+  }, [workspaceId, sessionId])
 
   if (isError || !session) {
     return null
