@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --mode production",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && mapps code:push --client-side --directoryPath ./dist/ -i 11494117"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.4",
