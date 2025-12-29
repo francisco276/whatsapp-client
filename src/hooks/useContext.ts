@@ -14,7 +14,12 @@ export const useContext = () => {
 
   const getContext = async () => {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const context: any = await monday.getContext()
+    let context: any
+    if (import.meta.env.MODE === 'development' && import.meta.env.VITE_DEV_CONTEXT) {
+      context = JSON.parse(import.meta.env.VITE_DEV_CONTEXT)
+    } else {
+      context = await monday.getContext()
+    }
 
     return {
         workspaceId: context?.data?.workspaceId,
