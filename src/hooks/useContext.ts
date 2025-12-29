@@ -27,7 +27,7 @@ export const useContext = () => {
         boardId: context?.data?.boardId,
         userId: context?.data?.user.id,
         theme: context?.data?.theme,
-        version: `${context?.data?.appVersion.versionData.major}.${context?.data?.appVersion.versionData.minor}`,
+        version: `${context?.data?.appVersion?.versionData?.major}.${context?.data?.appVersion?.versionData?.minor}`,
         accountId: context?.data?.account.id
       } as AppContext
   }
