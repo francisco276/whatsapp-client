@@ -27,6 +27,18 @@ export class SocketClient {
     return this.socket.on(event, callback)
   }
 
+  onConnect(callback: () => void) {
+    this.socket.on('connect', callback)
+  }
+
+  onDisconnect(callback: () => void) {
+    this.socket.on('disconnect', callback)
+  }
+
+  isConnected() {
+    return this.socket.connected
+  }
+
   disconnect() {
     this.socket.disconnect()
   }

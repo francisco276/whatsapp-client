@@ -42,6 +42,10 @@ export const sendMessage = async ({ workspaceId, sessionId, chatId, message, fil
       timeout: 0
     })
 
+    // Update sent message counter
+    const currentSent = parseInt(localStorage.getItem('messages_sent_count') || '0')
+    localStorage.setItem('messages_sent_count', (currentSent + 1).toString())
+
     return response.data
   } catch {
     throw new Error('Error on send message')

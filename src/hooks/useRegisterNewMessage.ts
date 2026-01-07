@@ -17,9 +17,14 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     if (!workspaceId || !session) return
 
     const socket = new SocketClient({ workspaceId, sessionId: session })
+    
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
 
     handlerNotifyMessage(socket, ({ id, unreadCount }) => {
-      if (chat !== id && unreadCount) incrementUnreadChat(id)
+      if (chat !== id && unreadCount) {
+        incrementUnreadChat(id)
+        audio.play().catch(e => console.log('Audio play failed:', e))
+      }
       if (chat !== id && (unreadCount === 0)) setInitialData(id, unreadCount)
     })
  
