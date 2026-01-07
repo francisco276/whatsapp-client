@@ -23,7 +23,7 @@ export const ContactItem = ({ contactId, isToggle }: ContactItemProps) => {
   }
 
   const button = <Button
-    className={`w-full border-1! border-[#A3E7F3]! ${isToggle ? 'justify-start!' : ''}  ${isSelected ? 'bg-[#E8F9FC]!' : ''}`}
+    className={`w-full border-1! border-[#A3E7F3]! transition-all! duration-200! hover:scale-[1.02]! active:scale-[0.98]! ${isToggle ? 'justify-start!' : ''}  ${isSelected ? 'bg-[#E8F9FC]! shadow-inner!' : 'hover:bg-[#F5FEFF]!'}`}
     size='large'
     kind='secondary'
     onClick={() => {

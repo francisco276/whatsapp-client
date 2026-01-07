@@ -50,9 +50,9 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
       `}
     >
       <div
-        className={`max-w-xs md:max-w-md rounded-lg text-wrap text-ellipsis whitespace-pre-line
-          ${(isMyMessage && !isDateSeprator) && 'bg-[#0DACC8] text-white rounded-br-none px-4 py-2'}
-          ${(!isMyMessage && !isDateSeprator) && 'bg-white text-slate-900 border border-slate-200 rounded-bl-none px-4 py-2'}
+        className={`max-w-xs md:max-w-md rounded-2xl text-wrap text-ellipsis whitespace-pre-line shadow-sm transition-all hover:shadow-md
+          ${(isMyMessage && !isDateSeprator) && 'bg-gradient-to-br from-[#0DACC8] to-[#0B8AA0] text-white rounded-br-none px-4 py-2.5'}
+          ${(!isMyMessage && !isDateSeprator) && 'bg-white text-slate-900 border border-slate-100 rounded-bl-none px-4 py-2.5'}
         `}
       >
         {!isMyMessage && isAGroup && (
