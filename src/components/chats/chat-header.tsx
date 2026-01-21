@@ -18,7 +18,7 @@ export const ChatHeader = () => {
 
   useEffect(() => {
     const updateCount = () => {
-      setSentCount(parseInt(localStorage.getItem('messages_sent_count') || '0'))
+      setSentCount(parseInt(localStorage.getItem('messages_sent_total_count') || '0'))
     }
     updateCount()
     const interval = setInterval(updateCount, 1000)
@@ -41,7 +41,7 @@ export const ChatHeader = () => {
   return (
     <div className='border-b! border-x-0 border-slate-200!'>
       <Box className="px-4 pt-2 text-right">
-        <Text type="text3" color="secondary">Mensajes enviados: {sentCount}</Text>
+        <Text type="text3" color="secondary">Total mensajes enviados: {sentCount}</Text>
       </Box>
       <Flex gap={10} className='p-4 pt-2' align="center">
         <Badge type="indicator" color={isConnected ? "notification" : "notification"} anchor="bottom-end">

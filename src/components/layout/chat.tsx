@@ -11,7 +11,7 @@ export const Chat = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const updateCount = () => {
-      setSentCount(parseInt(localStorage.getItem('messages_sent_count') || '0'))
+      setSentCount(parseInt(localStorage.getItem('messages_sent_total_count') || '0'))
     }
     updateCount()
     window.addEventListener('storage', updateCount)
