@@ -30,7 +30,7 @@ export const ChatHeader = () => {
 
   return (
     <Flex gap={10} className='p-4 border-b! border-x-0 border-slate-200!' align="center">
-      <Badge type="indicator" color={isConnected ? "primary" : "primary"} size="small" anchor="bottom-end">
+      <Badge type="indicator" color={isConnected ? "notification" : "notification"} anchor="bottom-end">
         {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
       </Badge>
       <Flex direction="column" align="start">
