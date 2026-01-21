@@ -54,6 +54,24 @@ export const MessageInput = () => {
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     setMessage(event.target.value)
   }
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      if (!userCanNotSendMessage && !isPending) {
+        mutate({
+          chatId: chat,
+          sessionId: session,
+          workspaceId,
+          message: message.trim(),
+          files: selectedFiles
+        })
+        setMessage('')
+        clearFiles()
+      }
+    }
+  }
+
   return (
     <div>
       <TemplateSelector onSelect={(message) => setMessage(message)} isChecked={isChecked} onChange={onChange} />
@@ -97,15 +115,17 @@ export const MessageInput = () => {
             <MenuItem icon={Note} title="Plantilla" onClick={onChange} />
           </Menu>
         </MenuButton>
-        <TextArea
-          size='small'
-          placeholder='Escribe tu mensaje'
-          value={message}
-          onChange={handleChange}
-          resize={false}
-          allowExceedingMaxLength
-          rows={1}
-        />
+        <div onKeyDown={handleKeyDown} className="flex-1">
+          <TextArea
+            size='small'
+            placeholder='Escribe tu mensaje'
+            value={message}
+            onChange={handleChange}
+            resize={false}
+            allowExceedingMaxLength
+            rows={1}
+          />
+        </div>
         <IconButton
           className='bg-[#0DACC8]! text-white hover:bg-[#0B8AA0]!'
           ariaLabel='Enviar mensaje'

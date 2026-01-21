@@ -1,4 +1,4 @@
-import { Flex, Heading, Icon, Avatar, Badge } from '@vibe/core'
+import { Flex, Heading, Icon, Avatar, Badge, Box, Text } from '@vibe/core'
 import { PersonRound } from '@vibe/icons'
 import { useChatId } from '@/hooks/useChat'
 import { useGetContact } from '@/hooks/useGetContact'
@@ -12,8 +12,18 @@ export const ChatHeader = () => {
   const workspaceId = useWorkspaceId()
   const { session } = useContext(SessionContext)
   const [isConnected, setIsConnected] = useState(false)
+  const [sentCount, setSentCount] = useState(0)
 
   const { contact } = useGetContact({ contactId: chatId, enabled: !!chatId  })
+
+  useEffect(() => {
+    const updateCount = () => {
+      setSentCount(parseInt(localStorage.getItem('messages_sent_count') || '0'))
+    }
+    updateCount()
+    const interval = setInterval(updateCount, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     if (!workspaceId || !session) return
@@ -29,16 +39,21 @@ export const ChatHeader = () => {
   }, [workspaceId, session])
 
   return (
-    <Flex gap={10} className='p-4 border-b! border-x-0 border-slate-200!' align="center">
-      <Badge type="indicator" color={isConnected ? "notification" : "notification"} anchor="bottom-end">
-        {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
-      </Badge>
-      <Flex direction="column" align="start">
-        <Heading type='h2' weight='bold'> {contact?.displayName} </Heading>
-        <div className={`text-xs ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
-          {isConnected ? 'En línea' : 'Desconectado'}
-        </div>
+    <div className='border-b! border-x-0 border-slate-200!'>
+      <Box className="px-4 pt-2 text-right">
+        <Text type="text3" color="secondary">Mensajes enviados: {sentCount}</Text>
+      </Box>
+      <Flex gap={10} className='p-4 pt-2' align="center">
+        <Badge type="indicator" color={isConnected ? "notification" : "notification"} anchor="bottom-end">
+          {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
+        </Badge>
+        <Flex direction="column" align="start">
+          <Heading type='h2' weight='bold'> {contact?.displayName} </Heading>
+          <div className={`text-xs ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+            {isConnected ? 'En línea' : 'Desconectado'}
+          </div>
+        </Flex>
       </Flex>
-    </Flex>
+    </div>
   )
 }

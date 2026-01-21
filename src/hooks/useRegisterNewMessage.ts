@@ -5,12 +5,14 @@ import { SocketClient } from '@/lib/socket'
 import { handlerNotifyMessage } from '@/lib/socket-handlers/messages'
 import { unreadChatStore } from '@/stores/unReadChatStore'
 import { Chat } from '@/lib/services/chats'
+import { useNotifications } from '@/hooks/useNotifications'
 
 export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: string, chats?: Chat[] }) => {
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
   const incrementUnreadChat = unreadChatStore((state) => state.incrementUnreadChat)
   const setInitialData = unreadChatStore((state) => state.setInitialData)
+  const { sendNotifications } = useNotifications()
 
   useEffect(() => {
     console.log({ workspaceId, session})
@@ -24,6 +26,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
       if (chat !== id && unreadCount) {
         incrementUnreadChat(id)
         audio.play().catch(e => console.log('Audio play failed:', e))
+        sendNotifications()
       }
       if (chat !== id && (unreadCount === 0)) setInitialData(id, unreadCount)
     })
@@ -31,7 +34,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     return () => {
       socket?.disconnect()
     }
-  }, [workspaceId, session])
+  }, [workspaceId, session, chat])
 
   chats?.forEach((chat) => {
     if (chat.unreadCount) {
