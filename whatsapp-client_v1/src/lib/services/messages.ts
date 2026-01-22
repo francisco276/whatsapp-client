@@ -1,0 +1,87 @@
+import { api } from "../axios"
+import type { MessageList, Message } from "../../types/message"
+import type { SelectedFile } from "@/hooks/useFileSelector"
+import { SuccessDataResponse } from "@/types/response"
+import { MessageKey } from '@/types/message'
+
+const ROUTE = '/messages'
+
+
+export const getMessages = async ({ workspaceId, sessionId, chatId, offset }: { workspaceId: string, sessionId: string, chatId: string, cursor?: number | string, offset?: number | string }) => {
+  try {
+    const { data: response } = await api.get<SuccessDataResponse<MessageList>>(
+      `${workspaceId}/${sessionId}${ROUTE}/list/${chatId}`,
+      {
+        params: {
+          offset,
+          limit: 100
+        },
+        timeout: 0
+      }
+    )
+
+    return response.data
+  } catch {
+    throw new Error('Error on fetch messages')
+  }
+}
+
+export const sendMessage = async ({ workspaceId, sessionId, chatId, message, files }: { workspaceId: string, sessionId: string, chatId: string, message: string, files?: SelectedFile[] }) => {
+
+  const formData = new FormData()
+
+  formData.append('jid', chatId)
+  formData.append('message', message)
+
+  files?.forEach((file) => {
+    formData.append('files', file.file)
+  })
+
+  try {
+    const response = await api.post(`${workspaceId}/${sessionId}${ROUTE}/send`, formData, {
+      timeout: 0
+    })
+
+    // Update sent message counter in persistent localStorage
+    const currentSent = parseInt(localStorage.getItem('messages_sent_total_count') || '0')
+    localStorage.setItem('messages_sent_total_count', (currentSent + 1).toString())
+
+    return response.data
+  } catch {
+    throw new Error('Error on send message')
+  }
+}
+
+export async function downloadMedia({ workspaceId, sessionId, message }: { workspaceId: string, sessionId: string, message?: Message }) {
+  if (message === undefined) {
+    throw new Error('Message is required')
+  }
+
+  try {
+    const response = await api.post(
+      `${workspaceId}/${sessionId}${ROUTE}/download`,
+      message,
+      {
+        timeout: 0,
+        responseType: 'arraybuffer',
+      }
+    )
+
+    const mimeType = response.headers['content-type'] || 'application/octet-stream'
+    const blob = new Blob([response.data], { type: mimeType })
+
+    const url = URL.createObjectURL(blob)
+
+    return url
+  } catch {
+    throw new Error('Error downloading media')
+  }
+}
+
+export async function markMessagesAsRead ({ workspaceId, sessionId, readMessages }: { workspaceId: string, sessionId: string, readMessages: MessageKey[] }) {
+  try {
+    return await api.post(`${workspaceId}/${sessionId}${ROUTE}/markAsRead`, { read_messages: readMessages })
+  } catch {
+    throw new Error('Error to mark messages as read ')
+  }
+}
