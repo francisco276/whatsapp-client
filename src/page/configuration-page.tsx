@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { Box, Flex, Heading, Icon, Menu, MenuItem, Divider } from '@vibe/core'
-import { Settings, Person, Basic } from '@vibe/icons'
+import { Box, Flex, Heading, Icon, Menu, MenuItem, Divider, Button } from '@vibe/core'
+import { Settings, Person, Basic, NavigationChevronLeft } from '@vibe/icons'
 import { AccountSection } from '@/components/settings/account-section'
 import { SessionsSection } from '@/components/settings/sessions-settings.tsx'
 import Authorization from "@/components/layout/authorization"
 import MondayContex from "@/components/layout/monday-context";
+import { useLocation } from 'wouter'
 
 const ConfigurationPage = () => {
   const [page, setPage] = useState('account')
+  const [, setLocation] = useLocation()
 
   return (
     <MondayContex>
@@ -22,15 +24,28 @@ const ConfigurationPage = () => {
                 backgroundColor="allgreyBackgroundColor"
                 padding="large"
               >
-                <Flex gap={10} align='center'>
-                  <Icon icon={Settings} />
-                  <Heading type="h3" weight="bold">Settings</Heading>
+                <Flex direction="column" gap={20} className="h-full">
+                  <Flex direction="column" gap={10} className="w-full">
+                    <Button 
+                      kind="tertiary" 
+                      size="small" 
+                      leftIcon={NavigationChevronLeft} 
+                      onClick={() => setLocation('/')}
+                      className="mb-4 self-start"
+                    >
+                      Volver al inicio
+                    </Button>
+                    <Flex gap={10} align='center'>
+                      <Icon icon={Settings} />
+                      <Heading type="h3" weight="bold">Settings</Heading>
+                    </Flex>
+                    <Divider />
+                    <Menu>
+                      <MenuItem icon={Person} title="Cuenta" onClick={() => setPage('account')} />
+                      <MenuItem icon={Basic} title="Sesiones" onClick={() => setPage('sessions')} />
+                    </Menu>
+                  </Flex>
                 </Flex>
-                <Divider />
-                <Menu>
-                  <MenuItem icon={Person} title="Cuenta" onClick={() => setPage('account')} />
-                  <MenuItem icon={Basic} title="Sesiones" onClick={() => setPage('sessions')} />
-                </Menu>
               </Box>
               <Box
                 className="w-full h-full"
