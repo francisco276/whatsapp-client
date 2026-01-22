@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { IconButton, Flex, Box, Heading, TextField, Text } from '@vibe/core'
+import { IconButton, Flex, Box, Heading, TextField } from '@vibe/core'
 import { NavigationChevronLeft, NavigationChevronRight, Search } from '@vibe/icons'
 import { SideBarList } from './skeletons/sidebar-list'
 import { ChatList } from './list/chats-list'
