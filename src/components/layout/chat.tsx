@@ -45,8 +45,10 @@ export const Chat = ({ children }: { children: React.ReactNode }) => {
       {children}
       <div className="bg-white border-t border-gray-200 px-6 py-4">
         <MessageInput />
-        <div className="mt-1 text-right">
-          <Text type="text3" color="secondary">Mensajes enviados: {sentCount}</Text>
+        <div className="mt-1 flex justify-between items-center">
+          <Text type="text3" color="secondary" weight="bold" className="bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+            Tracking de mensajes: {sentCount}
+          </Text>
         </div>
       </div>
     </div>
