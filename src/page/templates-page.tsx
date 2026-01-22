@@ -16,20 +16,13 @@ export default function TemplatesPage() {
       <Authorization>
         <Workspace>
               <Box padding="xxxl">
-                <Flex align="center" gap={10} className="mb-4">
-                  <Link href="/">
-                    <IconButton 
-                      size='small' 
-                      kind='tertiary' 
-                      icon={NavigationChevronLeft}
-                      ariaLabel="Volver"
-                    />
-                  </Link>
-                  <Box>
-                    <Heading className="font-medium! text-slate-700!">Plantillas de Mensajes</Heading>
-                    <Text className="text-sm! text-slate-500!">Gestiona y organiza todas tus plantillas de mensajes</Text>
-                  </Box>
-                </Flex>
+                <Link href="/">
+                  <IconButton size='small' kind='tertiary' icon={NavigationChevronLeft}  />
+                </Link>
+                <Box>
+                  <Heading className="font-medium! text-slate-700!">Plantillas de Mensajes</Heading>
+                  <Text className="text-sm! text-slate-500!">Gestiona y organiza todas tus plantillas de mensajes</Text>
+                </Box>
                 <Box>
                   <Flex justify="end">
                     <Button

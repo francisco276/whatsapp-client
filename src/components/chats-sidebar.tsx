@@ -66,9 +66,6 @@ const ChatsSidebar = ({ chats, loading, error }: ChatSidebarProps) => {
           )
           }
         </Box>
-        <div className="p-2 border-t border-slate-100 text-center">
-          <span className="text-[10px] text-slate-400">v16</span>
-        </div>
       </Flex>
     </Box>
   )

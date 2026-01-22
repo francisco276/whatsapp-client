@@ -15,6 +15,7 @@ export const Chat = ({ children }: { children: React.ReactNode }) => {
     }
     updateCount()
     window.addEventListener('storage', updateCount)
+    // Custom event for same-window updates
     const interval = setInterval(updateCount, 1000)
     return () => {
       window.removeEventListener('storage', updateCount)

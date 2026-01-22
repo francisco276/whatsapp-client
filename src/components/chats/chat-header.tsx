@@ -41,7 +41,7 @@ export const ChatHeader = () => {
   return (
     <div className='border-b! border-x-0 border-slate-200!'>
       <Box className="px-4 pt-2 text-right">
-        <Text type="text3" color="secondary">Tracking mensajes: {sentCount}</Text>
+        <Text type="text3" color="secondary">Total mensajes enviados: {sentCount}</Text>
       </Box>
       <Flex gap={10} className='p-4 pt-2' align="center">
         <Badge type="indicator" color={isConnected ? "notification" : "notification"} anchor="bottom-end">
