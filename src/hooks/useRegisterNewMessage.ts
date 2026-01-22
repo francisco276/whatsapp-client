@@ -23,12 +23,20 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
 
     handlerNotifyMessage(socket, ({ id, unreadCount }) => {
-      if (chat !== id && unreadCount) {
-        incrementUnreadChat(id)
+      // Play sound and send notification regardless of chat status (per user request)
+      if (unreadCount) {
         audio.play().catch(e => console.log('Audio play failed:', e))
         sendNotifications()
       }
-      if (chat !== id && (unreadCount === 0)) setInitialData(id, unreadCount)
+
+      // Only increment counter if the user is NOT looking at the active chat
+      if (chat !== id && unreadCount) {
+        incrementUnreadChat(id)
+      }
+
+      if (chat !== id && unreadCount === 0) {
+        setInitialData(id, unreadCount)
+      }
     })
  
     return () => {
