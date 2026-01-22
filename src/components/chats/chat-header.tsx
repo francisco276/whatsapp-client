@@ -40,10 +40,8 @@ export const ChatHeader = () => {
 
   return (
     <div className='border-b! border-x-0 border-slate-200!'>
-      <Box className="px-4 pt-2 flex justify-end">
-        <Text type="text3" color="secondary" weight="bold" className="bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-          Tracking de mensajes: {sentCount}
-        </Text>
+      <Box className="px-4 pt-2 text-right">
+        <Text type="text3" color="secondary">Tracking mensajes: {sentCount}</Text>
       </Box>
       <Flex gap={10} className='p-4 pt-2' align="center">
         <Badge type="indicator" color={isConnected ? "notification" : "notification"} anchor="bottom-end">

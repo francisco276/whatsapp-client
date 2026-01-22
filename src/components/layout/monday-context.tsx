@@ -20,15 +20,13 @@ export default function MondayContext({ children }: MondayContextProps) {
     return <Error title={ERROR_LOAD_CONTEXT.title} errorMessage={ERROR_LOAD_CONTEXT.title} />
   }
 
-  const { accountId: workspaceId, userId, theme } = context
+  const { accountId: workspaceId, userId } = context
 
   return (
-    <div className={`monday-app-theme-${theme || 'light'} h-full w-full`}>
-      <WorkspaceProvider workspaceId={workspaceId}>
-        <UserProvider userId={userId}>
-          {children}
-        </UserProvider>
-      </WorkspaceProvider>
-    </div>
+    <WorkspaceProvider workspaceId={workspaceId}>
+      <UserProvider userId={userId}>
+        {children}
+      </UserProvider>
+    </WorkspaceProvider>
   )
 }

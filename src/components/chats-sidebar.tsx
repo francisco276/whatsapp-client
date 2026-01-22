@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { IconButton, Flex, Box, Heading, TextField, Text } from '@vibe/core'
+import { IconButton, Flex, Box, Heading, TextField } from '@vibe/core'
 import { NavigationChevronLeft, NavigationChevronRight, Search } from '@vibe/icons'
 import { SideBarList } from './skeletons/sidebar-list'
 import { ChatList } from './list/chats-list'
@@ -66,8 +66,8 @@ const ChatsSidebar = ({ chats, loading, error }: ChatSidebarProps) => {
           )
           }
         </Box>
-        <div className="p-4 border-t border-slate-100 mt-auto">
-          <Text type="text3" color="secondary" className="opacity-50">v16</Text>
+        <div className="p-2 border-t border-slate-100 text-center">
+          <span className="text-[10px] text-slate-400">v16</span>
         </div>
       </Flex>
     </Box>

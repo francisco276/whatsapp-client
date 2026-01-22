@@ -23,13 +23,13 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     const audio = new Audio('/assets/notification.mp3')
 
     handlerNotifyMessage(socket, ({ id, unreadCount }) => {
-      // Play sound and send notification regardless of chat status (per user request)
+      // Always play sound when new message arrives
       if (unreadCount) {
         audio.play().catch(e => console.log('Audio play failed:', e))
         sendNotifications()
       }
 
-      // Only increment counter if the user is NOT looking at the active chat
+      // Only increment counter if user is NOT viewing the active chat
       if (chat !== id && unreadCount) {
         incrementUnreadChat(id)
       }

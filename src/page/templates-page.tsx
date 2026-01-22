@@ -21,13 +21,13 @@ export default function TemplatesPage() {
                     <IconButton 
                       size='small' 
                       kind='tertiary' 
-                      icon={NavigationChevronLeft} 
-                      ariaLabel="Volver al inicio"
+                      icon={NavigationChevronLeft}
+                      ariaLabel="Volver"
                     />
                   </Link>
                   <Box>
-                    <Heading type="h2" weight="bold" className="text-slate-700!">Plantillas de Mensajes</Heading>
-                    <Text type="text2" color="secondary">Gestiona y organiza todas tus plantillas de mensajes</Text>
+                    <Heading className="font-medium! text-slate-700!">Plantillas de Mensajes</Heading>
+                    <Text className="text-sm! text-slate-500!">Gestiona y organiza todas tus plantillas de mensajes</Text>
                   </Box>
                 </Flex>
                 <Box>
