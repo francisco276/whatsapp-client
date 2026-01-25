@@ -1,0 +1,1241 @@
+{
+  "id": "8fb875f9-9232-442c-b52c-a3b68813c5cc",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.authorization": {
+      "name": "authorization",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work": {
+          "name": "work",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "authorization_work_workspaces_id_fk": {
+          "name": "authorization_work_workspaces_id_fk",
+          "tableFrom": "authorization",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "work"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "unique_user_on_workspace": {
+          "name": "unique_user_on_workspace",
+          "nullsNotDistinct": false,
+          "columns": [
+            "work",
+            "userId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.chat": {
+      "name": "chat",
+      "schema": "",
+      "columns": {
+        "pkId": {
+          "name": "pkId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sessionId": {
+          "name": "sessionId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "archived": {
+          "name": "archived",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contactPrimaryIdentityKey": {
+          "name": "contactPrimaryIdentityKey",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conversationTimestamp": {
+          "name": "conversationTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "disappearingMode": {
+          "name": "disappearingMode",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "displayName": {
+          "name": "displayName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "endOfHistoryTransfer": {
+          "name": "endOfHistoryTransfer",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "endOfHistoryTransferType": {
+          "name": "endOfHistoryTransferType",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ephemeralExpiration": {
+          "name": "ephemeralExpiration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ephemeralSettingTimestamp": {
+          "name": "ephemeralSettingTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isDefaultSubgroup": {
+          "name": "isDefaultSubgroup",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isParentGroup": {
+          "name": "isParentGroup",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastMsgTimestamp": {
+          "name": "lastMsgTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lidJid": {
+          "name": "lidJid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "markedAsUnread": {
+          "name": "markedAsUnread",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mediaVisibility": {
+          "name": "mediaVisibility",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messages": {
+          "name": "messages",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "muteEndTime": {
+          "name": "muteEndTime",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "newJid": {
+          "name": "newJid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notSpam": {
+          "name": "notSpam",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oldJid": {
+          "name": "oldJid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pHash": {
+          "name": "pHash",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentGroupId": {
+          "name": "parentGroupId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant": {
+          "name": "participant",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pinned": {
+          "name": "pinned",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pnJid": {
+          "name": "pnJid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pnhDuplicateLidThread": {
+          "name": "pnhDuplicateLidThread",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "readOnly": {
+          "name": "readOnly",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shareOwnPn": {
+          "name": "shareOwnPn",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "support": {
+          "name": "support",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "suspended": {
+          "name": "suspended",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tcToken": {
+          "name": "tcToken",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tcTokenSenderTimestamp": {
+          "name": "tcTokenSenderTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tcTokenTimestamp": {
+          "name": "tcTokenTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terminated": {
+          "name": "terminated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unreadCount": {
+          "name": "unreadCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unreadMentionCount": {
+          "name": "unreadMentionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wallpaper": {
+          "name": "wallpaper",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastMessageRecvTimestamp": {
+          "name": "lastMessageRecvTimestamp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "commentsCount": {
+          "name": "commentsCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "unique_chat_id_per_session_id": {
+          "name": "unique_chat_id_per_session_id",
+          "columns": [
+            {
+              "expression": "sessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "chat_session_id_index": {
+          "name": "chat_session_id_index",
+          "columns": [
+            {
+              "expression": "sessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contacts": {
+      "name": "contacts",
+      "schema": "",
+      "columns": {
+        "pkId": {
+          "name": "pkId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sessionId": {
+          "name": "sessionId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lid": {
+          "name": "lid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notify": {
+          "name": "notify",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verifiedName": {
+          "name": "verifiedName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imgUrl": {
+          "name": "imgUrl",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "unique_contact_id_per_session_id": {
+          "name": "unique_contact_id_per_session_id",
+          "columns": [
+            {
+              "expression": "sessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "contact_session_id_index": {
+          "name": "contact_session_id_index",
+          "columns": [
+            {
+              "expression": "sessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.messages": {
+      "name": "messages",
+      "schema": "",
+      "columns": {
+        "pkId": {
+          "name": "pkId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "messages_pkId_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "sessionId": {
+          "name": "sessionId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remoteJid": {
+          "name": "remoteJid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "agentId": {
+          "name": "agentId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bizPrivacyStatus": {
+          "name": "bizPrivacyStatus",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "broadcast": {
+          "name": "broadcast",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "clearMedia": {
+          "name": "clearMedia",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duration": {
+          "name": "duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ephemeralDuration": {
+          "name": "ephemeralDuration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ephemeralOffToOn": {
+          "name": "ephemeralOffToOn",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ephemeralOutOfSync": {
+          "name": "ephemeralOutOfSync",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ephemeralStartTimestamp": {
+          "name": "ephemeralStartTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "finalLiveLocation": {
+          "name": "finalLiveLocation",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "futureproofData": {
+          "name": "futureproofData",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ignore": {
+          "name": "ignore",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keepInChat": {
+          "name": "keepInChat",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "key": {
+          "name": "key",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "labels": {
+          "name": "labels",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mediaCiphertextSha256": {
+          "name": "mediaCiphertextSha256",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mediaData": {
+          "name": "mediaData",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageC2STimestamp": {
+          "name": "messageC2STimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageSecret": {
+          "name": "messageSecret",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageStubParameters": {
+          "name": "messageStubParameters",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageStubType": {
+          "name": "messageStubType",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageTimestamp": {
+          "name": "messageTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "multicast": {
+          "name": "multicast",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "originalSelfAuthorUserJidString": {
+          "name": "originalSelfAuthorUserJidString",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant": {
+          "name": "participant",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "paymentInfo": {
+          "name": "paymentInfo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "photoChange": {
+          "name": "photoChange",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pollAdditionalMetadata": {
+          "name": "pollAdditionalMetadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pollUpdates": {
+          "name": "pollUpdates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pushName": {
+          "name": "pushName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quotedPaymentInfo": {
+          "name": "quotedPaymentInfo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quotedStickerData": {
+          "name": "quotedStickerData",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reactions": {
+          "name": "reactions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revokeMessageTimestamp": {
+          "name": "revokeMessageTimestamp",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "starred": {
+          "name": "starred",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "statusAlreadyViewed": {
+          "name": "statusAlreadyViewed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "statusPsa": {
+          "name": "statusPsa",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "urlNumber": {
+          "name": "urlNumber",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "urlText": {
+          "name": "urlText",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userReceipt": {
+          "name": "userReceipt",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verifiedBizName": {
+          "name": "verifiedBizName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eventResponses": {
+          "name": "eventResponses",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pinInChat": {
+          "name": "pinInChat",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reportingTokenInfo": {
+          "name": "reportingTokenInfo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "unique_contact_id_per_session_id_and_workspace_id": {
+          "name": "unique_contact_id_per_session_id_and_workspace_id",
+          "columns": [
+            {
+              "expression": "sessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "workspaceId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "remoteJid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.preferences": {
+      "name": "preferences",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"notifications\":{\"onMessageSend\":true},\"privacy\":{\"doNotSyncPreviousChats\":false}}'::jsonb"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "preferences_workspaceId_workspaces_id_fk": {
+          "name": "preferences_workspaceId_workspaces_id_fk",
+          "tableFrom": "preferences",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.session_access": {
+      "name": "session_access",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sessionId": {
+          "name": "sessionId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "grantedBy": {
+          "name": "grantedBy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "session_access_workspaceId_workspaces_id_fk": {
+          "name": "session_access_workspaceId_workspaces_id_fk",
+          "tableFrom": "session_access",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "session_acess_table": {
+          "name": "session_acess_table",
+          "nullsNotDistinct": false,
+          "columns": [
+            "workspaceId",
+            "userId",
+            "sessionId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "pkId": {
+          "name": "pkId",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sessionId": {
+          "name": "sessionId",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sync": {
+          "name": "sync",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "session_id_index": {
+          "name": "session_id_index",
+          "columns": [
+            {
+              "expression": "sessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessions_workspaceId_workspaces_id_fk": {
+          "name": "sessions_workspaceId_workspaces_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "unique_id_per_session_id": {
+          "name": "unique_id_per_session_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sessionId",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.workspaces": {
+      "name": "workspaces",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.templates": {
+      "name": "templates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedBy": {
+          "name": "updatedBy",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "templates_workspaceId_workspaces_id_fk": {
+          "name": "templates_workspaceId_workspaces_id_fk",
+          "tableFrom": "templates",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.user_role": {
+      "name": "user_role",
+      "schema": "public",
+      "values": [
+        "admin",
+        "user",
+        "reader"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

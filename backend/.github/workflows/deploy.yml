@@ -1,0 +1,54 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main # Or whatever your main branch is called (e.g., master)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # GitHub Actions runner environment
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0 # Action to add private key to SSH agent
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
+      - name: Add EC2 SSH host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Generate .env file
+        run: |
+          echo "API_KEY=${{ vars.API_KEY }}" > .env
+      - name: Copy .env to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no .env \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/server/.env
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Navigate to your application directory on EC2
+            # Replace '~/your-app-directory' with the actual path
+            cd ~/server
+
+            # Pull the latest code from your GitHub repository
+            # Make sure your EC2 instance has git installed
+            git pull origin main 
+
+            # Build and restart Docker Compose services
+            # --build: Rebuilds services if their images are out of date
+            # -d: Run containers in detached mode
+            # docker compose down backend # Stop and remove existing containers
+            # docker compose up --build -d # Build new images and start containers
+            docker compose down 
+            docker compose --env-file .env up --build -d
+
+            echo "Deployment complete!"
+          EOF

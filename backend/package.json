@@ -1,0 +1,62 @@
+{
+  "name": "whatsapp-monday-app",
+  "version": "1.0.0",
+  "description": "This is an app to integrate whatsapp on monday.com",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/src/index.js",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "lint": "ts-standard",
+    "lint:fix": "ts-standard --fix",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "push": "drizzle-kit push"
+  },
+  "author": "Daniel Poot",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/multipart": "^9.0.3",
+    "@types/qrcode": "^1.5.5",
+    "baileys": "^7.0.0-rc.9",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.4",
+    "fastify": "^5.2.1",
+    "fastify-plugin": "^5.0.1",
+    "json-schema-to-ts": "^3.1.1",
+    "pg": "^8.13.1",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "drizzle-kit": "^0.30.2",
+    "ts-standard": "^12.0.2",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "extends": [
+      "./node_modules/ts-standard/eslintrc.json"
+    ]
+  },
+  "eslintIgnore": [
+    "dist",
+    "node_modules"
+  ],
+  "ts-standard": {
+    "ignore": [
+      "dist",
+      "node_modules"
+    ]
+  }
+}
