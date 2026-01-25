@@ -11,7 +11,6 @@ import { Error } from '@/components/error'
 import { EmptyState } from "@/components/empty-state"
 import Chats from '@/components/layout/chats'
 import { ValidationError } from '@/errors/PublicError'
-import { AddSession } from '@/components/add-session'
 
 type SingleChatProps = {
   phoneColumnId: string
@@ -53,9 +52,7 @@ export function SingleChat({ phoneColumnId }: SingleChatProps) {
     <Chats
       enableSidebar={false} chatId={data?.chatId}
       emptyComponent={
-        <EmptyState title="Bienvenido" icon="Update" description="Elige una sesión para ver las conversaciones" iconClassName="text-[#0DACC8]">
-          <AddSession isToggle={true} />
-        </EmptyState>
+        <EmptyState title="Bienvenido" icon="Update" description="Elige una sesión para ver las conversaciones" iconClassName="text-[#0DACC8]" />
       }
     />
   )
