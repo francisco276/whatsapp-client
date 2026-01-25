@@ -1,6 +1,6 @@
 import Workspace from "@/components/layout/workspace"
 import { TemplateForm } from "@/components/templetes/template-form"
-import { Heading, Box, Text, Flex, Button, useSwitch, IconButton } from "@vibe/core"
+import { Heading, Box, Text, Flex, Button, useSwitch } from "@vibe/core"
 import { Modal, ModalHeader, ModalContent, ModalBasicLayout } from '@vibe/core/next'
 import { Add, NavigationChevronLeft } from '@vibe/icons'
 import { Templates } from "@/components/layout/templates"
@@ -17,7 +17,14 @@ export default function TemplatesPage() {
         <Workspace>
               <Box padding="xxxl">
                 <Link href="/">
-                  <IconButton size='small' kind='tertiary' icon={NavigationChevronLeft}  />
+                  <Button
+                    size='small'
+                    kind='tertiary'
+                    leftIcon={NavigationChevronLeft}
+                    className='text-white! hover:bg-slate-700! mb-4'
+                  >
+                    Volver a Sesiones
+                  </Button>
                 </Link>
                 <Box>
                   <Heading className="font-medium! text-slate-700!">Plantillas de Mensajes</Heading>
