@@ -9,6 +9,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { useFileSelector } from '@/hooks/useFileSelector'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { TemplateSelector } from '@/components/modals/template-selector'
+import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
 export const MessageInput = () => {
   const workspaceId = useWorkspaceId()
@@ -19,10 +20,12 @@ export const MessageInput = () => {
   const { sendNotifications } = useNotifications()
   const { handleFileSelect, selectedFiles, removeFile, formatFileSize, clearFiles } = useFileSelector()
   const { isChecked, onChange } = useSwitch()
+  const incrementSentCount = useMessageCounterStore((state) => state.incrementSentCount)
 
   const { mutate, isPending } = useMutation({
     mutationFn: sendMessage,
     onSuccess: () => {
+      incrementSentCount()
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
       }, 200)

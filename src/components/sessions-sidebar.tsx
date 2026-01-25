@@ -1,7 +1,7 @@
 import { ERROR_LOAD_SESSIONS } from '@/config/errors'
 import { Session } from '@/types'
 import { cn } from '@/utils/utils'
-import { Box, Flex, Heading, IconButton } from '@vibe/core'
+import { Box, Flex, Heading, IconButton, Text } from '@vibe/core'
 import { ContentDirectory, NavigationChevronLeft, NavigationChevronRight, Settings } from '@vibe/icons'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import { MondayApi } from '../lib/monday/api'
@@ -11,6 +11,7 @@ import { SessionContext } from './providers/session/session-context'
 import { SessionsList } from './sessions/sessions-list'
 import { SideBarList } from './skeletons/sidebar-list'
 import { Link } from 'wouter'
+import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
 type SessionSidebarProps = {
   type?: 'small' | 'full'
@@ -23,6 +24,7 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
   const monday = new MondayApi()
   const { session: currentSession, setSession } = useContext(SessionContext)
   const [sessionsSidebarOpen, setSessionsSidebarOpen] = useState(true)
+  const sentCount = useMessageCounterStore((state) => state.sentCount)
 
   const isSmallVersion = useMemo(() => type === 'small', [type])
 
@@ -69,6 +71,13 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
             >
               Sesiones
             </Heading>
+            <Text
+              type='text2'
+              color='fixedLight'
+              className={cn('opacity-80', { 'invisible!': !isSmallVersion && !sessionsSidebarOpen })}
+            >
+              Mensajes enviados: {sentCount}
+            </Text>
             {!isSmallVersion && <AddSession disabled={loading || error} isToggle={sessionsSidebarOpen} />}
           </Flex>
         </Box>
