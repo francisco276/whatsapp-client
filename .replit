@@ -18,33 +18,17 @@ author = "agent"
 task = "workflow.run"
 args = "Backend"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Frontend"
-
 [[workflows.workflow]]
 name = "Backend"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd backend && npm run dev"
-waitForPort = 3000
-
-[[workflows.workflow]]
-name = "Frontend"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[ports]]
 localPort = 3000
@@ -54,10 +38,6 @@ externalPort = 3000
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 5001
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
@@ -66,7 +46,7 @@ publicDir = "dist"
 [userenv]
 
 [userenv.shared]
-PORT = "3000"
+PORT = "5000"
 
 [userenv.development]
 VITE_WHATSAPP_API = "http://localhost:3000"
