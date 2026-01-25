@@ -9,12 +9,12 @@ export function getPhoneColumnsByColumnId({ columnValues, columnId }: { columnVa
   if (column === undefined) return
   console.log({ column }, 'Column Value Type')
 
-  if (column.__typename === 'PhoneValue') {
+  if ('phone' in column && column.phone) {
     const { phone, country_short_name } = column
     return { phone, country_short_name }
   }
 
-  if (column.__typename === 'MirrorValue' && 'display_value' in column && column.display_value) {
+  if ('display_value' in column && column.display_value) {
     const display_value = column.display_value
     const formatedPhone = display_value.startsWith('+') ? display_value : `+${display_value}`
     const phoneData = parsePhoneNumber(formatedPhone)

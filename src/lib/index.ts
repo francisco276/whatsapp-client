@@ -20,13 +20,10 @@ function extractLast10Digits(phone: string): string {
 
 function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string, country_short_name: string } | null {
   for (const column of columnValues) {
-    const isPhoneValue = column.__typename === 'PhoneValue' || column.type === 'phone'
-    const isMirrorValue = column.__typename === 'MirrorValue' || column.type === 'mirror'
-    
-    if (isPhoneValue && 'phone' in column && column.phone) {
+    if ('phone' in column && column.phone) {
       return { phone: column.phone, country_short_name: column.country_short_name || 'US' }
     }
-    if (isMirrorValue && 'display_value' in column && column.display_value) {
+    if ('display_value' in column && column.display_value) {
       const displayValue = column.display_value
       if (displayValue && /^\+?\d[\d\s-]+$/.test(displayValue.replace(/\s/g, ''))) {
         const formattedPhone = displayValue.startsWith('+') ? displayValue : `+${displayValue}`
@@ -107,7 +104,7 @@ export async function getSingleChatInformationAutoDetect({
       throw new PublicError(ERROT_ITEM_NOT_FOUNT)
     }
 
-    console.log('[AutoDetect] Column values:', item.column_values.map((c: ColumnValue) => ({ id: c.id, type: c.__typename, phone: (c as any).phone })))
+    console.log('[AutoDetect] Column values:', item.column_values.map((c: ColumnValue) => ({ id: c.id, phone: (c as any).phone, display_value: (c as any).display_value })))
     
     const phoneData = findPhoneColumnFromValues(item.column_values)
     console.log('[AutoDetect] Phone data found:', phoneData)

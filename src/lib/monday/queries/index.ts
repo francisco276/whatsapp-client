@@ -8,12 +8,10 @@ export const getPhoneColumnsByItemId = `
           value
           display_value
           text
-          __typename
         }
         ... on PhoneValue {
           country_short_name
           phone
-          __typename
         }
       }
     }
@@ -30,12 +28,10 @@ export const getAllColumnValuesFromItem = `
           value
           display_value
           text
-          __typename
         }
         ... on PhoneValue {
           country_short_name
           phone
-          __typename
         }
       }
     }
