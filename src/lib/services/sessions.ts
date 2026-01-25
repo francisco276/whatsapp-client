@@ -42,3 +42,17 @@ export const deleteSession = async ({ workspaceId, sessionId }: { workspaceId: s
     throw new Error('Error on delete sessions')
   }
 }
+
+export const reconnectSession = async ({ workspaceId, sessionId }: { workspaceId: string, sessionId: string }) => {
+  try {
+    const { data: response } = await api.post<SuccessDataResponse<{ success: boolean }>>(`${ROUTE}/reconnect`, {
+      workspaceId,
+      sessionId
+    }, {
+      timeout: 30000
+    })
+    return response.data
+  } catch (error) {
+    throw new Error('Error reconnecting session')
+  }
+}

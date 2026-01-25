@@ -83,3 +83,24 @@ export const del: RouteHandler = async (req, res) => {
     await handleError(error, res)
   }
 }
+
+export const reconnect: RouteHandler = async (req, res) => {
+  try {
+    const { user: { userId } } = req
+    const { workspaceId, sessionId } = validateSessionBody(req)
+
+    const workspace = await WorkspaceManager.getWorkspace(workspaceId)
+
+    if (!workspace.sessionExists(sessionId)) {
+      throw new ConflictError('Session does not exist')
+    }
+
+    const session = workspace.getSession(sessionId)
+
+    await session.ensureConnected(userId)
+
+    await sendSuccessResponse(res, { success: true }, 'Session reconnected successfully')
+  } catch (error) {
+    await handleError(error, res)
+  }
+}

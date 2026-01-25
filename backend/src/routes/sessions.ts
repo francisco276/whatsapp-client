@@ -6,6 +6,7 @@ export default function defineRoutes (fastify: FastifyInstance, _: any, done: Fu
   fastify.get('/:workspaceId', sessions.list)
   fastify.get('/:workspaceId/:sessionId', sessions.find)
   fastify.post('/add', sessions.add)
+  fastify.post('/reconnect', sessions.reconnect)
   fastify.delete('/', sessions.del)
   done()
 }

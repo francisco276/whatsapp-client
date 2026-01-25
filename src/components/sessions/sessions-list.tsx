@@ -25,6 +25,7 @@ export const SessionsList = ({ sessions, onClickSession, sessionSelected, isTogg
       isSelected={sessionSelected === session.id}
       isSynced={session.isSynced}
       isToggle={isToggle}
+      status={session.status}
     />
   ))
 }
