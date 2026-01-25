@@ -3,7 +3,7 @@ import { Session } from '@/types'
 import { cn } from '@/utils/utils'
 import { Box, Flex, Heading, IconButton, Text } from '@vibe/core'
 import { ContentDirectory, NavigationChevronLeft, NavigationChevronRight, Settings } from '@vibe/icons'
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { MondayApi } from '../lib/monday/api'
 import { AddSession } from './add-session'
 import { Error } from './error'
@@ -25,6 +25,12 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
   const { session: currentSession, setSession } = useContext(SessionContext)
   const [sessionsSidebarOpen, setSessionsSidebarOpen] = useState(true)
   const sentCount = useMessageCounterStore((state) => state.sentCount)
+
+  useEffect(() => {
+    if (!currentSession && sessions.length > 0 && !loading && !error) {
+      setSession(sessions[0].id)
+    }
+  }, [sessions, currentSession, loading, error, setSession])
 
   const isSmallVersion = useMemo(() => type === 'small', [type])
 
