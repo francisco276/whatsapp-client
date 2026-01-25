@@ -3,7 +3,6 @@ export const getPhoneColumnsByItemId = `
     items (ids: $itemId) {
       column_values (ids: $columnId) {
         id
-        type
         text
         value
         ... on MirrorValue {
@@ -23,7 +22,6 @@ export const getAllColumnValuesFromItem = `
     items (ids: $itemId) {
       column_values {
         id
-        type
         text
         value
         ... on MirrorValue {
