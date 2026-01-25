@@ -48,7 +48,7 @@ export const ChatHeader = () => {
           {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
         </Badge>
         <Flex direction="column" align="start">
-          <Heading type='h2' weight='bold'> {contact?.displayName} </Heading>
+          <Heading type='h2' weight='bold' className="text-gray-800!"> {contact?.displayName} </Heading>
           <div className={`text-xs ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
             {isConnected ? 'En línea' : 'Desconectado'}
           </div>
