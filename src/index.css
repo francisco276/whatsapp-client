@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+/* Force light theme colors for settings modal */
+.light-app-theme,
+.light-app-theme * {
+  --primary-text-color: #323338 !important;
+  --secondary-text-color: #676879 !important;
+  --text-color-on-primary: #323338 !important;
+  --text-color-on-inverted: #323338 !important;
+  color-scheme: light !important;
+}
+
+.light-app-theme .monday-storybook-text_component,
+.light-app-theme [class*="text"],
+.light-app-theme [class*="Text"],
+.light-app-theme p,
+.light-app-theme span,
+.light-app-theme label {
+  color: #323338 !important;
+}
+
+.light-app-theme h1,
+.light-app-theme h2,
+.light-app-theme h3,
+.light-app-theme [class*="heading"],
+.light-app-theme [class*="Heading"] {
+  color: #323338 !important;
+}
+
+.light-app-theme [class*="menu-item"],
+.light-app-theme [class*="MenuItem"] {
+  color: #323338 !important;
+}
