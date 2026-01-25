@@ -1,4 +1,4 @@
-import { Flex, Heading, Icon, Avatar, Badge, Box, Text } from '@vibe/core'
+import { Flex, Icon, Avatar, Badge, Box, Text } from '@vibe/core'
 import { PersonRound } from '@vibe/icons'
 import { useChatId } from '@/hooks/useChat'
 import { useGetContact } from '@/hooks/useGetContact'
@@ -48,7 +48,7 @@ export const ChatHeader = () => {
           {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
         </Badge>
         <Flex direction="column" align="start">
-          <Heading type='h2' weight='bold' className="text-gray-800!"> {contact?.displayName} </Heading>
+          <h2 className="text-xl font-bold" style={{ color: '#323338' }}>{contact?.displayName}</h2>
           <div className={`text-xs ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
             {isConnected ? 'En línea' : 'Desconectado'}
           </div>
