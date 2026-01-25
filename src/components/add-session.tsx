@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useContext } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addSession } from '../lib/services/sessions'
 import { Button, Flex, Loader, Toast, ToastType } from "@vibe/core"
@@ -9,13 +9,16 @@ import { handlerUpdateQrCode, handlerConnection } from '../lib/socket-handlers/s
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { Error } from './error'
 import { ERROR_LOAD_QR } from '@/config/errors'
+import { SessionContext } from './providers/session/session-context'
 
-export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled?: boolean }) => {
+export const AddSession = ({ isToggle, disabled, onSessionCreated }: { isToggle: boolean, disabled?: boolean, onSessionCreated?: (sessionId: string) => void }) => {
   const queryClient = useQueryClient()
   const workspaceId = useWorkspaceId()
+  const { setSession } = useContext(SessionContext)
   const [socket, setSocket] = useState<SocketClient | null>()
   const [qrCode, setQrCode] = useState<string | null>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [toast, setToast] = useState({ type: '', message: '', })
   const { data, isIdle, mutate, isPending: isLoading, isError, reset } = useMutation({
     mutationKey: ['AddSession'],
@@ -38,6 +41,7 @@ export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled
 
   const handleOpen = () => {
     const sessionId = Date.now().toString()
+    setCurrentSessionId(sessionId)
     setQrCode(null)
     setIsOpen(true)
     reset()
@@ -60,9 +64,11 @@ export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled
     })
 
     handlerConnection(socket, ({ error, insert }) => {
-      if (insert) {
+      if (insert && currentSessionId) {
         setToast({ type: 'positive', message: 'Conexión establecida correctamente.' })
         queryClient.invalidateQueries({ queryKey: ['getSessions', workspaceId] })
+        setSession(currentSessionId)
+        onSessionCreated?.(currentSessionId)
       }
 
       if (error) {
@@ -76,7 +82,7 @@ export const AddSession = ({ isToggle, disabled }: { isToggle: boolean, disabled
     return () => {
       socket.disconnect()
     }
-  }, [socket, queryClient, workspaceId])
+  }, [socket, queryClient, workspaceId, currentSessionId, setSession, onSessionCreated])
 
   const qr = useMemo(() => qrCode ?? data?.qr, [qrCode, data])
 
