@@ -1,16 +1,19 @@
 export const getPhoneColumnsByItemId = `
-  query getColumnById ($itemId: [ID!]!, $columnId: [String!]!) {
-    items (ids: $itemId) {
-      column_values (ids: $columnId) {
+  query getColumnById ($itemId: ID!, $columnId: String!) {
+    items (ids: [$itemId]) {
+      column_values (ids: [$columnId]) {
         id
-        text
         value
         ... on MirrorValue {
+          value
           display_value
+          text
+          __typename
         }
         ... on PhoneValue {
           country_short_name
           phone
+          __typename
         }
       }
     }
@@ -18,18 +21,21 @@ export const getPhoneColumnsByItemId = `
 `
 
 export const getAllColumnValuesFromItem = `
-  query getAllColumnValues ($itemId: [ID!]!) {
-    items (ids: $itemId) {
+  query getAllColumnValues ($itemId: ID!) {
+    items (ids: [$itemId]) {
       column_values {
         id
-        text
         value
         ... on MirrorValue {
+          value
           display_value
+          text
+          __typename
         }
         ... on PhoneValue {
           country_short_name
           phone
+          __typename
         }
       }
     }

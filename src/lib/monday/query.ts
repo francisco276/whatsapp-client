@@ -17,8 +17,8 @@ export class MondayQuery {
       getPhoneColumnsByItemId,
       {
         variables: {
-         itemId: [itemId],
-         columnId: [columnId]
+         itemId,
+         columnId
         }
       }
     )
@@ -30,7 +30,7 @@ export class MondayQuery {
       getAllColumnValuesFromItem,
       {
         variables: {
-         itemId: [itemId]
+         itemId
         }
       }
     )
