@@ -20,15 +20,25 @@ export function SingleChat() {
   const { data: context } = useMondayContex()
   const itemId = useMemo(() => context?.itemId ?? '', [context])
   
+  console.log('[SingleChat] Debug values:', { sessionId, workspaceId, itemId, contextData: context })
+  
+  const queryEnabled = !!sessionId && !!workspaceId && !!itemId
+  console.log('[SingleChat] Query enabled:', queryEnabled)
+  
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['getItem', itemId, sessionId],
-    queryFn: () => getSingleChatInformationAutoDetect({
-      monday,
-      workspaceId,
-      sessionId,
-      itemId
-    }),
-    enabled: !!sessionId && !!workspaceId && !!itemId,
+    queryFn: async () => {
+      console.log('[SingleChat] Query executing with:', { sessionId, workspaceId, itemId })
+      const result = await getSingleChatInformationAutoDetect({
+        monday,
+        workspaceId,
+        sessionId,
+        itemId
+      })
+      console.log('[SingleChat] Query result:', result)
+      return result
+    },
+    enabled: queryEnabled,
     retry: 1,
   })
 
@@ -54,6 +64,22 @@ export function SingleChat() {
     }
 
     return <Error title={ERROR_LOAD_MESSAGES_HISTORY.title} errorMessage={ERROR_LOAD_MESSAGES_HISTORY.description} />
+  }
+
+  if (data && !data.isValid) {
+    return (
+      <Chats
+        enableSidebar={false}
+        emptyComponent={
+          <EmptyState 
+            title="Chat no encontrado" 
+            icon="NoColor" 
+            description="No se encontró un chat de WhatsApp para este número de teléfono. Verifica que el número sea correcto y que exista una conversación previa." 
+            iconClassName="text-orange-500" 
+          />
+        }
+      />
+    )
   }
 
   return (

@@ -38,13 +38,14 @@ export const isValidContact = async ({ workspaceId, sessionId, id }: { workspace
       .post<SuccessDataResponse<{ isValid: boolean }>>(
         `${workspaceId}/${sessionId}${ROUTE}/valid`,
         { id },
-        { timeout: 0 }
+        { timeout: 30000 }
       )
 
     const { isValid } = response.data
 
     return isValid
   } catch (error) {
-    throw new Error('Error on fetch contact')
+    console.warn('[isValidContact] Error validating contact, returning false:', error)
+    return false
   }
 }

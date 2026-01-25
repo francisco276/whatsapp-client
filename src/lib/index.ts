@@ -13,6 +13,11 @@ function normalizePhone(phone: string): string {
   return phone.replace(/[\s\-\(\)\+]/g, '').replace(/^0+/, '')
 }
 
+function extractLast10Digits(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 10 ? digits.slice(-10) : digits
+}
+
 function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string, country_short_name: string } | null {
   for (const column of columnValues) {
     if (column.__typename === 'PhoneValue' && column.phone) {
@@ -32,22 +37,52 @@ function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string
 async function findChatByPhone(workspaceId: string, sessionId: string, phone: string): Promise<string | null> {
   try {
     const normalizedPhone = normalizePhone(phone)
+    const phoneLast10 = extractLast10Digits(phone)
+    console.log('[findChatByPhone] Searching for phone:', { normalizedPhone, phoneLast10 })
+    
     const { chats } = await getChats({ workspaceId, sessionId })
+    console.log('[findChatByPhone] Total chats to search:', chats.length)
     
     for (const chat of chats) {
       const chatPhone = jidToFormatedPhone(chat.id)
+      
       if (chatPhone) {
         const normalizedChatPhone = normalizePhone(chatPhone)
+        const chatLast10 = extractLast10Digits(chatPhone)
+        
         if (normalizedChatPhone.includes(normalizedPhone) || normalizedPhone.includes(normalizedChatPhone)) {
+          console.log('[findChatByPhone] Match by standard JID:', chat.id)
+          return chat.id
+        }
+        
+        if (phoneLast10.length >= 10 && chatLast10.length >= 10) {
+          if (phoneLast10 === chatLast10) {
+            console.log('[findChatByPhone] Match by last 10 digits:', chat.id)
+            return chat.id
+          }
+        }
+      }
+      
+      if (chat.name) {
+        const normalizedName = normalizePhone(chat.name)
+        const nameLast10 = extractLast10Digits(chat.name)
+        
+        if (normalizedName.includes(normalizedPhone) || normalizedPhone.includes(normalizedName)) {
+          console.log('[findChatByPhone] Match by chat name (normalized):', chat.id, chat.name)
+          return chat.id
+        }
+        
+        if (phoneLast10.length >= 10 && nameLast10.length >= 10 && phoneLast10 === nameLast10) {
+          console.log('[findChatByPhone] Match by chat name (last 10):', chat.id, chat.name)
           return chat.id
         }
       }
-      if (chat.name && normalizePhone(chat.name).includes(normalizedPhone)) {
-        return chat.id
-      }
     }
+    
+    console.log('[findChatByPhone] No match found')
     return null
-  } catch {
+  } catch (error) {
+    console.error('[findChatByPhone] Error:', error)
     return null
   }
 }
@@ -59,34 +94,50 @@ export async function getSingleChatInformationAutoDetect({
   itemId
 }: { monday: MondayApi, workspaceId: string, sessionId: string, itemId: string }) {
   try {
+    console.log('[AutoDetect] Starting with itemId:', itemId)
     const { data } = await monday.query.getAllColumnValuesFromItem({ itemId })
+    console.log('[AutoDetect] Got column values:', data)
     const item = data.items[0]
 
-    if (!item || !item.column_values) throw new PublicError(ERROT_ITEM_NOT_FOUNT)
+    if (!item || !item.column_values) {
+      console.log('[AutoDetect] Item not found')
+      throw new PublicError(ERROT_ITEM_NOT_FOUNT)
+    }
 
+    console.log('[AutoDetect] Column values:', item.column_values.map((c: ColumnValue) => ({ id: c.id, type: c.__typename, phone: (c as any).phone })))
+    
     const phoneData = findPhoneColumnFromValues(item.column_values)
+    console.log('[AutoDetect] Phone data found:', phoneData)
+    
     if (!phoneData || !phoneData.phone) {
+      console.log('[AutoDetect] No valid phone column found')
       throw new ValidationError(ERROR_PHONE_NUMBER_INVALID.title, ERROR_PHONE_NUMBER_INVALID.description)
     }
 
     const jid = formatPhoneToWhatsAppJID(phoneData.phone, phoneData.country_short_name as any)
+    console.log('[AutoDetect] Formatted JID:', jid)
     
     let isValid = await isValidContact({ workspaceId, sessionId, id: jid })
+    console.log('[AutoDetect] Is valid contact (standard JID):', isValid)
     let chatId = jid
 
     if (!isValid) {
+      console.log('[AutoDetect] Trying fallback search for phone:', phoneData.phone)
       const foundChatId = await findChatByPhone(workspaceId, sessionId, phoneData.phone)
+      console.log('[AutoDetect] Found chat by phone search:', foundChatId)
       if (foundChatId) {
         chatId = foundChatId
         isValid = true
       }
     }
 
+    console.log('[AutoDetect] Final result:', { isValid, chatId })
     return {
       isValid,
       chatId
     }
   } catch (error) {
+    console.error('[AutoDetect] Error:', error)
     if (error instanceof Error) {
       throw error
     }

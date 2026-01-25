@@ -1,42 +1,56 @@
 import { useContext, useState, MouseEvent, ChangeEvent, useMemo } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChatContext } from '../providers/chat/chat-context'
 import { SessionContext } from '../providers/session/session-context'
+import { sendMessage } from '../../lib/services/messages'
 import { Flex, Icon, IconButton, Menu, MenuButton, MenuItem, TextArea, useSwitch } from '@vibe/core'
 import { Attach, Send, File, Image, Video, CloseSmall, Note } from '@vibe/icons'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useFileSelector } from '@/hooks/useFileSelector'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { TemplateSelector } from '@/components/modals/template-selector'
-import { useMessageQueue } from '@/hooks/useMessageQueue'
+import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
 export const MessageInput = () => {
   const workspaceId = useWorkspaceId()
   const { session } = useContext(SessionContext)
   const { chat } = useContext(ChatContext)
+  const queryClient = useQueryClient()
   const [message, setMessage] = useState<string>('')
-  const [isSending, setIsSending] = useState(false)
   const { sendNotifications } = useNotifications()
   const { handleFileSelect, selectedFiles, removeFile, formatFileSize, clearFiles } = useFileSelector()
   const { isChecked, onChange } = useSwitch()
-  const { queueMessage } = useMessageQueue()
+  const incrementSentCount = useMessageCounterStore((state) => state.incrementSentCount)
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: sendMessage,
+    onSuccess: () => {
+      incrementSentCount()
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
+      }, 200)
+      sendNotifications()
+    }
+  })
 
   const userCanNotSendMessage = useMemo(() => message === '' && (selectedFiles.length === 0), [message, selectedFiles])
 
   function handleSubmit(event: MouseEvent) {
-    event.preventDefault()
-    if (!userCanNotSendMessage && !isSending) {
-      setIsSending(true)
-      queueMessage({
-        chatId: chat,
-        sessionId: session,
-        workspaceId,
-        message: message.trim(),
-        files: selectedFiles
-      })
-      setMessage('')
-      clearFiles()
-      sendNotifications()
-      setTimeout(() => setIsSending(false), 500)
+    try {
+      event.preventDefault()
+      if (!userCanNotSendMessage) {
+        mutate({
+          chatId: chat,
+          sessionId: session,
+          workspaceId,
+          message: message.trim(),
+          files: selectedFiles
+        })
+        setMessage('')
+        clearFiles()
+      }
+    } catch (error) {
+      console.log('Error', error)
     }
   }
 
@@ -47,9 +61,8 @@ export const MessageInput = () => {
   function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      if (!userCanNotSendMessage && !isSending) {
-        setIsSending(true)
-        queueMessage({
+      if (!userCanNotSendMessage && !isPending) {
+        mutate({
           chatId: chat,
           sessionId: session,
           workspaceId,
@@ -58,8 +71,6 @@ export const MessageInput = () => {
         })
         setMessage('')
         clearFiles()
-        sendNotifications()
-        setTimeout(() => setIsSending(false), 500)
       }
     }
   }
@@ -99,7 +110,7 @@ export const MessageInput = () => {
         </div>
       )}
       <Flex align='center' gap={20}>
-        <MenuButton className='text-[#0DACC8]!' component={Attach} disabled={isSending}>
+        <MenuButton className='text-[#0DACC8]!' component={Attach} disabled={isPending}>
           <Menu>
             <MenuItem icon={File} title="Documento" onClick={() => handleFileSelect('document')} />
             <MenuItem icon={Image} title="Imagen" onClick={() => handleFileSelect('image')} />
@@ -125,7 +136,7 @@ export const MessageInput = () => {
           icon={Send}
           iconClassName='text-[#A3E7F3]'
           onClick={handleSubmit}
-          disabled={userCanNotSendMessage || isSending}
+          disabled={userCanNotSendMessage || isPending}
         />
       </Flex>
     </div>

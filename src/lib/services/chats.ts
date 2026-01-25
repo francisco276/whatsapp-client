@@ -15,11 +15,12 @@ export type Chat = {
 
 export const getChats = async ({ workspaceId, sessionId }: { workspaceId: string, sessionId: string }) => {
   try {
-    const { data: response } = await api.get<SuccessDataResponse<{ chats: Chat[] }>>(`/${workspaceId}/${sessionId}${ROUTE}`, { timeout: 0 })
+    const { data: response } = await api.get<SuccessDataResponse<{ chats: Chat[] }>>(`/${workspaceId}/${sessionId}${ROUTE}`, { timeout: 60000 })
 
     return response.data
   } catch (error) {
-    throw new Error('Error on fetch chats')
+    console.error('[getChats] Error fetching chats:', error)
+    return { chats: [] }
   }
 }
 
