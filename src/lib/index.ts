@@ -1,12 +1,17 @@
 import { MondayApi } from '@/lib/monday/api'
-import { formatPhoneToWhatsAppJID } from "@/utils/whatsapp"
+import { formatPhoneToWhatsAppJID, jidToFormatedPhone } from "@/utils/whatsapp"
 import { isValidContact } from "@/lib/services/contacts"
+import { getChats } from "@/lib/services/chats"
 import { getPhoneColumnsByColumnId } from '@/utils/utils'
 import { PublicError, ValidationError } from '@/errors/PublicError'
 import { ERROR_PHONE_NUMBER_INVALID, ERROT_ITEM_NOT_FOUNT } from '@/config/errors'
 import { ColumnValue } from '@/types/monday'
 
 type ColumnValuesResponse = { items: { column_values: ColumnValue[] } }
+
+function normalizePhone(phone: string): string {
+  return phone.replace(/[\s\-\(\)\+]/g, '').replace(/^0+/, '')
+}
 
 function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string, country_short_name: string } | null {
   for (const column of columnValues) {
@@ -22,6 +27,29 @@ function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string
     }
   }
   return null
+}
+
+async function findChatByPhone(workspaceId: string, sessionId: string, phone: string): Promise<string | null> {
+  try {
+    const normalizedPhone = normalizePhone(phone)
+    const { chats } = await getChats({ workspaceId, sessionId })
+    
+    for (const chat of chats) {
+      const chatPhone = jidToFormatedPhone(chat.id)
+      if (chatPhone) {
+        const normalizedChatPhone = normalizePhone(chatPhone)
+        if (normalizedChatPhone.includes(normalizedPhone) || normalizedPhone.includes(normalizedChatPhone)) {
+          return chat.id
+        }
+      }
+      if (chat.name && normalizePhone(chat.name).includes(normalizedPhone)) {
+        return chat.id
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
 }
 
 export async function getSingleChatInformationAutoDetect({
@@ -41,13 +69,22 @@ export async function getSingleChatInformationAutoDetect({
       throw new ValidationError(ERROR_PHONE_NUMBER_INVALID.title, ERROR_PHONE_NUMBER_INVALID.description)
     }
 
-    const id = formatPhoneToWhatsAppJID(phoneData.phone, phoneData.country_short_name as any)
+    const jid = formatPhoneToWhatsAppJID(phoneData.phone, phoneData.country_short_name as any)
+    
+    let isValid = await isValidContact({ workspaceId, sessionId, id: jid })
+    let chatId = jid
 
-    const isValid = await isValidContact({ workspaceId, sessionId, id })
+    if (!isValid) {
+      const foundChatId = await findChatByPhone(workspaceId, sessionId, phoneData.phone)
+      if (foundChatId) {
+        chatId = foundChatId
+        isValid = true
+      }
+    }
 
     return {
       isValid,
-      chatId: id
+      chatId
     }
   } catch (error) {
     if (error instanceof Error) {

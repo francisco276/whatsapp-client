@@ -18,24 +18,37 @@ export function SingleChat() {
   const sessionId = useSessionId()
 
   const { data: context } = useMondayContex()
-  const { itemId } = useMemo(() => context ?? { itemId: ''}, [context])
+  const itemId = useMemo(() => context?.itemId ?? '', [context])
   
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['getItem', itemId, sessionId],
     queryFn: () => getSingleChatInformationAutoDetect({
       monday,
       workspaceId,
-      sessionId: sessionId,
+      sessionId,
       itemId
     }),
     enabled: !!sessionId && !!workspaceId && !!itemId,
+    retry: 1,
   })
+
+  if (!sessionId) {
+    return (
+      <Chats
+        enableSidebar={false}
+        emptyComponent={
+          <EmptyState title="Bienvenido" icon="Update" description="Selecciona una sesión de WhatsApp" iconClassName="text-[#0DACC8]" />
+        }
+      />
+    )
+  }
 
   if (isLoading) {
     return <FullLoader title="Recuperando historial de conversación" description="Estamos recuperando el historial de conversación. Esto puede tardar unos segundos." />
   }
 
   if (isError) {
+    console.error('SingleChat error:', error)
     if (error instanceof ValidationError) {
       return <Error title={error.title} errorMessage={error.description} />
     }
@@ -47,7 +60,7 @@ export function SingleChat() {
     <Chats
       enableSidebar={false} chatId={data?.chatId}
       emptyComponent={
-        <EmptyState title="Bienvenido" icon="Update" description="Elige una sesión para ver las conversaciones" iconClassName="text-[#0DACC8]" />
+        <EmptyState title="Bienvenido" icon="Update" description="Selecciona una sesión de WhatsApp" iconClassName="text-[#0DACC8]" />
       }
     />
   )
