@@ -2,7 +2,8 @@ import { io } from 'socket.io-client'
 import type { Socket } from 'socket.io-client'
 import type { SocketSuccessResponse, SocketErrorResponse } from '../types/socket'
 
-const URL: string | undefined = import.meta.env.VITE_SOCKET_API ?? undefined
+const FALLBACK_URL = 'https://3e5729a4-02a3-4a8c-8eba-aadd16aa74f8-00-3a2yr3uhnetzl.spock.replit.dev'
+const URL: string = import.meta.env.VITE_SOCKET_API || FALLBACK_URL
 const API_KEY: string | undefined = import.meta.env.VITE_API_KEY ?? undefined
 
 export class SocketClient {
