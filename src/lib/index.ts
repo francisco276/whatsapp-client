@@ -20,10 +20,13 @@ function extractLast10Digits(phone: string): string {
 
 function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string, country_short_name: string } | null {
   for (const column of columnValues) {
-    if (column.__typename === 'PhoneValue' && column.phone) {
+    const isPhoneValue = column.__typename === 'PhoneValue' || column.type === 'phone'
+    const isMirrorValue = column.__typename === 'MirrorValue' || column.type === 'mirror'
+    
+    if (isPhoneValue && 'phone' in column && column.phone) {
       return { phone: column.phone, country_short_name: column.country_short_name || 'US' }
     }
-    if (column.__typename === 'MirrorValue' && column.display_value) {
+    if (isMirrorValue && 'display_value' in column && column.display_value) {
       const displayValue = column.display_value
       if (displayValue && /^\+?\d[\d\s-]+$/.test(displayValue.replace(/\s/g, ''))) {
         const formattedPhone = displayValue.startsWith('+') ? displayValue : `+${displayValue}`

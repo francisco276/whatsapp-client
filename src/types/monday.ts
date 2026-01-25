@@ -43,15 +43,20 @@ export type AppSettings = {
 export type ColumnValue =
   {
       id: string
-      __typename: 'PhoneValue'
+      type: string
+      text?: string
+      value?: string
+      __typename?: 'PhoneValue'
       country_short_name?: CountryCode
       phone?: string
     }
   | {
       id: string
-      __typename: 'MirrorValue'
-      display_value: string
+      type: string
       text?: string
+      value?: string
+      __typename?: 'MirrorValue'
+      display_value?: string
     }
 
 export type MondayListenResponse<T> = {

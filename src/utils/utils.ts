@@ -14,8 +14,8 @@ export function getPhoneColumnsByColumnId({ columnValues, columnId }: { columnVa
     return { phone, country_short_name }
   }
 
-  if (column.__typename === 'MirrorValue') {
-    const { display_value } = column
+  if (column.__typename === 'MirrorValue' && 'display_value' in column && column.display_value) {
+    const display_value = column.display_value
     const formatedPhone = display_value.startsWith('+') ? display_value : `+${display_value}`
     const phoneData = parsePhoneNumber(formatedPhone)
     console.log({ phoneData }, 'Parsed Phone Data')
