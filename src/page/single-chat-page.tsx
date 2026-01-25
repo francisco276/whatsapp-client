@@ -19,12 +19,15 @@ const SingleChatPage = () => {
 
   useEffect(() => {
     monday.listen<SingleSettings>('settings', (data) => {
-      if (data.data.phoneColumnId !== null) {
-        const phoneColumnId = Object.keys(data.data.phoneColumnId!)[0]
-        setState(value => ({ ...value, error: '', phoneColumnId }))
-      } else {
-        setState(value => ({ ...value, error: ERROR_PHONE_COLUMN_CONFIGURATION }))
+      const phoneColumnData = data.data?.phoneColumnId
+      if (phoneColumnData && typeof phoneColumnData === 'object') {
+        const keys = Object.keys(phoneColumnData)
+        if (keys.length > 0) {
+          setState(value => ({ ...value, error: '', phoneColumnId: keys[0] }))
+          return
+        }
       }
+      setState(value => ({ ...value, error: ERROR_PHONE_COLUMN_CONFIGURATION }))
     })
   }, [monday])
 
