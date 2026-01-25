@@ -17,6 +17,7 @@ export type AuthorizedUser = {
 export type UserPreferencesConfig = {
   notifications: {
     onMessageSend: boolean
+    soundEnabled?: boolean
   }
 }
 
