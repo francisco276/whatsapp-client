@@ -10,10 +10,19 @@ type UserListProps = {
 export const UserList = ({ loading = false, users }: UserListProps) => {
   if (loading) {
     return (
-      <List>
-        <Skeleton size="h1" type="text" className="mb-2 !w-full" />
-        <Skeleton size="h1" type="text" className="mb-2 !w-full" />
-        <Skeleton size="h1" type="text" className="mb-2 !w-full" />
+      <List className='min-h-[250px]'>
+        <Flex align='center' gap={10} className='mb-3 p-2'>
+          <Skeleton type="circle" width={40} height={40} />
+          <Skeleton size="small" type="text" className="!w-[200px]" />
+        </Flex>
+        <Flex align='center' gap={10} className='mb-3 p-2'>
+          <Skeleton type="circle" width={40} height={40} />
+          <Skeleton size="small" type="text" className="!w-[180px]" />
+        </Flex>
+        <Flex align='center' gap={10} className='mb-3 p-2'>
+          <Skeleton type="circle" width={40} height={40} />
+          <Skeleton size="small" type="text" className="!w-[220px]" />
+        </Flex>
       </List>
     )
   }
