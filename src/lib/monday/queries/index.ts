@@ -20,6 +20,28 @@ export const getPhoneColumnsByItemId = `
   }
 `
 
+export const getAllColumnValuesFromItem = `
+  query getAllColumnValues ($itemId: ID!) {
+    items (ids: [$itemId]) {
+      column_values {
+        id
+        value
+        ... on MirrorValue {
+          value
+          display_value
+          text
+          __typename
+        }
+        ... on PhoneValue {
+          country_short_name
+          phone
+          __typename
+        }
+      }
+    }
+  }
+`
+
 export const getUsers = `
   query {
     users(limit: 500, page: 1) {

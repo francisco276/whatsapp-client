@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getSingleChatInformation } from "@/lib"
+import { getSingleChatInformationAutoDetect } from "@/lib"
 import { MondayApi } from '@/lib/monday/api'
 import { ERROR_LOAD_MESSAGES_HISTORY } from '@/config/errors'
 import { useSessionId } from '@/hooks/useSessionId'
@@ -12,11 +12,7 @@ import { EmptyState } from "@/components/empty-state"
 import Chats from '@/components/layout/chats'
 import { ValidationError } from '@/errors/PublicError'
 
-type SingleChatProps = {
-  phoneColumnId: string
-}
-
-export function SingleChat({ phoneColumnId }: SingleChatProps) {
+export function SingleChat() {
   const monday = new MondayApi()
   const workspaceId = useWorkspaceId()
   const sessionId = useSessionId()
@@ -25,15 +21,14 @@ export function SingleChat({ phoneColumnId }: SingleChatProps) {
   const { itemId } = useMemo(() => context ?? { itemId: ''}, [context])
   
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['getItem', itemId],
-    queryFn: () => getSingleChatInformation({
+    queryKey: ['getItem', itemId, sessionId],
+    queryFn: () => getSingleChatInformationAutoDetect({
       monday,
       workspaceId,
       sessionId: sessionId,
-      itemId,
-      phoneColumnId
+      itemId
     }),
-    enabled: !!sessionId && !!sessionId && !!itemId,
+    enabled: !!sessionId && !!workspaceId && !!itemId,
   })
 
   if (isLoading) {

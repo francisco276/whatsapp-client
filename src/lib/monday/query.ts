@@ -1,6 +1,6 @@
 import { MondayRequest } from './request';
-import { getPhoneColumnsByItemId, getUsers, getUsersWithName } from './queries'
-import { User } from '@/types/monday'
+import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName } from './queries'
+import { User, ColumnValue } from '@/types/monday'
 
 /**
  * Stores methods to work with Monday GraphQL Queries
@@ -19,6 +19,18 @@ export class MondayQuery {
         variables: {
          itemId,
          columnId
+        }
+      }
+    )
+  }
+
+  async getAllColumnValuesFromItem({ itemId }: { itemId: string | number }) {
+    return this.requestor.request<{ items: { column_values: ColumnValue[] }[] }>(
+      'getAllColumnValuesFromItem',
+      getAllColumnValuesFromItem,
+      {
+        variables: {
+         itemId
         }
       }
     )

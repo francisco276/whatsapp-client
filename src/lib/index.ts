@@ -8,6 +8,54 @@ import { ColumnValue } from '@/types/monday'
 
 type ColumnValuesResponse = { items: { column_values: ColumnValue[] } }
 
+function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string, country_short_name: string } | null {
+  for (const column of columnValues) {
+    if (column.__typename === 'PhoneValue' && column.phone) {
+      return { phone: column.phone, country_short_name: column.country_short_name || 'US' }
+    }
+    if (column.__typename === 'MirrorValue' && column.display_value) {
+      const displayValue = column.display_value
+      if (displayValue && /^\+?\d[\d\s-]+$/.test(displayValue.replace(/\s/g, ''))) {
+        const formattedPhone = displayValue.startsWith('+') ? displayValue : `+${displayValue}`
+        return { phone: formattedPhone.replace(/[\s-]/g, ''), country_short_name: 'US' }
+      }
+    }
+  }
+  return null
+}
+
+export async function getSingleChatInformationAutoDetect({
+  monday,
+  workspaceId,
+  sessionId,
+  itemId
+}: { monday: MondayApi, workspaceId: string, sessionId: string, itemId: string }) {
+  try {
+    const { data } = await monday.query.getAllColumnValuesFromItem({ itemId })
+    const item = data.items[0]
+
+    if (!item || !item.column_values) throw new PublicError(ERROT_ITEM_NOT_FOUNT)
+
+    const phoneData = findPhoneColumnFromValues(item.column_values)
+    if (!phoneData || !phoneData.phone) {
+      throw new ValidationError(ERROR_PHONE_NUMBER_INVALID.title, ERROR_PHONE_NUMBER_INVALID.description)
+    }
+
+    const id = formatPhoneToWhatsAppJID(phoneData.phone, phoneData.country_short_name as any)
+
+    const isValid = await isValidContact({ workspaceId, sessionId, id })
+
+    return {
+      isValid,
+      chatId: id
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+  }
+}
+
 export async function getSingleChatInformation({
   monday,
   workspaceId,
