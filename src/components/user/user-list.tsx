@@ -30,9 +30,9 @@ export const UserList = ({ loading = false, users }: UserListProps) => {
   if (users.length === 0) {
     return (
       <Flex align='center' justify='center' className='py-3' direction='column'>
-        <Heading align='center' type='h3' weight='bold'>No se encontraron usuarios disponibles</Heading>
-        <Text className='w-full text-wrap'>Puede que aún no se hayan agregado usuarios a esta cuenta de monday o que no tengas permisos suficientes para verlos.</Text>
-        <Text>Si crees que esto es un error, contacta a un administrador.</Text>
+        <Heading align='center' type='h3' weight='bold' className="text-gray-800!">No se encontraron usuarios disponibles</Heading>
+        <Text className='w-full text-wrap text-gray-600!'>Puede que aún no se hayan agregado usuarios a esta cuenta de monday o que no tengas permisos suficientes para verlos.</Text>
+        <Text className="text-gray-600!">Si crees que esto es un error, contacta a un administrador.</Text>
       </Flex>
     )
   }

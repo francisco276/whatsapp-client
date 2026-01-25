@@ -40,7 +40,7 @@ export const UserItem = ({ user }: UserItemProps) => {
   return (
     <ListItem size="large" className="!px-0 overflow-visible!" component="div" >
       <ListItemAvatar src={user.image} />
-      <Text className="mr-auto" ellipsis>{user.name}</Text>
+      <Text className="mr-auto text-gray-800!" ellipsis>{user.name}</Text>
       {
         user.authorized && (
           <Dropdown

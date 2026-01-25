@@ -21,11 +21,11 @@ export const Notifications = () => {
     <SettingBox title="Notificaciones">
       <Flex direction="column" align="start" gap="medium">
         <Flex justify="space-between" className="w-full py-3 border-b border-gray-100">
-          <Text>Recibe una notificación al enviar un mensaje.</Text>
+          <Text className="text-gray-700!">Recibe una notificación al enviar un mensaje.</Text>
           <Toggle className="ml-auto" size="small" disabled={isLoading} isSelected={isChecked} onChange={handleOnChange} />
         </Flex>
         <Flex justify="space-between" className="w-full py-3">
-          <Text>Sonido de alerta al recibir un mensaje.</Text>
+          <Text className="text-gray-700!">Sonido de alerta al recibir un mensaje.</Text>
           <Toggle className="ml-auto" size="small" disabled={isLoading} isSelected={isSoundChecked} onChange={handleSoundChange} />
         </Flex>
       </Flex>

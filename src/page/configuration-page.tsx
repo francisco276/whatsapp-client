@@ -12,19 +12,18 @@ const ConfigurationPage = () => {
   return (
     <MondayContex>
       <Authorization>
-        <div>
+        <div className="light-app-theme">
           <Box
-            className="h-screen w-screen"
+            className="h-screen w-screen bg-white"
           >
             <Flex align='start' className='h-full'>
               <Box
-                className="w-[300px] max-w-[300px] h-full"
-                backgroundColor="allgreyBackgroundColor"
+                className="w-[300px] max-w-[300px] h-full bg-gray-50"
                 padding="large"
               >
                 <Flex gap={10} align='center'>
-                  <Icon icon={Settings} />
-                  <Heading type="h3" weight="bold">Settings</Heading>
+                  <Icon icon={Settings} className="text-gray-800" />
+                  <Heading type="h3" weight="bold" className="text-gray-800!">Settings</Heading>
                 </Flex>
                 <Divider />
                 <Menu>
@@ -33,7 +32,7 @@ const ConfigurationPage = () => {
                 </Menu>
               </Box>
               <Box
-                className="w-full h-full"
+                className="w-full h-full bg-white"
                 padding="large"
               >
                 {page === 'account' && <AccountSection />}

@@ -7,8 +7,8 @@ type SettingBoxprops = {
 
 export const SettingBox = ({ title, children }: SettingBoxprops) => {
   return (
-    <Box border rounded="medium" padding="medium" marginBottom="medium" borderColor="layoutBorderColor">
-      <Text type="text1" weight="bold" className='uppercase'>{title}</Text>
+    <Box border rounded="medium" padding="medium" marginBottom="medium" borderColor="layoutBorderColor" className="bg-white">
+      <Text type="text1" weight="bold" className='uppercase text-gray-700!'>{title}</Text>
       {children}
     </Box>
   )

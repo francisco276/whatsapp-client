@@ -5,8 +5,8 @@ import { SessionAccess } from '../sessions/session-acess'
 
 export const SessionsSection = () => {
   return (
-    <Box>
-      <Heading type="h1" weight="bold" className='!mb-px'>Account</Heading>
+    <Box className="text-gray-800">
+      <Heading type="h1" weight="bold" className='!mb-px text-gray-800!'>Sesiones</Heading>
       <SessionProvider>
         <>
           <RemoveSession />
