@@ -12,6 +12,7 @@ import { SessionsList } from './sessions/sessions-list'
 import { SideBarList } from './skeletons/sidebar-list'
 import { Link } from 'wouter'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
+import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 
 type SessionSidebarProps = {
   type?: 'small' | 'full'
@@ -22,9 +23,17 @@ type SessionSidebarProps = {
 
 const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSidebarProps) => {
   const monday = new MondayApi()
+  const workspaceId = useWorkspaceId()
   const { session: currentSession, setSession } = useContext(SessionContext)
   const [sessionsSidebarOpen, setSessionsSidebarOpen] = useState(true)
-  const sentCount = useMessageCounterStore((state) => state.sentCount)
+  const { sentCount, setWorkspaceId, fetchCount } = useMessageCounterStore()
+
+  useEffect(() => {
+    if (workspaceId) {
+      setWorkspaceId(workspaceId)
+      fetchCount()
+    }
+  }, [workspaceId, setWorkspaceId, fetchCount])
 
   useEffect(() => {
     if (!currentSession && sessions.length > 0 && !loading && !error) {

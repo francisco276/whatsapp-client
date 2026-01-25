@@ -10,6 +10,7 @@ import { useFileSelector } from '@/hooks/useFileSelector'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { TemplateSelector } from '@/components/modals/template-selector'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
+import { useMessageQueueStore } from '@/stores/messageQueueStore'
 
 export const MessageInput = () => {
   const workspaceId = useWorkspaceId()
@@ -21,6 +22,7 @@ export const MessageInput = () => {
   const { handleFileSelect, selectedFiles, removeFile, formatFileSize, clearFiles } = useFileSelector()
   const { isChecked, onChange } = useSwitch()
   const incrementSentCount = useMessageCounterStore((state) => state.incrementSentCount)
+  const addToQueue = useMessageQueueStore((state) => state.addToQueue)
 
   const { mutate, isPending } = useMutation({
     mutationFn: sendMessage,
@@ -30,6 +32,16 @@ export const MessageInput = () => {
         queryClient.invalidateQueries({ queryKey: ['messages', session, chat, workspaceId] })
       }, 200)
       sendNotifications()
+    },
+    onError: (error) => {
+      console.log('[MessageInput] Send failed, adding to queue:', error)
+      addToQueue({
+        chatId: chat,
+        sessionId: session,
+        workspaceId,
+        message: message.trim(),
+        files: selectedFiles
+      })
     }
   })
 

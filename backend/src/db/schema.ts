@@ -253,4 +253,24 @@ export const sessionAccessRelations = relations(sessionAccessTable, ({ one }) =>
   })
 }))
 
+export const messageCountersTable = pgTable('message_counters', {
+  id: serial('id').primaryKey(),
+  workspaceId: text('workspaceId').notNull()
+    .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+  year: integer('year').notNull(),
+  month: integer('month').notNull(),
+  sentCount: integer('sentCount').notNull().default(0),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull()
+}, (table) => [
+  unique('unique_counter_per_workspace_month').on(table.workspaceId, table.year, table.month)
+])
+
+export const messageCountersRelations = relations(messageCountersTable, ({ one }) => ({
+  workspace: one(workspacesTable, {
+    fields: [messageCountersTable.workspaceId],
+    references: [workspacesTable.id]
+  })
+}))
+
 export * from './templates'

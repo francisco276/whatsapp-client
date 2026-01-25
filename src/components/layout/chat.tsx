@@ -1,27 +1,14 @@
 import { ChatHeader } from '@/components/chats/chat-header'
 import { EmptyState } from '@/components/empty-state'
 import { MessageInput } from "@/components/messages/message-input"
+import { MessageQueueStatus } from "@/components/messages/message-queue-status"
 import { useChatId } from '@/hooks/useChat'
 import { Box, Text } from '@vibe/core'
-import { useEffect, useState } from 'react'
+import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
 export const Chat = ({ children }: { children: React.ReactNode }) => {
   const chatId = useChatId()
-  const [sentCount, setSentCount] = useState(0)
-
-  useEffect(() => {
-    const updateCount = () => {
-      setSentCount(parseInt(localStorage.getItem('messages_sent_total_count') || '0'))
-    }
-    updateCount()
-    window.addEventListener('storage', updateCount)
-    // Custom event for same-window updates
-    const interval = setInterval(updateCount, 1000)
-    return () => {
-      window.removeEventListener('storage', updateCount)
-      clearInterval(interval)
-    }
-  }, [])
+  const sentCount = useMessageCounterStore((state) => state.sentCount)
 
   if (!chatId) {
     return (
@@ -44,6 +31,7 @@ export const Chat = ({ children }: { children: React.ReactNode }) => {
       <ChatHeader />
       {children}
       <div className="bg-white border-t border-gray-200 px-6 py-4">
+        <MessageQueueStatus />
         <MessageInput />
         <div className="mt-1 text-right">
           <Text type="text3" color="secondary">Mensajes enviados: {sentCount}</Text>
