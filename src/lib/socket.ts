@@ -12,7 +12,7 @@ export class SocketClient {
   constructor({ workspaceId, sessionId }: { workspaceId: string, sessionId: string }) {
     console.log('[Socket] Connecting to:', URL, 'workspaceId:', workspaceId, 'sessionId:', sessionId)
     this.socket = io(URL, {
-      path: '/wa/socket.io',
+      path: '/socket.io/',
       autoConnect: true,
       auth: {
         token: API_KEY
