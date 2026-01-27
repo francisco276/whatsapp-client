@@ -5,10 +5,11 @@ import { useRegisterNewMessage } from '@/hooks/useRegisterNewMessage'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { getChats } from '@/lib/services/chats'
 import { useQuery } from '@tanstack/react-query'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { EmptyState } from '../empty-state'
 import { SessionContext } from '../providers/session/session-context'
 import { Box } from "@vibe/core"
+import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
 type ChatsProps = {
   enableSidebar?: boolean,
@@ -19,6 +20,14 @@ type ChatsProps = {
 export default function Chats({ enableSidebar = true, chatId, emptyComponent: EmptyComponent }: ChatsProps) {
   const workspaceId = useWorkspaceId()
   const { session } = useContext(SessionContext)
+  const { setWorkspaceId, fetchCount } = useMessageCounterStore()
+
+  useEffect(() => {
+    if (workspaceId) {
+      setWorkspaceId(workspaceId)
+      fetchCount()
+    }
+  }, [workspaceId, setWorkspaceId, fetchCount])
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['getChats', session],
