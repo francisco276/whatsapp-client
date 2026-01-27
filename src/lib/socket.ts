@@ -2,7 +2,7 @@ import { io } from 'socket.io-client'
 import type { Socket } from 'socket.io-client'
 import type { SocketSuccessResponse, SocketErrorResponse } from '../types/socket'
 
-const FALLBACK_URL = 'https://3e5729a4-02a3-4a8c-8eba-aadd16aa74f8-00-3a2yr3uhnetzl.spock.replit.dev'
+const FALLBACK_URL = 'https://wa.appssimplifica.dev'
 const URL: string = import.meta.env.VITE_SOCKET_API || FALLBACK_URL
 const API_KEY: string | undefined = import.meta.env.VITE_API_KEY ?? undefined
 
@@ -10,8 +10,9 @@ export class SocketClient {
   private readonly socket: Socket
 
   constructor({ workspaceId, sessionId }: { workspaceId: string, sessionId: string }) {
+    console.log('[Socket] Connecting to:', URL, 'workspaceId:', workspaceId, 'sessionId:', sessionId)
     this.socket = io(URL, {
-      path: '/socket.io',
+      path: '/wa/socket.io',
       autoConnect: true,
       auth: {
         token: API_KEY
@@ -20,7 +21,20 @@ export class SocketClient {
         workspaceId,
         sessionId
       },
-      multiplex: false
+      multiplex: false,
+      transports: ['websocket', 'polling']
+    })
+
+    this.socket.on('connect', () => {
+      console.log('[Socket] Connected successfully, socket id:', this.socket.id)
+    })
+
+    this.socket.on('connect_error', (error) => {
+      console.error('[Socket] Connection error:', error.message)
+    })
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('[Socket] Disconnected:', reason)
     })
   }
 
