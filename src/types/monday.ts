@@ -67,7 +67,7 @@ export type MondayListenResponse<T> = {
 }
 
 export type SingleSettings = {
-  phoneColumnId: null | string
+  phoneColumnId: null | Record<string, unknown>
 }
 
 export type User = {
