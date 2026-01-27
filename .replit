@@ -49,5 +49,9 @@ publicDir = "dist"
 PORT = "5000"
 
 [userenv.development]
-VITE_WHATSAPP_API = "https://3e5729a4-02a3-4a8c-8eba-aadd16aa74f8-00-3a2yr3uhnetzl.spock.replit.dev/api/v1"
-VITE_SOCKET_API = "https://3e5729a4-02a3-4a8c-8eba-aadd16aa74f8-00-3a2yr3uhnetzl.spock.replit.dev"
+VITE_WHATSAPP_API = "https://wa.appssimplifica.dev/wa/api/v1"
+VITE_SOCKET_API = "https://wa.appssimplifica.dev"
+
+[userenv.production]
+VITE_WHATSAPP_API = "https://wa.appssimplifica.dev/wa/api/v1"
+VITE_SOCKET_API = "https://wa.appssimplifica.dev"
