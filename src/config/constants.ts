@@ -1,4 +1,4 @@
-export const MONDAY_API_VERSION = '2025-04'
+export const MONDAY_API_VERSION = '2024-10'
 export const API_TIMEOUT = 60000
 
 export const AUTHORIZATION_TYPES = {

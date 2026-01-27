@@ -3,8 +3,15 @@ export const getPhoneColumnsByItemId = `
     items (ids: [$itemId]) {
       column_values (ids: [$columnId]) {
         id
-        value
         text
+        value
+        ... on PhoneValue {
+          country_short_name
+          phone
+        }
+        ... on MirrorValue {
+          display_value
+        }
       }
     }
   }
@@ -15,8 +22,15 @@ export const getAllColumnValuesFromItem = `
     items (ids: [$itemId]) {
       column_values {
         id
-        value
         text
+        value
+        ... on PhoneValue {
+          country_short_name
+          phone
+        }
+        ... on MirrorValue {
+          display_value
+        }
       }
     }
   }
