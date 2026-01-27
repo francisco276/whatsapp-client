@@ -30,6 +30,13 @@ function findPhoneColumnFromValues(columnValues: ColumnValue[]): { phone: string
         return { phone: formattedPhone.replace(/[\s-]/g, ''), country_short_name: 'US' }
       }
     }
+    if ('text' in column && column.text) {
+      const textValue = column.text as string
+      if (textValue && /^\+?\d[\d\s-]+$/.test(textValue.replace(/\s/g, ''))) {
+        const formattedPhone = textValue.startsWith('+') ? textValue : `+${textValue}`
+        return { phone: formattedPhone.replace(/[\s-]/g, ''), country_short_name: 'US' }
+      }
+    }
   }
   return null
 }

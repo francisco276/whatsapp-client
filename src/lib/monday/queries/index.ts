@@ -4,15 +4,7 @@ export const getPhoneColumnsByItemId = `
       column_values (ids: [$columnId]) {
         id
         value
-        ... on MirrorValue {
-          value
-          display_value
-          text
-        }
-        ... on PhoneValue {
-          country_short_name
-          phone
-        }
+        text
       }
     }
   }
@@ -24,15 +16,7 @@ export const getAllColumnValuesFromItem = `
       column_values {
         id
         value
-        ... on MirrorValue {
-          value
-          display_value
-          text
-        }
-        ... on PhoneValue {
-          country_short_name
-          phone
-        }
+        text
       }
     }
   }

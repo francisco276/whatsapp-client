@@ -23,6 +23,15 @@ export function getPhoneColumnsByColumnId({ columnValues, columnId }: { columnVa
     return { phone: phoneData.number, country_short_name: phoneData?.country }
   }
 
+  if ('text' in column && column.text) {
+    const textValue = column.text as string
+    const formatedPhone = textValue.startsWith('+') ? textValue : `+${textValue}`
+    const phoneData = parsePhoneNumber(formatedPhone)
+    console.log({ phoneData }, 'Parsed Phone Data from text')
+    if (phoneData === undefined) return
+    return { phone: phoneData.number, country_short_name: phoneData?.country }
+  }
+
   return
 }
 
