@@ -2,6 +2,7 @@ import { SuccessDataResponse } from "@/types/response"
 import { api } from "../axios"
 
 const ROUTE = '/counters'
+const LOCAL_STORAGE_KEY = 'wa_message_counter'
 
 export type CounterData = {
   sentCount: number
@@ -9,22 +10,54 @@ export type CounterData = {
   month: number
 }
 
-export const getCounter = async ({ workspaceId }: { workspaceId: string }) => {
+const getLocalCounter = (workspaceId: string): CounterData => {
   try {
-    const { data: response } = await api.get<SuccessDataResponse<CounterData>>(`${ROUTE}/${workspaceId}`)
-    return response.data
-  } catch (error) {
-    console.error('[getCounter] Error:', error)
-    return { sentCount: 0, year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+    const stored = localStorage.getItem(`${LOCAL_STORAGE_KEY}_${workspaceId}`)
+    if (stored) {
+      const data = JSON.parse(stored) as CounterData
+      const now = new Date()
+      if (data.year === now.getFullYear() && data.month === now.getMonth() + 1) {
+        return data
+      }
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+  return { sentCount: 0, year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+}
+
+const setLocalCounter = (workspaceId: string, data: CounterData): void => {
+  try {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_${workspaceId}`, JSON.stringify(data))
+  } catch {
+    // Ignore localStorage errors
   }
 }
 
-export const incrementCounter = async ({ workspaceId }: { workspaceId: string }) => {
+export const getCounter = async ({ workspaceId }: { workspaceId: string }): Promise<CounterData> => {
+  try {
+    const { data: response } = await api.get<SuccessDataResponse<CounterData>>(`${ROUTE}/${workspaceId}`)
+    setLocalCounter(workspaceId, response.data)
+    return response.data
+  } catch {
+    return getLocalCounter(workspaceId)
+  }
+}
+
+export const incrementCounter = async ({ workspaceId }: { workspaceId: string }): Promise<CounterData | null> => {
+  const localData = getLocalCounter(workspaceId)
+  const newData: CounterData = {
+    sentCount: localData.sentCount + 1,
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1
+  }
+  setLocalCounter(workspaceId, newData)
+
   try {
     const { data: response } = await api.post<SuccessDataResponse<CounterData>>(`${ROUTE}/${workspaceId}/increment`)
+    setLocalCounter(workspaceId, response.data)
     return response.data
-  } catch (error) {
-    console.error('[incrementCounter] Error:', error)
-    return null
+  } catch {
+    return newData
   }
 }
