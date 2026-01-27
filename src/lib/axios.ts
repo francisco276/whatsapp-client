@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const PRODUCTION_API_URL = 'https://3e5729a4-02a3-4a8c-8eba-aadd16aa74f8-00-3a2yr3uhnetzl.spock.replit.dev/api/v1'
+const PRODUCTION_API_URL = 'https://wa.appssimplifica.dev/wa/api/v1'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_WHATSAPP_API || PRODUCTION_API_URL,
