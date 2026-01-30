@@ -4,7 +4,8 @@ import type { SocketSuccessResponse, SocketErrorResponse } from '../types/socket
 
 const FALLBACK_URL = 'https://wa.appssimplifica.dev'
 const URL: string = import.meta.env.VITE_SOCKET_API || FALLBACK_URL
-const API_KEY: string | undefined = import.meta.env.VITE_API_KEY ?? undefined
+const FALLBACK_API_KEY = 'i%x9^zp1T6y&&HUbu43ZVTUoIk3Pp0Lwf2YH@97W9E&y^k364c'
+const API_KEY: string = import.meta.env.VITE_API_KEY || FALLBACK_API_KEY
 
 export class SocketClient {
   private readonly socket: Socket
