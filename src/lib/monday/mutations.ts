@@ -1,6 +1,6 @@
 import { MONDAY_API_VERSION } from "@/config/constants";
 import { MondayRequest } from './request';
-import { notification } from "./mutations/index";
+import { notification, changeColumnValue } from "./mutations/index";
 
 export class MondayMutation {
   private requestor: MondayRequest
@@ -18,6 +18,22 @@ export class MondayMutation {
           userId,
           targetId,
           message
+        }
+      }
+    )
+  }
+
+  async changeColumnValue(boardId: string, itemId: string, columnId: string, value: string) {
+    return this.requestor.request(
+      'changeColumnValue',
+      changeColumnValue,
+      {
+        apiVersion: MONDAY_API_VERSION,
+        variables: {
+          boardId,
+          itemId,
+          columnId,
+          value
         }
       }
     )

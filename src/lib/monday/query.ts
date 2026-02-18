@@ -1,6 +1,6 @@
 import { MondayRequest } from './request';
-import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName } from './queries'
-import { User, ColumnValue } from '@/types/monday'
+import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName, getBoardColumns } from './queries'
+import { User, ColumnValue, BoardColumn } from '@/types/monday'
 
 /**
  * Stores methods to work with Monday GraphQL Queries
@@ -46,5 +46,17 @@ export class MondayQuery {
         name
       }
     })
+  }
+
+  async getBoardColumns(boardId: string) {
+    return this.requestor.request<{ boards: { columns: BoardColumn[] }[] }>(
+      'getBoardColumns',
+      getBoardColumns,
+      {
+        variables: {
+          boardId
+        }
+      }
+    )
   }
 }

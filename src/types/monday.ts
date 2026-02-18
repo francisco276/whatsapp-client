@@ -66,6 +66,12 @@ export type MondayListenResponse<T> = {
   type: string
 }
 
+export type BoardColumn = {
+  id: string
+  title: string
+  type: string
+}
+
 export type SingleSettings = {
   phoneColumnId: null | Record<string, unknown>
 }

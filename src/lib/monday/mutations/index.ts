@@ -9,3 +9,16 @@ export const notification = `
     }
   }
 `
+
+export const changeColumnValue = `
+  mutation ($boardId: ID!, $itemId: ID!, $columnId: String!, $value: JSON!) {
+    change_column_value (
+      board_id: $boardId,
+      item_id: $itemId,
+      column_id: $columnId,
+      value: $value
+    ) {
+      id
+    }
+  }
+`

@@ -57,3 +57,15 @@ export const getUsersWithName = `
     }
   }
 `
+
+export const getBoardColumns = `
+  query ($boardId: ID!) {
+    boards (ids: [$boardId]) {
+      columns {
+        id
+        title
+        type
+      }
+    }
+  }
+`
