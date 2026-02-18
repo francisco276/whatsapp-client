@@ -1,4 +1,4 @@
-import { Flex, Toggle, Text, useSwitch } from "@vibe/core"
+import { Flex, Toggle, Text, useSwitch, AttentionBox } from "@vibe/core"
 import { SettingBox } from "./setting-box"
 import { usePreferences } from "@/hooks/usePreferences"
 import { useUserId } from "@/hooks/useUserId"
@@ -12,6 +12,7 @@ export const Notifications = () => {
   const { isChecked: isSoundChecked } = useSwitch({ defaultChecked: true, isChecked: config?.notifications?.soundEnabled ?? true })
   const { requestPermission } = useServiceWorker()
   const [browserNotifEnabled, setBrowserNotifEnabled] = useState(false)
+  const [notifError, setNotifError] = useState<string | null>(null)
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -28,9 +29,18 @@ export const Notifications = () => {
   }
 
   async function handleBrowserNotifChange(value: boolean) {
+    setNotifError(null)
     if (value) {
-      const granted = await requestPermission()
-      setBrowserNotifEnabled(granted)
+      const result = await requestPermission()
+      if (result === 'granted') {
+        setBrowserNotifEnabled(true)
+      } else if (result === 'denied') {
+        setBrowserNotifEnabled(false)
+        setNotifError('Las notificaciones fueron bloqueadas. Ve a la configuración de tu navegador para habilitarlas en este sitio.')
+      } else {
+        setBrowserNotifEnabled(false)
+        setNotifError('Las notificaciones del navegador no están disponibles dentro de Monday.com. Esta función requiere abrir la app directamente en el navegador.')
+      }
     } else {
       setBrowserNotifEnabled(false)
     }
@@ -54,6 +64,14 @@ export const Notifications = () => {
           </Flex>
           <Toggle className="ml-auto" size="small" isSelected={browserNotifEnabled} onChange={handleBrowserNotifChange} />
         </Flex>
+        {notifError && (
+          <AttentionBox
+            title="Notificaciones no disponibles"
+            text={notifError}
+            type="warning"
+            className="w-full"
+          />
+        )}
       </Flex>
     </SettingBox>
   )

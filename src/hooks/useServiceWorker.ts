@@ -1,35 +1,18 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useCallback } from 'react'
 
 export const useServiceWorker = () => {
-  const readyRef = useRef<boolean>(false)
+  const requestPermission = useCallback(async (): Promise<'granted' | 'denied' | 'unsupported'> => {
+    if (!('Notification' in window)) return 'unsupported'
 
-  useEffect(() => {
-    if (!('serviceWorker' in navigator)) {
-      console.log('[SW] Service Workers not supported')
-      return
+    if (Notification.permission === 'granted') return 'granted'
+    if (Notification.permission === 'denied') return 'denied'
+
+    try {
+      const permission = await Notification.requestPermission()
+      return permission === 'granted' ? 'granted' : 'denied'
+    } catch {
+      return 'unsupported'
     }
-
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then(() => {
-        return navigator.serviceWorker.ready
-      })
-      .then(() => {
-        readyRef.current = true
-        console.log('[SW] Service Worker ready')
-      })
-      .catch((error) => {
-        console.log('[SW] Service Worker registration failed:', error.message)
-      })
-  }, [])
-
-  const requestPermission = useCallback(async (): Promise<boolean> => {
-    if (!('Notification' in window)) return false
-    if (Notification.permission === 'granted') return true
-    if (Notification.permission === 'denied') return false
-
-    const permission = await Notification.requestPermission()
-    return permission === 'granted'
   }, [])
 
   const sendNotification = useCallback(async (data: { chatId?: string, contactName?: string, preview?: string }) => {
@@ -44,17 +27,10 @@ export const useServiceWorker = () => {
       silent: false
     }
 
-    if (readyRef.current && navigator.serviceWorker?.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: 'NEW_MESSAGE',
-        data
-      })
-    } else {
-      try {
-        new Notification(title, options)
-      } catch (e) {
-        console.log('[SW] Notification failed:', e)
-      }
+    try {
+      new Notification(title, options)
+    } catch (e) {
+      console.log('[SW] Notification failed:', e)
     }
   }, [])
 
