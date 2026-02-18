@@ -29,6 +29,7 @@ export const groupMessagesByDate = (messages: MessageItem[]): MessageItem[] => {
           isVideo: false,
           isDocument: false,
           isSticker: false,
+          isAudio: false,
           isForwarded: false
         },
         participant: '',
@@ -80,6 +81,7 @@ export const getMessageAsString = (message: WMessage): MessageContent => {
     isVideo: false,
     isDocument: false,
     isSticker: false,
+    isAudio: false,
     isForwarded: false,
   }
 
@@ -141,6 +143,16 @@ export const getMessageAsString = (message: WMessage): MessageContent => {
       isForwarded: documentMessage.contextInfo?.isForwarded
     }
   }
+
+  if (message.audioMessage) {
+    messageObject = {
+      ...messageObject,
+      isAudio: true,
+      audioDuration: message.audioMessage.seconds,
+      isForwarded: message.audioMessage.contextInfo?.isForwarded ?? false
+    }
+  }
+
   if (message.interactiveMessage) {
     messageObject = {
       ...messageObject,
@@ -207,12 +219,14 @@ export const getMessageSize = (message: MessageItem): number => {
       isVideo,
       isDocument,
       isSticker,
+      isAudio,
       isForwarded
     } = getMessageAsString(message.originalMessage.message as WMessage)
 
     if (isForwarded) aditionalSpace += 24
     if (isSticker || isImage || isVideo) aditionalSpace += 200
     if (isDocument) aditionalSpace += 50
+    if (isAudio) aditionalSpace += 60
 
     const lineHeight = text ? 24 : 1
     const lines = text.split(/\r\n|\n|\r/)

@@ -3,6 +3,7 @@ import type { MessageItem } from "../types/message"
 import { downloadMedia } from "../lib/services/messages"
 import { MessageImageComponent } from './messages/formats/image'
 import { MessageDocumentComponent } from './messages/formats/document'
+import { MessageAudioComponent } from './messages/formats/audio'
 import { Icon, Loader } from '@vibe/core'
 import { Forward } from '@vibe/icons'
 import { MessageVideoComponent } from './messages/formats/video'
@@ -19,9 +20,11 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
       isVideo,
       isSticker,
       isDocument,
+      isAudio,
       documentTitle,
       isForwarded,
       isGift,
+      audioDuration,
     },
     timestamp,
     participant,
@@ -34,12 +37,32 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
   const { contact } = useGetContact({ contactId: participant, enabled: isAGroup })
 
   const { data: mediaUrl, isLoading: isLoadingMedia } = useQuery({
-    queryKey: ['getMedia', message],
+    queryKey: ['getMedia', message.id],
     queryFn: () => downloadMedia({ workspaceId, sessionId, message: originalMessage }),
-    enabled: (isImage || isVideo || isSticker),
+    enabled: (isImage || isVideo || isSticker || isAudio),
     refetchOnWindowFocus: false,
     staleTime: 1440 * 60 * 1000
   })
+
+  const { data: docUrl, isLoading: isLoadingDoc, refetch: downloadDoc } = useQuery({
+    queryKey: ['getDoc', message.id],
+    queryFn: () => downloadMedia({ workspaceId, sessionId, message: originalMessage }),
+    enabled: false,
+    refetchOnWindowFocus: false,
+    staleTime: 1440 * 60 * 1000
+  })
+
+  const handleDocDownload = async () => {
+    const result = await downloadDoc()
+    if (result.data) {
+      const link = document.createElement('a')
+      link.href = result.data
+      link.download = documentTitle || 'document'
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer'
+      link.click()
+    }
+  }
 
   return (
     <div
@@ -61,9 +84,10 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
 
         {isForwarded && <p className="text-gray-500 flex gap-2 items-center"><Icon iconType="svg" icon={Forward} iconLabel="forwarded" iconSize={16} />Forwarded</p>}
 
-        {isLoadingMedia && <Loader size="small" />}
+        {isLoadingMedia && !isAudio && <Loader size="small" />}
         {((isImage || isSticker) && mediaUrl) && <MessageImageComponent url={mediaUrl} />}
-        {(isDocument && documentTitle) && <MessageDocumentComponent name={documentTitle} />}
+        {(isDocument && documentTitle) && <MessageDocumentComponent name={documentTitle} url={docUrl} isLoading={isLoadingDoc} onDownload={handleDocDownload} />}
+        {(isAudio) && <MessageAudioComponent url={mediaUrl} duration={audioDuration} isLoading={isLoadingMedia} />}
         {(isVideo && mediaUrl) && <MessageVideoComponent url={mediaUrl} isGift={isGift!} />}
         {
           isDateSeprator && (

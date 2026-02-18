@@ -94,6 +94,16 @@ export type WMessage = {
       }
     }
   },
+  audioMessage?: {
+    url: string
+    mimetype: string
+    seconds: number
+    ptt: boolean
+    contextInfo?: {
+      isForwarded: boolean
+      forwardingScore: number
+    }
+  },
   editedMessage: {
     message: {
       protocolMessage: {
@@ -133,10 +143,12 @@ export type MessageContent = {
   isVideo: boolean
   isDocument: boolean
   isSticker: boolean
+  isAudio: boolean
   type?: string
   documentTitle?: string
   isForwarded: boolean
   isGift?: boolean
+  audioDuration?: number
 }
 
 export type MessageItem = {
