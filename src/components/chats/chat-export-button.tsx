@@ -1,8 +1,7 @@
 import { useState, useCallback, useContext } from 'react'
-import { Button, Flex, Text, Dropdown, Loader, Tooltip } from '@vibe/core'
+import { Button, Flex, Text, Loader, Tooltip } from '@vibe/core'
 import { Modal, ModalContent, ModalFooter, ModalHeader } from '@vibe/core/next'
 import { Download } from '@vibe/icons'
-import { useQuery } from '@tanstack/react-query'
 import { MondayApi } from '@/lib/monday/api'
 import { useContext as useMondayContext } from '@/hooks/useContext'
 import { getMessages } from '@/lib/services/messages'
@@ -12,21 +11,11 @@ import { useGetContact } from '@/hooks/useGetContact'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { SessionContext } from '@/components/providers/session/session-context'
 import type { Message } from '@/types/message'
-import type { BoardColumn } from '@/types/monday'
 
 const monday = new MondayApi()
 
-const TEXT_COLUMN_TYPES = ['long_text']
-
-type ColumnOption = {
-  value: string
-  label: string
-  columnType: string
-}
-
 export const ChatExportButton = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedColumn, setSelectedColumn] = useState<ColumnOption | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [exportResult, setExportResult] = useState<'success' | 'error' | null>(null)
 
@@ -35,24 +24,6 @@ export const ChatExportButton = () => {
   const { session } = useContext(SessionContext)
   const { contact } = useGetContact({ contactId: chatId, enabled: !!chatId })
   const { data: mondayContext } = useMondayContext()
-
-  const { data: columnsData, isLoading: isLoadingColumns } = useQuery({
-    queryKey: ['boardColumns', mondayContext?.boardId],
-    queryFn: async () => {
-      if (!mondayContext?.boardId) return []
-      const response = await monday.query.getBoardColumns(mondayContext.boardId)
-      const board = response.data.boards[0]
-      if (!board) return []
-      return board.columns
-        .filter((col: BoardColumn) => TEXT_COLUMN_TYPES.includes(col.type))
-        .map((col: BoardColumn) => ({
-          value: col.id,
-          label: col.title,
-          columnType: col.type
-        }))
-    },
-    enabled: !!mondayContext?.boardId && isOpen
-  })
 
   const fetchAllMessages = useCallback(async (): Promise<Message[]> => {
     if (!workspaceId || !session || !chatId) return []
@@ -78,7 +49,7 @@ export const ChatExportButton = () => {
   }, [workspaceId, session, chatId])
 
   const handleExport = useCallback(async () => {
-    if (!selectedColumn || !mondayContext?.boardId || !mondayContext?.itemId) return
+    if (!mondayContext?.itemId) return
 
     setIsExporting(true)
     setExportResult(null)
@@ -88,20 +59,15 @@ export const ChatExportButton = () => {
       const contactName = contact?.displayName || chatId || 'Contacto'
       const formattedText = formatChatForExport(messages, contactName)
 
-      const value = JSON.stringify({ text: formattedText })
-
-      await monday.mutation.changeColumnValue(
-        mondayContext.boardId,
+      await monday.mutation.createUpdate(
         mondayContext.itemId,
-        selectedColumn.value,
-        value
+        formattedText
       )
 
       setExportResult('success')
       setTimeout(() => {
         setIsOpen(false)
         setExportResult(null)
-        setSelectedColumn(null)
       }, 2000)
     } catch (error) {
       console.error('Export failed:', error)
@@ -109,19 +75,19 @@ export const ChatExportButton = () => {
     } finally {
       setIsExporting(false)
     }
-  }, [selectedColumn, mondayContext, fetchAllMessages, contact, chatId])
+  }, [mondayContext, fetchAllMessages, contact, chatId])
 
   const handleClose = useCallback(() => {
+    if (isExporting) return
     setIsOpen(false)
     setExportResult(null)
-    setSelectedColumn(null)
-  }, [])
+  }, [isExporting])
 
   if (!chatId) return null
 
   return (
     <>
-      <Tooltip content="Exportar chat a columna">
+      <Tooltip content="Exportar chat">
         <Button
           kind="tertiary"
           size="small"
@@ -140,56 +106,41 @@ export const ChatExportButton = () => {
         <ModalHeader title="Exportar conversación" />
         <ModalContent>
           <Flex direction="column" gap={16} className="p-2">
-            <Text type="text2" color="secondary">
-              Selecciona la columna de texto donde guardar el historial del chat.
-            </Text>
-
-            {isLoadingColumns ? (
-              <Flex justify="center" className="py-4">
-                <Loader size={24} />
+            {isExporting ? (
+              <Flex direction="column" align="center" gap={12} className="py-4">
+                <Loader size={32} />
+                <Text type="text2" color="secondary">
+                  Exportando conversación...
+                </Text>
               </Flex>
-            ) : columnsData && columnsData.length > 0 ? (
-              <Dropdown
-                placeholder="Seleccionar columna"
-                options={columnsData}
-                onChange={(option: any) => setSelectedColumn(option)}
-                value={selectedColumn}
-                size="small"
-                clearable={false}
-                searchable={false}
-              />
-            ) : (
-              <Text type="text2" color="secondary">
-                No se encontraron columnas de "Texto largo" en el tablero. Agrega una columna de ese tipo para poder exportar el chat.
-              </Text>
-            )}
-
-            {exportResult === 'success' && (
+            ) : exportResult === 'success' ? (
               <Text type="text2" style={{ color: '#258750' }}>
-                Chat exportado correctamente.
+                Chat exportado correctamente. Revisa la pestaña de "Actualizaciones" del elemento.
               </Text>
-            )}
-
-            {exportResult === 'error' && (
+            ) : exportResult === 'error' ? (
               <Text type="text2" style={{ color: '#d83a52' }}>
                 Error al exportar. Intenta de nuevo.
+              </Text>
+            ) : (
+              <Text type="text2" color="secondary">
+                El historial completo del chat se publicará como una actualización en el elemento actual de Monday.com.
               </Text>
             )}
           </Flex>
         </ModalContent>
-        <ModalFooter
-          primaryButton={{
-            text: isExporting ? 'Exportando...' : 'Exportar',
-            onClick: handleExport,
-            disabled: !selectedColumn || isExporting,
-            loading: isExporting,
-          }}
-          secondaryButton={{
-            text: 'Cancelar',
-            onClick: handleClose,
-            disabled: isExporting,
-          }}
-        />
+        {!isExporting && exportResult !== 'success' && (
+          <ModalFooter
+            primaryButton={{
+              text: 'Exportar',
+              onClick: handleExport,
+              disabled: isExporting,
+            }}
+            secondaryButton={{
+              text: 'Cancelar',
+              onClick: handleClose,
+            }}
+          />
+        )}
       </Modal>
     </>
   )

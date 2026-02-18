@@ -1,6 +1,6 @@
 import { MONDAY_API_VERSION } from "@/config/constants";
 import { MondayRequest } from './request';
-import { notification, changeColumnValue } from "./mutations/index";
+import { notification, changeColumnValue, createUpdate } from "./mutations/index";
 
 export class MondayMutation {
   private requestor: MondayRequest
@@ -34,6 +34,20 @@ export class MondayMutation {
           itemId,
           columnId,
           value
+        }
+      }
+    )
+  }
+
+  async createUpdate(itemId: string, body: string) {
+    return this.requestor.request(
+      'createUpdate',
+      createUpdate,
+      {
+        apiVersion: MONDAY_API_VERSION,
+        variables: {
+          itemId,
+          body
         }
       }
     )

@@ -22,3 +22,14 @@ export const changeColumnValue = `
     }
   }
 `
+
+export const createUpdate = `
+  mutation ($itemId: ID!, $body: String!) {
+    create_update (
+      item_id: $itemId,
+      body: $body
+    ) {
+      id
+    }
+  }
+`
