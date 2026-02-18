@@ -1,6 +1,5 @@
-import { useState, useCallback, useContext } from 'react'
-import { Button, Flex, Text, Loader, Tooltip } from '@vibe/core'
-import { Modal, ModalContent, ModalFooter, ModalHeader } from '@vibe/core/next'
+import { useState, useCallback, useContext, useRef } from 'react'
+import { Button, Flex, Text, Loader, Tooltip, Dialog, DialogContentContainer } from '@vibe/core'
 import { Download } from '@vibe/icons'
 import { MondayApi } from '@/lib/monday/api'
 import { useContext as useMondayContext } from '@/hooks/useContext'
@@ -15,9 +14,9 @@ import type { Message } from '@/types/message'
 const monday = new MondayApi()
 
 export const ChatExportButton = () => {
-  const [isOpen, setIsOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [exportResult, setExportResult] = useState<'success' | 'error' | null>(null)
+  const buttonRef = useRef<HTMLDivElement>(null)
 
   const chatId = useChatId()
   const workspaceId = useWorkspaceId()
@@ -66,82 +65,71 @@ export const ChatExportButton = () => {
 
       setExportResult('success')
       setTimeout(() => {
-        setIsOpen(false)
         setExportResult(null)
-      }, 2000)
+      }, 3000)
     } catch (error) {
       console.error('Export failed:', error)
       setExportResult('error')
+      setTimeout(() => {
+        setExportResult(null)
+      }, 3000)
     } finally {
       setIsExporting(false)
     }
   }, [mondayContext, fetchAllMessages, contact, chatId])
 
-  const handleClose = useCallback(() => {
-    if (isExporting) return
-    setIsOpen(false)
-    setExportResult(null)
-  }, [isExporting])
-
   if (!chatId) return null
 
   return (
-    <>
-      <Tooltip content="Exportar chat">
-        <Button
-          kind="tertiary"
-          size="small"
-          onClick={() => setIsOpen(true)}
-        >
-          <Download />
-        </Button>
-      </Tooltip>
-
-      <Modal
-        id="export-chat-modal"
-        show={isOpen}
-        onClose={handleClose}
-        size="medium"
-      >
-        <ModalHeader title="Exportar conversación" />
-        <ModalContent>
-          <Flex direction="column" gap={16} className="p-2">
-            {isExporting ? (
-              <Flex direction="column" align="center" gap={12} className="py-4">
-                <Loader size={32} />
-                <Text type="text2" color="secondary">
-                  Exportando conversación...
+    <div ref={buttonRef}>
+      <Dialog
+        position="bottom"
+        showTrigger={['click']}
+        hideTrigger={['clickoutside']}
+        content={
+          <DialogContentContainer style={{ padding: 16, maxWidth: 280 }}>
+            <Flex direction="column" gap={12}>
+              {isExporting ? (
+                <Flex direction="column" align="center" gap={8} className="py-2">
+                  <Loader size={24} />
+                  <Text type="text2" color="secondary">Exportando...</Text>
+                </Flex>
+              ) : exportResult === 'success' ? (
+                <Text type="text2" style={{ color: '#258750' }}>
+                  Exportado. Revisa "Actualizaciones".
                 </Text>
-              </Flex>
-            ) : exportResult === 'success' ? (
-              <Text type="text2" style={{ color: '#258750' }}>
-                Chat exportado correctamente. Revisa la pestaña de "Actualizaciones" del elemento.
-              </Text>
-            ) : exportResult === 'error' ? (
-              <Text type="text2" style={{ color: '#d83a52' }}>
-                Error al exportar. Intenta de nuevo.
-              </Text>
-            ) : (
-              <Text type="text2" color="secondary">
-                El historial completo del chat se publicará como una actualización en el elemento actual de Monday.com.
-              </Text>
-            )}
-          </Flex>
-        </ModalContent>
-        {!isExporting && exportResult !== 'success' && (
-          <ModalFooter
-            primaryButton={{
-              text: 'Exportar',
-              onClick: handleExport,
-              disabled: isExporting,
-            }}
-            secondaryButton={{
-              text: 'Cancelar',
-              onClick: handleClose,
-            }}
-          />
-        )}
-      </Modal>
-    </>
+              ) : exportResult === 'error' ? (
+                <Text type="text2" style={{ color: '#d83a52' }}>
+                  Error al exportar. Intenta de nuevo.
+                </Text>
+              ) : (
+                <>
+                  <Text type="text2" color="secondary">
+                    Exportar el chat como actualización en este elemento.
+                  </Text>
+                  <Flex gap={8} justify="end">
+                    <Button
+                      size="small"
+                      onClick={handleExport}
+                    >
+                      Exportar
+                    </Button>
+                  </Flex>
+                </>
+              )}
+            </Flex>
+          </DialogContentContainer>
+        }
+      >
+        <Tooltip content="Exportar chat">
+          <Button
+            kind="tertiary"
+            size="small"
+          >
+            <Download />
+          </Button>
+        </Tooltip>
+      </Dialog>
+    </div>
   )
 }
