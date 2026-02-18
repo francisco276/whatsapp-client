@@ -16,7 +16,8 @@ type MessagesListProps = {
 export const MessagesList = ({ messages = [], isLoading = false, onScroll }: MessagesListProps) => {
   const listRef = useRef<HTMLElement | null>(null)
   const [scrollToId, setScrollToId] = useState<string | undefined>(undefined)
-  const prevLastMessageIdRef = useRef<string | undefined>(undefined)
+  const prevMessageCountRef = useRef<number>(0)
+  const initialScrollDoneRef = useRef<boolean>(false)
 
   const messagesElements = messages.map(message => {
     const size = getMessageSize(message)
@@ -30,21 +31,27 @@ export const MessagesList = ({ messages = [], isLoading = false, onScroll }: Mes
 
   useEffect(() => {
     const lastMessageId = messagesElements[messagesElements.length - 1]?.id
+    const currentCount = messagesElements.length
 
-    if (!scrollToId && lastMessageId) {
+    if (!initialScrollDoneRef.current && lastMessageId) {
+      initialScrollDoneRef.current = true
+      prevMessageCountRef.current = currentCount
       setScrollToId(lastMessageId)
-      prevLastMessageIdRef.current = lastMessageId
       return
     }
 
-    if (lastMessageId && lastMessageId !== prevLastMessageIdRef.current) {
-      prevLastMessageIdRef.current = lastMessageId
-      setScrollToId(lastMessageId)
+    if (lastMessageId && currentCount > prevMessageCountRef.current && initialScrollDoneRef.current) {
+      prevMessageCountRef.current = currentCount
+      setScrollToId(undefined)
+      requestAnimationFrame(() => {
+        setScrollToId(lastMessageId)
+      })
     }
 
     if (isLoading && messages.length === 0) {
       setScrollToId('')
-      prevLastMessageIdRef.current = undefined
+      prevMessageCountRef.current = 0
+      initialScrollDoneRef.current = false
     }
   }, [messages, isLoading])
 
