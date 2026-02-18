@@ -1,5 +1,5 @@
-import { useState, useCallback, useContext, useRef, useEffect } from 'react'
-import { Button, Flex, Text, Loader, Tooltip, Dialog, DialogContentContainer, Dropdown } from '@vibe/core'
+import { useState, useCallback, useContext, useEffect } from 'react'
+import { Button, Flex, Text, Loader, Tooltip } from '@vibe/core'
 import { Download } from '@vibe/icons'
 import { MondayApi } from '@/lib/monday/api'
 import { useContext as useMondayContext } from '@/hooks/useContext'
@@ -14,16 +14,15 @@ import type { BoardColumn } from '@/types/monday'
 
 const monday = new MondayApi()
 
-type ColumnOption = { value: string; label: string }
+type ColumnOption = { id: string; title: string }
 
 export const ChatExportButton = () => {
   const [isExporting, setIsExporting] = useState(false)
   const [exportResult, setExportResult] = useState<'success' | 'error' | null>(null)
   const [textColumns, setTextColumns] = useState<ColumnOption[]>([])
-  const [selectedColumn, setSelectedColumn] = useState<ColumnOption | null>(null)
+  const [selectedColumnId, setSelectedColumnId] = useState<string>('')
   const [loadingColumns, setLoadingColumns] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const buttonRef = useRef<HTMLDivElement>(null)
+  const [showPanel, setShowPanel] = useState(false)
 
   const chatId = useChatId()
   const workspaceId = useWorkspaceId()
@@ -32,7 +31,7 @@ export const ChatExportButton = () => {
   const { data: mondayContext } = useMondayContext()
 
   useEffect(() => {
-    if (!isOpen || !mondayContext?.boardId) return
+    if (!showPanel || !mondayContext?.boardId) return
 
     const loadColumns = async () => {
       setLoadingColumns(true)
@@ -42,10 +41,10 @@ export const ChatExportButton = () => {
         if (boards?.[0]?.columns) {
           const txtCols = boards[0].columns
             .filter((c: BoardColumn) => c.type === 'text')
-            .map((c: BoardColumn) => ({ value: c.id, label: c.title }))
+            .map((c: BoardColumn) => ({ id: c.id, title: c.title }))
           setTextColumns(txtCols)
           if (txtCols.length > 0) {
-            setSelectedColumn(txtCols[0])
+            setSelectedColumnId(txtCols[0].id)
           }
         }
       } catch (err) {
@@ -56,7 +55,7 @@ export const ChatExportButton = () => {
     }
 
     loadColumns()
-  }, [isOpen, mondayContext?.boardId])
+  }, [showPanel, mondayContext?.boardId])
 
   const fetchAllMessages = useCallback(async (): Promise<Message[]> => {
     if (!workspaceId || !session || !chatId) return []
@@ -96,12 +95,12 @@ export const ChatExportButton = () => {
         monday.mutation.createUpdate(mondayContext.itemId, formattedText)
       ]
 
-      if (selectedColumn) {
+      if (selectedColumnId) {
         promises.push(
           monday.mutation.changeColumnValue(
             String(mondayContext.boardId),
             String(mondayContext.itemId),
-            selectedColumn.value,
+            selectedColumnId,
             JSON.stringify(formattedText)
           )
         )
@@ -112,7 +111,7 @@ export const ChatExportButton = () => {
       setExportResult('success')
       setTimeout(() => {
         setExportResult(null)
-        setIsOpen(false)
+        setShowPanel(false)
       }, 3000)
     } catch (error) {
       console.error('Export failed:', error)
@@ -123,86 +122,139 @@ export const ChatExportButton = () => {
     } finally {
       setIsExporting(false)
     }
-  }, [mondayContext, fetchAllMessages, contact, chatId, selectedColumn])
+  }, [mondayContext, fetchAllMessages, contact, chatId, selectedColumnId])
 
   if (!chatId) return null
 
-  const dialogContent = (
-    <DialogContentContainer style={{ padding: 16, width: 300 }}>
-      <Flex direction="column" gap={12}>
-        {isExporting ? (
-          <Flex direction="column" align="center" gap={8} className="py-2">
-            <Loader size={24} />
-            <Text type="text2" color="secondary">Exportando...</Text>
-          </Flex>
-        ) : exportResult === 'success' ? (
-          <Text type="text2" style={{ color: '#258750' }}>
-            Exportado correctamente.
-          </Text>
-        ) : exportResult === 'error' ? (
-          <Text type="text2" style={{ color: '#d83a52' }}>
-            Error al exportar. Intenta de nuevo.
-          </Text>
-        ) : (
-          <>
-            <Text type="text2" color="secondary">
-              Se publicará como actualización y en la columna de texto seleccionada.
-            </Text>
-            {loadingColumns ? (
-              <Flex align="center" gap={8}>
-                <Loader size={16} />
-                <Text type="text2" color="secondary">Cargando columnas...</Text>
-              </Flex>
-            ) : textColumns.length > 0 ? (
-              <Dropdown
-                size="small"
-                placeholder="Columna de texto"
-                options={textColumns}
-                value={selectedColumn}
-                onChange={(option: ColumnOption | null) => setSelectedColumn(option)}
-                menuPosition="fixed"
-              />
-            ) : (
-              <Text type="text2" color="secondary" style={{ fontStyle: 'italic' }}>
-                No hay columnas de tipo Texto en el tablero.
-              </Text>
-            )}
-            <Flex gap={8} justify="end">
-              <Button
-                size="small"
-                onClick={handleExport}
-              >
-                Exportar
-              </Button>
-            </Flex>
-          </>
-        )}
-      </Flex>
-    </DialogContentContainer>
-  )
-
   return (
-    <div ref={buttonRef}>
-      <Dialog
-        position="bottom"
-        showTrigger={['click']}
-        hideTrigger={['clickoutside']}
-        content={dialogContent}
-        onDialogDidShow={() => setIsOpen(true)}
-        onDialogDidHide={() => {
-          setIsOpen(false)
-          setExportResult(null)
-        }}
-      >
-        <Tooltip content="Exportar chat">
-          <Button
-            kind="tertiary"
-            size="small"
+    <>
+      <Tooltip content="Exportar chat">
+        <Button
+          kind="tertiary"
+          size="small"
+          onClick={() => setShowPanel(true)}
+        >
+          <Download />
+        </Button>
+      </Tooltip>
+
+      {showPanel && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isExporting) {
+              setShowPanel(false)
+              setExportResult(null)
+            }
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 8,
+              padding: 20,
+              width: 'calc(100% - 32px)',
+              maxWidth: 340,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            }}
           >
-            <Download />
-          </Button>
-        </Tooltip>
-      </Dialog>
-    </div>
+            <Flex direction="column" gap={16}>
+              <Text type="text1" style={{ fontWeight: 600 }}>
+                Exportar conversación
+              </Text>
+
+              {isExporting ? (
+                <Flex direction="column" align="center" gap={10} style={{ padding: '12px 0' }}>
+                  <Loader size={28} />
+                  <Text type="text2" color="secondary">Exportando conversación...</Text>
+                </Flex>
+              ) : exportResult === 'success' ? (
+                <Text type="text2" style={{ color: '#258750' }}>
+                  Exportado correctamente. Revisa las actualizaciones del elemento.
+                </Text>
+              ) : exportResult === 'error' ? (
+                <Text type="text2" style={{ color: '#d83a52' }}>
+                  Error al exportar. Intenta de nuevo.
+                </Text>
+              ) : (
+                <>
+                  <Text type="text2" color="secondary">
+                    Se publicará como actualización y se guardará en la columna de texto seleccionada.
+                  </Text>
+
+                  {loadingColumns ? (
+                    <Flex align="center" gap={8}>
+                      <Loader size={16} />
+                      <Text type="text2" color="secondary">Cargando columnas...</Text>
+                    </Flex>
+                  ) : textColumns.length > 0 ? (
+                    <div>
+                      <Text type="text2" color="secondary" style={{ marginBottom: 6, display: 'block' }}>
+                        Columna de texto:
+                      </Text>
+                      <select
+                        value={selectedColumnId}
+                        onChange={(e) => setSelectedColumnId(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: 4,
+                          border: '1px solid #c5c7d0',
+                          fontSize: 14,
+                          color: '#323338',
+                          backgroundColor: '#fff',
+                          outline: 'none',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {textColumns.map((col) => (
+                          <option key={col.id} value={col.id}>
+                            {col.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <Text type="text2" color="secondary" style={{ fontStyle: 'italic' }}>
+                      No hay columnas de tipo Texto en el tablero. Solo se publicará como actualización.
+                    </Text>
+                  )}
+
+                  <Flex gap={8} justify="end">
+                    <Button
+                      kind="tertiary"
+                      size="small"
+                      onClick={() => {
+                        setShowPanel(false)
+                        setExportResult(null)
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={handleExport}
+                    >
+                      Exportar
+                    </Button>
+                  </Flex>
+                </>
+              )}
+            </Flex>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
