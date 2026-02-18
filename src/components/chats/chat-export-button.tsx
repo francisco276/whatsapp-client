@@ -18,9 +18,15 @@ const monday = new MondayApi()
 
 const TEXT_COLUMN_TYPES = ['long_text', 'text']
 
+type ColumnOption = {
+  value: string
+  label: string
+  columnType: string
+}
+
 export const ChatExportButton = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedColumn, setSelectedColumn] = useState<{ value: string; label: string } | null>(null)
+  const [selectedColumn, setSelectedColumn] = useState<ColumnOption | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [exportResult, setExportResult] = useState<'success' | 'error' | null>(null)
 
@@ -39,7 +45,11 @@ export const ChatExportButton = () => {
       if (!board) return []
       return board.columns
         .filter((col: BoardColumn) => TEXT_COLUMN_TYPES.includes(col.type))
-        .map((col: BoardColumn) => ({ value: col.id, label: col.title }))
+        .map((col: BoardColumn) => ({
+          value: col.id,
+          label: `${col.title} (${col.type === 'long_text' ? 'Texto largo' : 'Texto'})`,
+          columnType: col.type
+        }))
     },
     enabled: !!mondayContext?.boardId && isOpen
   })
@@ -78,7 +88,12 @@ export const ChatExportButton = () => {
       const contactName = contact?.displayName || chatId || 'Contacto'
       const formattedText = formatChatForExport(messages, contactName)
 
-      const value = JSON.stringify({ text: formattedText })
+      let value: string
+      if (selectedColumn.columnType === 'long_text') {
+        value = JSON.stringify({ text: formattedText })
+      } else {
+        value = JSON.stringify(formattedText)
+      }
 
       await monday.mutation.changeColumnValue(
         mondayContext.boardId,
@@ -146,6 +161,7 @@ export const ChatExportButton = () => {
                 value={selectedColumn}
                 size="small"
                 clearable={false}
+                searchable={false}
               />
             ) : (
               <Text type="text2" color="secondary">
