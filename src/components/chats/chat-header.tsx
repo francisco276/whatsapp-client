@@ -17,7 +17,7 @@ export const ChatHeader = () => {
       </Box>
       <Flex gap={10} className='p-4 pt-2' align="center">
         {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
-        <h3 className="text-lg font-bold" style={{ color: 'var(--primary-text-color)' }}>{contact?.displayName}</h3>
+        <Text type="text1" weight="bold" className="text-lg!">{contact?.displayName}</Text>
       </Flex>
     </div>
   )
