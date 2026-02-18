@@ -16,6 +16,7 @@ type MessagesListProps = {
 export const MessagesList = ({ messages = [], isLoading = false, onScroll }: MessagesListProps) => {
   const listRef = useRef<HTMLElement | null>(null)
   const [scrollToId, setScrollToId] = useState<string | undefined>(undefined)
+  const prevLastMessageIdRef = useRef<string | undefined>(undefined)
 
   const messagesElements = messages.map(message => {
     const size = getMessageSize(message)
@@ -27,13 +28,24 @@ export const MessagesList = ({ messages = [], isLoading = false, onScroll }: Mes
     }
   })
 
-  // On first load, scroll to bottom
   useEffect(() => {
-    if (!scrollToId) {
-      const lastMessageId = messagesElements[messagesElements.length - 1]?.id
-      if (lastMessageId) setScrollToId(lastMessageId)
+    const lastMessageId = messagesElements[messagesElements.length - 1]?.id
+
+    if (!scrollToId && lastMessageId) {
+      setScrollToId(lastMessageId)
+      prevLastMessageIdRef.current = lastMessageId
+      return
     }
-    if (isLoading && messages.length === 0) setScrollToId('')
+
+    if (lastMessageId && lastMessageId !== prevLastMessageIdRef.current) {
+      prevLastMessageIdRef.current = lastMessageId
+      setScrollToId(lastMessageId)
+    }
+
+    if (isLoading && messages.length === 0) {
+      setScrollToId('')
+      prevLastMessageIdRef.current = undefined
+    }
   }, [messages, isLoading])
 
   const itemRenderer = useCallback((item: VirtualizedListItem, index: number, style: CSSProperties) => {
