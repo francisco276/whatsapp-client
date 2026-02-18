@@ -11,13 +11,13 @@ export const ChatHeader = () => {
   const { contact } = useGetContact({ contactId: chatId, enabled: !!chatId  })
 
   return (
-    <div className='border-b! border-x-0 border-slate-200!' style={{ borderBottom: '1px solid #e5e7eb' }}>
+    <div className='border-b! border-x-0' style={{ borderBottom: '1px solid var(--ui-border-color)' }}>
       <Box className="px-4 pt-2 text-right">
         <Text type="text3" color="secondary">Total mensajes enviados: {sentCount}</Text>
       </Box>
       <Flex gap={10} className='p-4 pt-2' align="center">
         {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
-        <Heading type="h3" weight="bold" color="primary">{contact?.displayName}</Heading>
+        <Heading type="h3" weight="bold">{contact?.displayName}</Heading>
       </Flex>
     </div>
   )

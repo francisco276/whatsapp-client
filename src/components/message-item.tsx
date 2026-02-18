@@ -52,11 +52,11 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
       <div
         className={`max-w-xs md:max-w-md rounded-2xl text-wrap text-ellipsis whitespace-pre-line shadow-sm transition-all hover:shadow-md
           ${(isMyMessage && !isDateSeprator) && 'bg-gradient-to-br from-[#0DACC8] to-[#0B8AA0] text-white rounded-br-none px-4 py-2.5'}
-          ${(!isMyMessage && !isDateSeprator) && 'bg-white text-slate-900 border border-slate-100 rounded-bl-none px-4 py-2.5'}
+          ${(!isMyMessage && !isDateSeprator) && 'bg-[var(--primary-background-color)] text-[var(--primary-text-color)] border border-[var(--ui-border-color)] rounded-bl-none px-4 py-2.5'}
         `}
       >
         {!isMyMessage && isAGroup && (
-          <div className="text-sm text-[#FDB602]">{contact?.displayName}</div>
+          <div className="text-sm font-semibold" style={{ color: 'var(--primary-color)' }}>{contact?.displayName}</div>
         )}
 
         {isForwarded && <p className="text-gray-500 flex gap-2 items-center"><Icon iconType="svg" icon={Forward} iconLabel="forwarded" iconSize={16} />Forwarded</p>}
@@ -68,7 +68,7 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
         {
           isDateSeprator && (
             <div className="flex justify-center">
-              <div className="bg-gray-100 text-gray-600 text-sm px-4 py-2 rounded-full font-medium">
+              <div className="bg-[var(--secondary-background-color)] text-[var(--secondary-text-color)] text-sm px-4 py-2 rounded-full font-medium">
                 {messageString}
               </div>
             </div>
