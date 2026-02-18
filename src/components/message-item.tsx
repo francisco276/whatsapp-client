@@ -36,7 +36,7 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
 
   const { contact } = useGetContact({ contactId: participant, enabled: isAGroup })
 
-  const { data: mediaUrl, isLoading: isLoadingMedia } = useQuery({
+  const { data: mediaResult, isLoading: isLoadingMedia } = useQuery({
     queryKey: ['getMedia', message.id],
     queryFn: () => downloadMedia({ workspaceId, sessionId, message: originalMessage }),
     enabled: (isImage || isVideo || isSticker || isAudio),
@@ -44,7 +44,7 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
     staleTime: 1440 * 60 * 1000
   })
 
-  const { data: docUrl, isLoading: isLoadingDoc, refetch: downloadDoc } = useQuery({
+  const { data: docResult, isLoading: isLoadingDoc, refetch: downloadDoc } = useQuery({
     queryKey: ['getDoc', message.id],
     queryFn: () => downloadMedia({ workspaceId, sessionId, message: originalMessage }),
     enabled: false,
@@ -56,7 +56,7 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
     const result = await downloadDoc()
     if (result.data) {
       const link = document.createElement('a')
-      link.href = result.data
+      link.href = result.data.url
       link.download = documentTitle || 'document'
       link.target = '_blank'
       link.rel = 'noopener noreferrer'
@@ -85,10 +85,10 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
         {isForwarded && <p className="text-gray-500 flex gap-2 items-center"><Icon iconType="svg" icon={Forward} iconLabel="forwarded" iconSize={16} />Forwarded</p>}
 
         {isLoadingMedia && !isAudio && <Loader size="small" />}
-        {((isImage || isSticker) && mediaUrl) && <MessageImageComponent url={mediaUrl} />}
-        {(isDocument && documentTitle) && <MessageDocumentComponent name={documentTitle} url={docUrl} isLoading={isLoadingDoc} onDownload={handleDocDownload} />}
-        {(isAudio) && <MessageAudioComponent url={mediaUrl} duration={audioDuration} isLoading={isLoadingMedia} />}
-        {(isVideo && mediaUrl) && <MessageVideoComponent url={mediaUrl} isGift={isGift!} />}
+        {((isImage || isSticker) && mediaResult) && <MessageImageComponent url={mediaResult.url} mimeType={mediaResult.mimeType} />}
+        {(isDocument && documentTitle) && <MessageDocumentComponent name={documentTitle} url={docResult?.url} isLoading={isLoadingDoc} onDownload={handleDocDownload} />}
+        {(isAudio) && <MessageAudioComponent url={mediaResult?.url} duration={audioDuration} isLoading={isLoadingMedia} />}
+        {(isVideo && mediaResult) && <MessageVideoComponent url={mediaResult.url} isGift={isGift!} />}
         {
           isDateSeprator && (
             <div className="flex justify-center">

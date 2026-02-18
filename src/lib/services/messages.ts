@@ -52,7 +52,12 @@ export const sendMessage = async ({ workspaceId, sessionId, chatId, message, fil
   }
 }
 
-export async function downloadMedia({ workspaceId, sessionId, message }: { workspaceId: string, sessionId: string, message?: Message }) {
+export type MediaResult = {
+  url: string
+  mimeType: string
+}
+
+export async function downloadMedia({ workspaceId, sessionId, message }: { workspaceId: string, sessionId: string, message?: Message }): Promise<MediaResult> {
   if (message === undefined) {
     throw new Error('Message is required')
   }
@@ -72,7 +77,7 @@ export async function downloadMedia({ workspaceId, sessionId, message }: { works
 
     const url = URL.createObjectURL(blob)
 
-    return url
+    return { url, mimeType }
   } catch {
     throw new Error('Error downloading media')
   }
