@@ -8,6 +8,7 @@ import { Chat } from '@/lib/services/chats'
 import { useNotifications } from '@/hooks/useNotifications'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useUserId } from '@/hooks/useUserId'
+import { useServiceWorker } from '@/hooks/useServiceWorker'
 import { MondayApi } from '@/lib/monday/api'
 
 export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: string, chats?: Chat[] }) => {
@@ -20,6 +21,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const { config } = usePreferences({ userId })
   const monday = useRef(new MondayApi())
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const { sendNotification: sendBrowserNotification } = useServiceWorker()
 
   useEffect(() => {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
@@ -40,6 +42,10 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
         if (soundEnabled && audioRef.current) {
           audioRef.current.currentTime = 0
           audioRef.current.play().catch(e => console.log('Audio play failed:', e))
+        }
+
+        if (soundEnabled) {
+          sendBrowserNotification({ chatId: id })
         }
         
         sendNotifications()
