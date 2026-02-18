@@ -22,6 +22,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const monday = useRef(new MondayApi())
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const { sendNotification: sendBrowserNotification } = useServiceWorker()
+  const lastUnreadRef = useRef<Map<string, number>>(new Map())
 
   useEffect(() => {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
@@ -35,7 +36,12 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     const socket = new SocketClient({ workspaceId, sessionId: session })
 
     handlerNotifyMessage(socket, ({ id, unreadCount }) => {
-      if (chat !== id && unreadCount) {
+      const previousUnread = lastUnreadRef.current.get(id) ?? 0
+      lastUnreadRef.current.set(id, unreadCount)
+
+      const isNewIncoming = unreadCount > previousUnread
+
+      if (chat !== id && isNewIncoming) {
         incrementUnreadChat(id)
         
         const soundEnabled = config?.notifications?.soundEnabled !== false
@@ -51,7 +57,10 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
         sendNotifications()
         monday.current.notice('Nuevo mensaje de WhatsApp recibido', 'info', 3000)
       }
-      if (chat !== id && (unreadCount === 0)) setInitialData(id, unreadCount)
+      if (chat !== id && (unreadCount === 0)) {
+        setInitialData(id, unreadCount)
+        lastUnreadRef.current.set(id, 0)
+      }
     })
  
     return () => {

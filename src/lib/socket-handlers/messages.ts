@@ -8,7 +8,8 @@ export const handlerNotifyMessage = (socket: SocketClient, callback: (data: { id
       const { data } = event as SocketSuccessResponse
       if (data?.data) {
         const { unreadCount, id } = data.data as NotificationEvent
-        if (id !== undefined) {
+        console.log('[Socket] chats.upsert:', { id, unreadCount })
+        if (id !== undefined && unreadCount > 0) {
           callback({ id, unreadCount })
         }
       }
@@ -22,7 +23,8 @@ export const handlerNotifyMessage = (socket: SocketClient, callback: (data: { id
       if (data?.data) {
         const chatData = data.data as { chats?: NotificationEvent }
         const chat = chatData?.chats
-        if (chat?.id !== undefined) {
+        console.log('[Socket] chats.update:', { id: chat?.id, unreadCount: chat?.unreadCount })
+        if (chat?.id !== undefined && chat.unreadCount > 0) {
           callback({ id: chat.id, unreadCount: chat.unreadCount })
         }
       }
