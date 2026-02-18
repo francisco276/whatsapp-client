@@ -1,4 +1,4 @@
-import { Flex, Icon, Avatar, Box, Text, Heading } from '@vibe/core'
+import { Flex, Icon, Avatar, Box, Text } from '@vibe/core'
 import { PersonRound } from '@vibe/icons'
 import { useChatId } from '@/hooks/useChat'
 import { useGetContact } from '@/hooks/useGetContact'
@@ -17,7 +17,7 @@ export const ChatHeader = () => {
       </Box>
       <Flex gap={10} className='p-4 pt-2' align="center">
         {contact?.image ? <Avatar size="large" type="img" src={contact?.image} /> : <Icon icon={PersonRound} iconSize={48} />}
-        <Heading type="h3" weight="bold">{contact?.displayName}</Heading>
+        <h3 className="text-lg font-bold" style={{ color: 'var(--primary-text-color)' }}>{contact?.displayName}</h3>
       </Flex>
     </div>
   )
