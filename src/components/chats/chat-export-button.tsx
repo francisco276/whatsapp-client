@@ -16,7 +16,7 @@ import type { BoardColumn } from '@/types/monday'
 
 const monday = new MondayApi()
 
-const TEXT_COLUMN_TYPES = ['long_text', 'text']
+const TEXT_COLUMN_TYPES = ['long_text']
 
 type ColumnOption = {
   value: string
@@ -47,7 +47,7 @@ export const ChatExportButton = () => {
         .filter((col: BoardColumn) => TEXT_COLUMN_TYPES.includes(col.type))
         .map((col: BoardColumn) => ({
           value: col.id,
-          label: `${col.title} (${col.type === 'long_text' ? 'Texto largo' : 'Texto'})`,
+          label: col.title,
           columnType: col.type
         }))
     },
@@ -88,12 +88,7 @@ export const ChatExportButton = () => {
       const contactName = contact?.displayName || chatId || 'Contacto'
       const formattedText = formatChatForExport(messages, contactName)
 
-      let value: string
-      if (selectedColumn.columnType === 'long_text') {
-        value = JSON.stringify({ text: formattedText })
-      } else {
-        value = JSON.stringify(formattedText)
-      }
+      const value = JSON.stringify({ text: formattedText })
 
       await monday.mutation.changeColumnValue(
         mondayContext.boardId,
@@ -165,7 +160,7 @@ export const ChatExportButton = () => {
               />
             ) : (
               <Text type="text2" color="secondary">
-                No se encontraron columnas de texto en el tablero. Agrega una columna de tipo "Texto largo" o "Texto".
+                No se encontraron columnas de "Texto largo" en el tablero. Agrega una columna de ese tipo para poder exportar el chat.
               </Text>
             )}
 
