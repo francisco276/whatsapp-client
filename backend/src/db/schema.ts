@@ -273,4 +273,40 @@ export const messageCountersRelations = relations(messageCountersTable, ({ one }
   })
 }))
 
+export const mondayCredentialsTable = pgTable('monday_credentials', {
+  id: serial('id').primaryKey(),
+  workspaceId: text('workspaceId').notNull()
+    .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+  accessToken: text('accessToken').notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull()
+}, (table) => [
+  unique('unique_credential_per_workspace').on(table.workspaceId)
+])
+
+export const mondayCredentialsRelations = relations(mondayCredentialsTable, ({ one }) => ({
+  workspace: one(workspacesTable, {
+    fields: [mondayCredentialsTable.workspaceId],
+    references: [workspacesTable.id]
+  })
+}))
+
+export const mondayUserTargetsTable = pgTable('monday_user_targets', {
+  id: serial('id').primaryKey(),
+  workspaceId: text('workspaceId').notNull()
+    .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+  userId: text('userId').notNull(),
+  targetId: text('targetId').notNull(),
+  targetType: varchar('targetType', { length: 32 }).notNull().default('Project'),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull()
+}, (table) => [
+  unique('unique_target_per_user_workspace').on(table.workspaceId, table.userId)
+])
+
+export const mondayUserTargetsRelations = relations(mondayUserTargetsTable, ({ one }) => ({
+  workspace: one(workspacesTable, {
+    fields: [mondayUserTargetsTable.workspaceId],
+    references: [workspacesTable.id]
+  })
+}))
+
 export * from './templates'

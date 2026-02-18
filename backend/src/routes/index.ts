@@ -10,6 +10,7 @@ import PreferencesRouter from './preferences'
 import SessionAccess from './session-access'
 import TemplatesRoutes from './templates'
 import MessageCountersRoutes from './message-counters'
+import MondayRouter from './monday'
 import Auth from '@/plugins/auth'
 import { sessionValidationPlugin } from '@/plugins/session-validation'
 
@@ -22,6 +23,7 @@ export default function defineRoutes (fastify: FastifyInstance, _: any, done: Fu
   fastify.register(SessionAccess, { prefix: '/access' })
   fastify.register(TemplatesRoutes, { prefix: '/templates' })
   fastify.register(MessageCountersRoutes, { prefix: '/counters' })
+  fastify.register(MondayRouter, { prefix: '/monday' })
 
   fastify.register((instance, _, scopeDone) => {
     instance.addHook('preHandler', sessionValidationPlugin)

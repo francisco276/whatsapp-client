@@ -4,6 +4,12 @@
 A React-based frontend application for integrating Monday.com with WhatsApp messaging. This project is built with Vite, React 18, TypeScript, and Tailwind CSS, using the Monday.com Vibe design system.
 
 ## Recent Changes
+- 2026-02-18: Added server-side Monday.com notifications - backend sends notifications via Monday.com API when WhatsApp messages arrive, even when frontend views are closed
+  - New tables: monday_credentials (API token per workspace), monday_user_targets (boardId per user)
+  - New backend service: monday-notifications.ts with dispatchMondayNotifications()
+  - New endpoint: POST /api/v1/monday/register (auth required, admin-only for token)
+  - Frontend auto-registers boardId on app load via useMondayRegistration hook
+  - Settings UI: MondayToken component for admin to save API token
 - 2026-01-07: Configured for Replit environment - set Vite to run on port 5000 with all hosts allowed
 
 ## Tech Stack

@@ -8,6 +8,7 @@ import type { BaileysEventHandler } from '@/types/baileys'
 import type { MakeTransformedDrizzle } from '@/types/drizzle'
 import { transformDrizzle } from '@/utils/drizzle'
 import { emitEvent } from '@/utils/event-emitter'
+import { dispatchMondayNotifications } from '@/services/monday-notifications'
 
 const getKeyAuthor = (key: WAMessageKey | undefined | null): string => {
   if (key === undefined && key === null) return ''
@@ -133,6 +134,13 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
                   unreadCount: 1
                 }
               )
+
+              dispatchMondayNotifications({
+                workspaceId,
+                sessionId,
+                remoteJid: jid,
+                fromMe: message.key.fromMe === true
+              }).catch(e => console.error('[MondayNotifications] Background dispatch error:', e))
             }
           } catch (e) {
             if (e instanceof Error) {

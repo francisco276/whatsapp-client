@@ -2,6 +2,7 @@ import { Chat } from "@/components/chat"
 import { ChatsSidebar } from "@/components/chats-sidebar"
 import { ChatProvider } from "@/components/providers/chat/chat-provider"
 import { useRegisterNewMessage } from '@/hooks/useRegisterNewMessage'
+import { useMondayRegistration } from '@/hooks/useMondayRegistration'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { getChats } from '@/lib/services/chats'
 import { useQuery } from '@tanstack/react-query'
@@ -37,6 +38,7 @@ export default function Chats({ enableSidebar = true, chatId, emptyComponent: Em
   })
 
   useRegisterNewMessage({ workspaceId, chats: data?.chats ?? [] })
+  useMondayRegistration()
 
   if (!session) {
     return (
