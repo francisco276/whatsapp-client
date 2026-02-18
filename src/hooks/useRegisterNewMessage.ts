@@ -23,6 +23,16 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const { sendNotification: sendBrowserNotification } = useServiceWorker()
   const lastUnreadRef = useRef<Map<string, number>>(new Map())
+  const activeChatRef = useRef<string | undefined>(chat)
+  const configRef = useRef(config)
+
+  useEffect(() => {
+    activeChatRef.current = chat
+  }, [chat])
+
+  useEffect(() => {
+    configRef.current = config
+  }, [config])
 
   useEffect(() => {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
@@ -40,11 +50,14 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
       lastUnreadRef.current.set(id, unreadCount)
 
       const isNewIncoming = unreadCount > previousUnread
+      const currentChat = activeChatRef.current
 
-      if (chat !== id && isNewIncoming) {
+      console.log('[Notify] chatId:', id, 'activeChat:', currentChat, 'isNewIncoming:', isNewIncoming, 'unreadCount:', unreadCount)
+
+      if (currentChat !== id && isNewIncoming) {
         incrementUnreadChat(id)
         
-        const soundEnabled = config?.notifications?.soundEnabled !== false
+        const soundEnabled = configRef.current?.notifications?.soundEnabled !== false
         if (soundEnabled && audioRef.current) {
           audioRef.current.currentTime = 0
           audioRef.current.play().catch(e => console.log('Audio play failed:', e))
@@ -57,7 +70,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
         sendNotifications()
         monday.current.notice('Nuevo mensaje de WhatsApp recibido', 'info', 3000)
       }
-      if (chat !== id && (unreadCount === 0)) {
+      if (currentChat !== id && (unreadCount === 0)) {
         setInitialData(id, unreadCount)
         lastUnreadRef.current.set(id, 0)
       }
@@ -66,7 +79,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     return () => {
       socket?.disconnect()
     }
-  }, [workspaceId, session, chat, config])
+  }, [workspaceId, session])
 
   chats?.forEach((chat) => {
     if (chat.unreadCount) {
