@@ -22,6 +22,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const activeChatRef = useRef<string | undefined>(chat)
   const configRef = useRef(config)
+  const chatsRef = useRef<Chat[]>(chats ?? [])
 
   useEffect(() => {
     activeChatRef.current = chat
@@ -30,6 +31,12 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   useEffect(() => {
     configRef.current = config
   }, [config])
+
+  useEffect(() => {
+    if (chats && chats.length > 0) {
+      chatsRef.current = chats
+    }
+  }, [chats])
 
   useEffect(() => {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3')
@@ -46,7 +53,9 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
       const currentChat = activeChatRef.current
       const isViewingThisChat = currentChat === id
 
-      console.log('[Notify] chatId:', id, 'activeChat:', currentChat, 'isViewing:', isViewingThisChat, 'unreadCount:', unreadCount)
+      const contactName = chatsRef.current.find(c => c.id === id)?.name || id.split('@')[0]
+
+      console.log('[Notify] chatId:', id, 'contact:', contactName, 'activeChat:', currentChat, 'isViewing:', isViewingThisChat, 'unreadCount:', unreadCount)
 
       if (unreadCount > 0 && !isViewingThisChat) {
         incrementUnreadChat(id)
@@ -57,8 +66,8 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
           audioRef.current.play().catch(e => console.log('Audio play failed:', e))
         }
 
-        sendNotifications()
-        monday.current.notice('Nuevo mensaje de WhatsApp recibido', 'info', 3000)
+        sendNotifications(contactName)
+        monday.current.notice(`Nuevo mensaje de WhatsApp de: ${contactName}`, 'info', 5000)
       }
 
       if (unreadCount === 0) {

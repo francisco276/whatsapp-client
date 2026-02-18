@@ -15,12 +15,16 @@ export const useNotifications = () => {
     queryFn: () => getAuthorizationUsers({ workspaceId })
   })
 
-  async function sendNotifications() {
+  async function sendNotifications(contactName?: string) {
     if (!itemId && !boardId) return
+
+    const message = contactName
+      ? `Nuevo mensaje de WhatsApp de: ${contactName}`
+      : 'Un mensaje nuevo se ha enviado'
 
     const notifications = authorizedUsersResponse?.authorizations
       .filter(user =>  user.userId !== userId)
-      .map(async (user) => await monday.mutation.createNotification(user.userId, (itemId || boardId)!, "Un mensaje nuevo se ha enviado"))
+      .map(async (user) => await monday.mutation.createNotification(user.userId, (itemId || boardId)!, message))
 
     if (Array.isArray(notifications) && notifications.length > 0) {
       await Promise.all(notifications)
