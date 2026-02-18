@@ -8,7 +8,6 @@ import { Chat } from '@/lib/services/chats'
 import { useNotifications } from '@/hooks/useNotifications'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useUserId } from '@/hooks/useUserId'
-import { useServiceWorker } from '@/hooks/useServiceWorker'
 import { MondayApi } from '@/lib/monday/api'
 
 export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: string, chats?: Chat[] }) => {
@@ -21,8 +20,6 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const { config } = usePreferences({ userId })
   const monday = useRef(new MondayApi())
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const { sendNotification: sendBrowserNotification } = useServiceWorker()
-  const lastUnreadRef = useRef<Map<string, number>>(new Map())
   const activeChatRef = useRef<string | undefined>(chat)
   const configRef = useRef(config)
 
@@ -46,33 +43,26 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
     const socket = new SocketClient({ workspaceId, sessionId: session })
 
     handlerNotifyMessage(socket, ({ id, unreadCount }) => {
-      const previousUnread = lastUnreadRef.current.get(id) ?? 0
-      lastUnreadRef.current.set(id, unreadCount)
-
-      const isNewIncoming = unreadCount > previousUnread
       const currentChat = activeChatRef.current
+      const isViewingThisChat = currentChat === id
 
-      console.log('[Notify] chatId:', id, 'activeChat:', currentChat, 'isNewIncoming:', isNewIncoming, 'unreadCount:', unreadCount)
+      console.log('[Notify] chatId:', id, 'activeChat:', currentChat, 'isViewing:', isViewingThisChat, 'unreadCount:', unreadCount)
 
-      if (currentChat !== id && isNewIncoming) {
+      if (unreadCount > 0 && !isViewingThisChat) {
         incrementUnreadChat(id)
-        
+
         const soundEnabled = configRef.current?.notifications?.soundEnabled !== false
         if (soundEnabled && audioRef.current) {
           audioRef.current.currentTime = 0
           audioRef.current.play().catch(e => console.log('Audio play failed:', e))
         }
 
-        if (soundEnabled) {
-          sendBrowserNotification({ chatId: id })
-        }
-        
         sendNotifications()
         monday.current.notice('Nuevo mensaje de WhatsApp recibido', 'info', 3000)
       }
-      if (currentChat !== id && (unreadCount === 0)) {
-        setInitialData(id, unreadCount)
-        lastUnreadRef.current.set(id, 0)
+
+      if (unreadCount === 0) {
+        setInitialData(id, 0)
       }
     })
  
