@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useContext, useEffect } from 'react'
 import { EmptyState } from '../empty-state'
 import { SessionContext } from '../providers/session/session-context'
+import { AddSession } from '../add-session'
 import { Box } from "@vibe/core"
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
@@ -43,10 +44,12 @@ export default function Chats({ enableSidebar = true, chatId, emptyComponent: Em
         {EmptyComponent === undefined ?
           <EmptyState
             title='Bienvenido'
-            description='Selecciona una sesion para ver los contactos'
+            description='Selecciona una sesión para ver los contactos o inicia una nueva sesión'
             icon='Update'
             iconClassName="text-[#0DACC8]"
-          /> : EmptyComponent
+          >
+            <AddSession isToggle={true} />
+          </EmptyState> : EmptyComponent
         }
       </Box>
     )
