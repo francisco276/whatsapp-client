@@ -35,6 +35,8 @@ export const Chat = () => {
     enabled: !!(session && chat),
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.offset,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
   })
 
   useUpdateChat({ workspaceId: workspaceId!, chatId: chat!, sessionId: session! })
