@@ -144,13 +144,13 @@ export const ChatExportButton = () => {
             position: 'fixed',
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
+            width: '100%',
+            height: '100%',
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.3)',
+            backgroundColor: 'rgba(0,0,0,0.35)',
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget && !isExporting) {
@@ -163,25 +163,26 @@ export const ChatExportButton = () => {
             style={{
               background: '#fff',
               borderRadius: 8,
-              padding: 20,
-              width: 'calc(100% - 32px)',
-              maxWidth: 340,
+              padding: '20px 24px',
+              margin: 16,
+              width: 320,
+              maxWidth: 'calc(100vw - 32px)',
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
             }}
           >
-            <Flex direction="column" gap={16}>
-              <Text type="text1" style={{ fontWeight: 600 }}>
+            <Flex direction="column" gap={14}>
+              <Text type="text1" style={{ fontWeight: 600, fontSize: 16 }}>
                 Exportar conversación
               </Text>
 
               {isExporting ? (
-                <Flex direction="column" align="center" gap={10} style={{ padding: '12px 0' }}>
-                  <Loader size={28} />
-                  <Text type="text2" color="secondary">Exportando conversación...</Text>
+                <Flex direction="column" align="center" gap={10} style={{ padding: '8px 0' }}>
+                  <Loader size={24} />
+                  <Text type="text2" color="secondary">Exportando...</Text>
                 </Flex>
               ) : exportResult === 'success' ? (
                 <Text type="text2" style={{ color: '#258750' }}>
-                  Exportado correctamente. Revisa las actualizaciones del elemento.
+                  Exportado. Revisa las actualizaciones del elemento.
                 </Text>
               ) : exportResult === 'error' ? (
                 <Text type="text2" style={{ color: '#d83a52' }}>
@@ -189,49 +190,50 @@ export const ChatExportButton = () => {
                 </Text>
               ) : (
                 <>
-                  <Text type="text2" color="secondary">
-                    Se publicará como actualización y se guardará en la columna de texto seleccionada.
-                  </Text>
-
                   {loadingColumns ? (
-                    <Flex align="center" gap={8}>
+                    <Flex align="center" gap={8} style={{ padding: '4px 0' }}>
                       <Loader size={16} />
                       <Text type="text2" color="secondary">Cargando columnas...</Text>
                     </Flex>
                   ) : textColumns.length > 0 ? (
-                    <div>
-                      <Text type="text2" color="secondary" style={{ marginBottom: 6, display: 'block' }}>
-                        Columna de texto:
+                    <>
+                      <Text type="text2" color="secondary" style={{ lineHeight: 1.4 }}>
+                        Se publicará como actualización y se guardará en la columna seleccionada.
                       </Text>
-                      <select
-                        value={selectedColumnId}
-                        onChange={(e) => setSelectedColumnId(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          borderRadius: 4,
-                          border: '1px solid #c5c7d0',
-                          fontSize: 14,
-                          color: '#323338',
-                          backgroundColor: '#fff',
-                          outline: 'none',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {textColumns.map((col) => (
-                          <option key={col.id} value={col.id}>
-                            {col.title}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      <div>
+                        <Text type="text2" color="secondary" style={{ marginBottom: 4, display: 'block', fontSize: 13 }}>
+                          Columna de texto:
+                        </Text>
+                        <select
+                          value={selectedColumnId}
+                          onChange={(e) => setSelectedColumnId(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '7px 10px',
+                            borderRadius: 4,
+                            border: '1px solid #c5c7d0',
+                            fontSize: 14,
+                            color: '#323338',
+                            backgroundColor: '#fff',
+                            outline: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {textColumns.map((col) => (
+                            <option key={col.id} value={col.id}>
+                              {col.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
                   ) : (
-                    <Text type="text2" color="secondary" style={{ fontStyle: 'italic' }}>
-                      No hay columnas de tipo Texto en el tablero. Solo se publicará como actualización.
+                    <Text type="text2" color="secondary" style={{ lineHeight: 1.4 }}>
+                      Se publicará como actualización en el elemento actual.
                     </Text>
                   )}
 
-                  <Flex gap={8} justify="end">
+                  <Flex gap={8} justify="end" style={{ marginTop: 4 }}>
                     <Button
                       kind="tertiary"
                       size="small"
