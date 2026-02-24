@@ -24,8 +24,16 @@ interface MondayNotificationParams {
   fromMe: boolean
 }
 
+function formatPhoneNumber (jid: string): string {
+  const raw = jid.split('@')[0]
+  if (raw.length >= 10) {
+    return '+' + raw
+  }
+  return raw
+}
+
 async function getContactName (sessionId: string, workspaceId: string, remoteJid: string): Promise<string> {
-  const phoneNumber = remoteJid.split('@')[0]
+  const phoneNumber = formatPhoneNumber(remoteJid)
 
   try {
     const [contact] = await db
@@ -39,7 +47,9 @@ async function getContactName (sessionId: string, workspaceId: string, remoteJid
       .limit(1)
 
     if (contact !== undefined) {
-      return contact.notify ?? contact.verifiedName ?? contact.name ?? phoneNumber
+      const name = contact.notify ?? contact.verifiedName ?? contact.name
+      if (name) return `${name} (${phoneNumber})`
+      return phoneNumber
     }
 
     const [chat] = await db
@@ -53,7 +63,9 @@ async function getContactName (sessionId: string, workspaceId: string, remoteJid
       .limit(1)
 
     if (chat !== undefined) {
-      return chat.displayName ?? chat.name ?? phoneNumber
+      const name = chat.displayName ?? chat.name
+      if (name) return `${name} (${phoneNumber})`
+      return phoneNumber
     }
   } catch (e) {
     console.error('[MondayNotifications] Error getting contact name:', e)
