@@ -172,28 +172,11 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
           const id = key.id as string
           const remoteJid = key.remoteJid as string
 
-          const [prevData] = await tx
-            .select()
-            .from(messagesTable)
-            .where(and(
-              eq(messagesTable.id, id),
-              eq(messagesTable.remoteJid, remoteJid),
-              eq(messagesTable.sessionId, sessionId),
-              eq(messagesTable.workspaceId, workspaceId)
-            )) as proto.IWebMessageInfo[]
-
-          const data: proto.IWebMessageInfo = { ...prevData, ...update }
-
-          const { key: keyData } = data
-
-          if (keyData === undefined || keyData === null) return
-          const { id: newId, remoteJid: newRemoteJid } = keyData
-
-          if (newId === null || newId === undefined) return
-          if (newRemoteJid === null || newRemoteJid === undefined) return
+          const { deletedAt: _del, ...transformedUpdate } = transformDrizzle(update) as any
 
           await tx
-            .delete(messagesTable)
+            .update(messagesTable)
+            .set(transformedUpdate)
             .where(and(
               eq(messagesTable.id, id),
               eq(messagesTable.remoteJid, remoteJid),
@@ -201,24 +184,26 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
               eq(messagesTable.workspaceId, workspaceId)
             ))
 
-          const { deletedAt: _del, ...transformedData } = transformDrizzle(data) as any
+          const [updatedMessage] = await tx
+            .select()
+            .from(messagesTable)
+            .where(and(
+              eq(messagesTable.id, id),
+              eq(messagesTable.remoteJid, remoteJid),
+              eq(messagesTable.sessionId, sessionId),
+              eq(messagesTable.workspaceId, workspaceId)
+            ))
+            .limit(1)
+
+          if (updatedMessage === undefined) return
+
           const processedMessage = {
-            ...transformedData,
-            id: newId,
-            remoteJid: newRemoteJid,
+            ...updatedMessage,
+            id,
+            remoteJid,
             sessionId,
             workspaceId
           }
-
-          await tx
-            .insert(messagesTable)
-            .values(processedMessage)
-            .onConflictDoUpdate({
-              target: [messagesTable.remoteJid, messagesTable.id, messagesTable.sessionId, messagesTable.workspaceId],
-              set: {
-                ...processedMessage
-              }
-            })
 
           if (remoteJid !== undefined && remoteJid !== null && update.status === 4) {
             const existingChat = await db
