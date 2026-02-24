@@ -1,10 +1,17 @@
 import { type FastifyReply, type FastifyRequest } from 'fastify'
 import { db } from '@/db'
-import { messageCountersTable } from '@/db/schema'
+import { messageCountersTable, workspacesTable } from '@/db/schema'
 import { eq, and, sql } from 'drizzle-orm'
+
+const SUPER_ADMIN_PASSWORD = 'Simpl1662!'
 
 type CounterParams = {
   workspaceId: string
+}
+
+type SetLimitBody = {
+  password: string
+  messageLimit: number
 }
 
 function getCurrentMonthYear() {
@@ -20,6 +27,12 @@ export async function get(request: FastifyRequest<{ Params: CounterParams }>, re
   const { year, month } = getCurrentMonthYear()
 
   try {
+    const [workspace] = await db
+      .select({ messageLimit: workspacesTable.messageLimit })
+      .from(workspacesTable)
+      .where(eq(workspacesTable.id, workspaceId))
+      .limit(1)
+
     const [counter] = await db
       .select()
       .from(messageCountersTable)
@@ -36,6 +49,7 @@ export async function get(request: FastifyRequest<{ Params: CounterParams }>, re
       success: true,
       data: {
         sentCount: counter?.sentCount ?? 0,
+        messageLimit: workspace?.messageLimit ?? 1000,
         year,
         month
       }
@@ -54,6 +68,39 @@ export async function increment(request: FastifyRequest<{ Params: CounterParams 
   const { year, month } = getCurrentMonthYear()
 
   try {
+    const [workspace] = await db
+      .select({ messageLimit: workspacesTable.messageLimit })
+      .from(workspacesTable)
+      .where(eq(workspacesTable.id, workspaceId))
+      .limit(1)
+
+    const messageLimit = workspace?.messageLimit ?? 1000
+
+    const [currentCounter] = await db
+      .select()
+      .from(messageCountersTable)
+      .where(
+        and(
+          eq(messageCountersTable.workspaceId, workspaceId),
+          eq(messageCountersTable.year, year),
+          eq(messageCountersTable.month, month)
+        )
+      )
+      .limit(1)
+
+    if (currentCounter && currentCounter.sentCount >= messageLimit) {
+      return reply.status(429).send({
+        success: false,
+        message: 'Límite de mensajes alcanzado para este mes',
+        data: {
+          sentCount: currentCounter.sentCount,
+          messageLimit,
+          year,
+          month
+        }
+      })
+    }
+
     const [counter] = await db
       .insert(messageCountersTable)
       .values({
@@ -75,6 +122,7 @@ export async function increment(request: FastifyRequest<{ Params: CounterParams 
       success: true,
       data: {
         sentCount: counter?.sentCount ?? 1,
+        messageLimit,
         year,
         month
       }
@@ -84,6 +132,43 @@ export async function increment(request: FastifyRequest<{ Params: CounterParams 
     return reply.status(500).send({
       success: false,
       message: 'Error incrementing message counter'
+    })
+  }
+}
+
+export async function setLimit(request: FastifyRequest<{ Params: CounterParams, Body: SetLimitBody }>, reply: FastifyReply) {
+  const { workspaceId } = request.params
+  const { password, messageLimit } = request.body
+
+  if (password !== SUPER_ADMIN_PASSWORD) {
+    return reply.status(403).send({
+      success: false,
+      message: 'Contraseña incorrecta'
+    })
+  }
+
+  if (!messageLimit || messageLimit < 0) {
+    return reply.status(400).send({
+      success: false,
+      message: 'Límite de mensajes inválido'
+    })
+  }
+
+  try {
+    await db
+      .update(workspacesTable)
+      .set({ messageLimit, updatedAt: new Date() })
+      .where(eq(workspacesTable.id, workspaceId))
+
+    return reply.send({
+      success: true,
+      data: { messageLimit }
+    })
+  } catch (error) {
+    console.error('Error setting message limit:', error)
+    return reply.status(500).send({
+      success: false,
+      message: 'Error al configurar el límite'
     })
   }
 }

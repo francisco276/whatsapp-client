@@ -3,6 +3,7 @@ import { getCounter, incrementCounter } from '@/lib/services/counters'
 
 interface MessageCounterState {
   sentCount: number
+  messageLimit: number
   year: number
   month: number
   isLoading: boolean
@@ -14,6 +15,7 @@ interface MessageCounterState {
 
 export const useMessageCounterStore = create<MessageCounterState>()((set, get) => ({
   sentCount: 0,
+  messageLimit: 1000,
   year: new Date().getFullYear(),
   month: new Date().getMonth() + 1,
   isLoading: false,
@@ -32,6 +34,7 @@ export const useMessageCounterStore = create<MessageCounterState>()((set, get) =
       const data = await getCounter({ workspaceId })
       set({
         sentCount: data.sentCount,
+        messageLimit: data.messageLimit,
         year: data.year,
         month: data.month,
         isLoading: false
@@ -52,6 +55,7 @@ export const useMessageCounterStore = create<MessageCounterState>()((set, get) =
       if (data) {
         set({
           sentCount: data.sentCount,
+          messageLimit: data.messageLimit,
           year: data.year,
           month: data.month
         })

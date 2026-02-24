@@ -5,5 +5,6 @@ export default function defineRoutes(fastify: FastifyInstance, _: any, done: Fun
   fastify.addHook('onRequest', fastify.authenticate)
   fastify.get('/:workspaceId', messageCounters.get)
   fastify.post('/:workspaceId/increment', messageCounters.increment)
+  fastify.post('/:workspaceId/set-limit', messageCounters.setLimit)
   done()
 }

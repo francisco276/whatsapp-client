@@ -32,7 +32,7 @@ const ConfigurationPage = () => {
                 </Menu>
               </Box>
               <Box
-                className="w-full h-full bg-white"
+                className="w-full h-full bg-white overflow-y-auto"
                 padding="large"
               >
                 {page === 'account' && <AccountSection />}

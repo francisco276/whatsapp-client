@@ -6,6 +6,7 @@ import { templatesTable } from './templates'
 export const workspacesTable = pgTable('workspaces', {
   id: text('id').notNull().primaryKey(),
   name: varchar('name', { length: 500 }).notNull(),
+  messageLimit: integer('messageLimit').notNull().default(1000),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull()
 })

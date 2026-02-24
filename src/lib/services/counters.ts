@@ -6,6 +6,7 @@ const LOCAL_STORAGE_KEY = 'wa_message_counter'
 
 export type CounterData = {
   sentCount: number
+  messageLimit: number
   year: number
   month: number
 }
@@ -21,16 +22,14 @@ const getLocalCounter = (workspaceId: string): CounterData => {
       }
     }
   } catch {
-    // Ignore localStorage errors
   }
-  return { sentCount: 0, year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+  return { sentCount: 0, messageLimit: 1000, year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
 }
 
 const setLocalCounter = (workspaceId: string, data: CounterData): void => {
   try {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_${workspaceId}`, JSON.stringify(data))
   } catch {
-    // Ignore localStorage errors
   }
 }
 
@@ -48,6 +47,7 @@ export const incrementCounter = async ({ workspaceId }: { workspaceId: string })
   const localData = getLocalCounter(workspaceId)
   const newData: CounterData = {
     sentCount: localData.sentCount + 1,
+    messageLimit: localData.messageLimit,
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1
   }
@@ -59,5 +59,15 @@ export const incrementCounter = async ({ workspaceId }: { workspaceId: string })
     return response.data
   } catch {
     return newData
+  }
+}
+
+export const setMessageLimit = async ({ workspaceId, password, messageLimit }: { workspaceId: string, password: string, messageLimit: number }): Promise<{ success: boolean, message?: string }> => {
+  try {
+    const { data: response } = await api.post(`${ROUTE}/${workspaceId}/set-limit`, { password, messageLimit })
+    return { success: response.success }
+  } catch (error: any) {
+    const message = error?.response?.data?.message || 'Error al configurar el límite'
+    return { success: false, message }
   }
 }

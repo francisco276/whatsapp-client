@@ -9,11 +9,9 @@ const MONTH_NAMES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-const MESSAGE_LIMIT = 1000
-
 export const MessageUsage = () => {
   const workspaceId = useWorkspaceId()
-  const { sentCount, year, month, isLoading, setWorkspaceId, fetchCount } = useMessageCounterStore()
+  const { sentCount, messageLimit, year, month, isLoading, setWorkspaceId, fetchCount } = useMessageCounterStore()
 
   useEffect(() => {
     if (workspaceId) {
@@ -22,7 +20,8 @@ export const MessageUsage = () => {
     }
   }, [workspaceId])
 
-  const percentage = Math.min((sentCount / MESSAGE_LIMIT) * 100, 100)
+  const limit = messageLimit || 1000
+  const percentage = Math.min((sentCount / limit) * 100, 100)
   const monthName = MONTH_NAMES[(month || 1) - 1]
   const periodStart = `${monthName.toLowerCase().slice(0, 3)} 1, ${year}`
   const nextMonth = month === 12 ? 1 : (month || 1) + 1
@@ -55,7 +54,7 @@ export const MessageUsage = () => {
               {sentCount.toLocaleString()}
             </p>
             <p style={{ margin: 0, fontSize: 14, color: '#676879' }}>
-              / {MESSAGE_LIMIT.toLocaleString()} mensajes enviados
+              / {limit.toLocaleString()} mensajes enviados
             </p>
           </div>
 
@@ -77,7 +76,7 @@ export const MessageUsage = () => {
           </div>
 
           <p style={{ margin: 0, fontSize: 12, color: '#676879' }}>
-            {MESSAGE_LIMIT.toLocaleString()} mensajes por mes. El contador se reinicia el 1 de {nextMonthName.toLowerCase()}.
+            {limit.toLocaleString()} mensajes por mes. El contador se reinicia el 1 de {nextMonthName.toLowerCase()}.
           </p>
         </div>
       )}

@@ -3,6 +3,7 @@ import { Authorization } from './authorization'
 import { Notifications } from './notifications'
 import { MondayToken } from './monday-token'
 import { MessageUsage } from './message-usage'
+import { MessageLimitAdmin } from './message-limit-admin'
 
 export const AccountSection = () => {
   return (
@@ -12,6 +13,7 @@ export const AccountSection = () => {
       <Notifications />
       <MondayToken />
       <Authorization />
+      <MessageLimitAdmin />
     </Box>
   )
 }
