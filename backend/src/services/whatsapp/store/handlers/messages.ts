@@ -43,8 +43,9 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
           if (typeof remoteJid !== 'string') return undefined
           if (typeof id !== 'string') return undefined
 
+          const { deletedAt: _del, ...transformed } = transformDrizzle(message) as any
           return {
-            ...(transformDrizzle(message) as MakeTransformedDrizzle<typeof messagesTable.$inferInsert>),
+            ...transformed,
             remoteJid,
             id,
             sessionId,
@@ -94,7 +95,8 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
             if (typeof id !== 'string') return
 
             const jid = jidNormalizedUser(remoteJid)
-            const data = transformDrizzle(message) as MakeTransformedDrizzle<typeof messagesTable.$inferInsert>
+            const rawData = transformDrizzle(message) as MakeTransformedDrizzle<typeof messagesTable.$inferInsert>
+            const { deletedAt: _del, ...data } = rawData as any
 
             await db
               .insert(messagesTable)
@@ -199,8 +201,9 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
               eq(messagesTable.workspaceId, workspaceId)
             ))
 
+          const { deletedAt: _del, ...transformedData } = transformDrizzle(data) as any
           const processedMessage = {
-            ...(transformDrizzle(data) as MakeTransformedDrizzle<typeof messagesTable.$inferInsert>),
+            ...transformedData,
             id: newId,
             remoteJid: newRemoteJid,
             sessionId,
@@ -265,9 +268,12 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
 
   const del: BaileysEventHandler<'messages.delete'> = async (item): Promise<void> => {
     try {
+      const now = new Date()
+
       if ('all' in item) {
         await db
-          .delete(messagesTable)
+          .update(messagesTable)
+          .set({ deletedAt: now })
           .where(and(
             eq(messagesTable.remoteJid, item.jid),
             eq(messagesTable.sessionId, sessionId),
@@ -281,7 +287,8 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
       const keys = item.keys.filter(c => c.id).map((c) => c.id) as string[]
 
       await db
-        .delete(messagesTable)
+        .update(messagesTable)
+        .set({ deletedAt: now })
         .where(
           and(
             inArray(messagesTable.id, keys),

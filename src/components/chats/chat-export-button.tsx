@@ -1,5 +1,5 @@
 import { useState, useCallback, useContext, useEffect } from 'react'
-import { Button, Flex, Text, Loader, Tooltip } from '@vibe/core'
+import { Button, Loader, Tooltip } from '@vibe/core'
 import { Download } from '@vibe/icons'
 import { MondayApi } from '@/lib/monday/api'
 import { useContext as useMondayContext } from '@/hooks/useContext'
@@ -168,42 +168,44 @@ export const ChatExportButton = () => {
               width: 320,
               maxWidth: 'calc(100vw - 32px)',
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
             }}
           >
-            <Flex direction="column" gap={14}>
-              <Text type="text1" style={{ fontWeight: 600, fontSize: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <p style={{ margin: 0, fontWeight: 600, fontSize: 16, color: '#323338', textAlign: 'center' }}>
                 Exportar conversación
-              </Text>
+              </p>
 
               {isExporting ? (
-                <Flex direction="column" align="center" gap={10} style={{ padding: '8px 0' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '8px 0' }}>
                   <Loader size={24} />
-                  <Text type="text2" color="secondary">Exportando...</Text>
-                </Flex>
+                  <p style={{ margin: 0, fontSize: 14, color: '#676879' }}>Exportando...</p>
+                </div>
               ) : exportResult === 'success' ? (
-                <Text type="text2" style={{ color: '#258750' }}>
+                <p style={{ margin: 0, fontSize: 14, color: '#258750', textAlign: 'center' }}>
                   Exportado. Revisa las actualizaciones del elemento.
-                </Text>
+                </p>
               ) : exportResult === 'error' ? (
-                <Text type="text2" style={{ color: '#d83a52' }}>
+                <p style={{ margin: 0, fontSize: 14, color: '#d83a52', textAlign: 'center' }}>
                   Error al exportar. Intenta de nuevo.
-                </Text>
+                </p>
               ) : (
                 <>
                   {loadingColumns ? (
-                    <Flex align="center" gap={8} style={{ padding: '4px 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
                       <Loader size={16} />
-                      <Text type="text2" color="secondary">Cargando columnas...</Text>
-                    </Flex>
+                      <p style={{ margin: 0, fontSize: 14, color: '#676879' }}>Cargando columnas...</p>
+                    </div>
                   ) : textColumns.length > 0 ? (
                     <>
-                      <Text type="text2" color="secondary" style={{ lineHeight: 1.4 }}>
+                      <p style={{ margin: 0, fontSize: 13, color: '#676879', lineHeight: 1.5, textAlign: 'center' }}>
                         Se publicará como actualización y se guardará en la columna seleccionada.
-                      </Text>
+                      </p>
                       <div>
-                        <Text type="text2" color="secondary" style={{ marginBottom: 4, display: 'block', fontSize: 13 }}>
+                        <p style={{ margin: '0 0 4px 0', fontSize: 13, color: '#676879' }}>
                           Columna de texto:
-                        </Text>
+                        </p>
                         <select
                           value={selectedColumnId}
                           onChange={(e) => setSelectedColumnId(e.target.value)}
@@ -217,6 +219,7 @@ export const ChatExportButton = () => {
                             backgroundColor: '#fff',
                             outline: 'none',
                             cursor: 'pointer',
+                            boxSizing: 'border-box',
                           }}
                         >
                           {textColumns.map((col) => (
@@ -228,12 +231,12 @@ export const ChatExportButton = () => {
                       </div>
                     </>
                   ) : (
-                    <Text type="text2" color="secondary" style={{ lineHeight: 1.4 }}>
+                    <p style={{ margin: 0, fontSize: 13, color: '#676879', lineHeight: 1.5, textAlign: 'center' }}>
                       Se publicará como actualización en el elemento actual.
-                    </Text>
+                    </p>
                   )}
 
-                  <Flex gap={8} justify="end" style={{ marginTop: 4 }}>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 4 }}>
                     <Button
                       kind="tertiary"
                       size="small"
@@ -250,10 +253,10 @@ export const ChatExportButton = () => {
                     >
                       Exportar
                     </Button>
-                  </Flex>
+                  </div>
                 </>
               )}
-            </Flex>
+            </div>
           </div>
         </div>
       )}

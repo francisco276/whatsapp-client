@@ -187,7 +187,8 @@ export const messagesTable = pgTable('messages', {
   verifiedBizName: varchar('verifiedBizName', { length: 128 }),
   eventResponses: jsonb('eventResponses'),
   pinInChat: jsonb('pinInChat'),
-  reportingTokenInfo: jsonb('reportingTokenInfo')
+  reportingTokenInfo: jsonb('reportingTokenInfo'),
+  deletedAt: timestamp('deletedAt'),
 }, (table) => [
   uniqueIndex('unique_contact_id_per_session_id_and_workspace_id').on(table.sessionId, table.workspaceId, table.remoteJid, table.id)
 ])
