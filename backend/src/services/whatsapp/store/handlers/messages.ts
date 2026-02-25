@@ -137,12 +137,12 @@ export default function messageHandler (sessionId: string, workspaceId: string, 
                 }
               )
 
-              dispatchMondayNotifications({
-                workspaceId,
-                sessionId,
-                remoteJid: jid,
-                fromMe: message.key.fromMe === true
-              }).catch(e => console.error('[MondayNotifications] Background dispatch error:', e))
+              // dispatchMondayNotifications({
+              //   workspaceId,
+              //   sessionId,
+              //   remoteJid: jid,
+              //   fromMe: message.key.fromMe === true
+              // }).catch(e => console.error('[MondayNotifications] Background dispatch error:', e))
             }
           } catch (e) {
             if (e instanceof Error) {
