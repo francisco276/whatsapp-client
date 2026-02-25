@@ -5,7 +5,7 @@ import { SocketClient } from '@/lib/socket'
 import { handlerNotifyMessage } from '@/lib/socket-handlers/messages'
 import { unreadChatStore } from '@/stores/unReadChatStore'
 import { Chat } from '@/lib/services/chats'
-import { useNotifications } from '@/hooks/useNotifications'
+import { jidToFormatedPhone } from '@/utils/whatsapp'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useUserId } from '@/hooks/useUserId'
 import { MondayApi } from '@/lib/monday/api'
@@ -15,7 +15,6 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const { chat } = useContext(ChatContext)
   const incrementUnreadChat = unreadChatStore((state) => state.incrementUnreadChat)
   const setInitialData = unreadChatStore((state) => state.setInitialData)
-  const { sendNotifications } = useNotifications()
   const userId = useUserId()
   const { config } = usePreferences({ userId })
   const monday = useRef(new MondayApi())
@@ -53,7 +52,8 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
       const currentChat = activeChatRef.current
       const isViewingThisChat = currentChat === id
 
-      const contactName = chatsRef.current.find(c => c.id === id)?.name || id.split('@')[0]
+      const chatEntry = chatsRef.current.find(c => c.id === id)
+      const contactName = chatEntry?.name || jidToFormatedPhone(id) || id.split('@')[0]
 
       console.log('[Notify] chatId:', id, 'contact:', contactName, 'activeChat:', currentChat, 'isViewing:', isViewingThisChat, 'unreadCount:', unreadCount)
 
@@ -66,7 +66,6 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
           audioRef.current.play().catch(e => console.log('Audio play failed:', e))
         }
 
-        sendNotifications(contactName)
         monday.current.notice(`Nuevo mensaje de WhatsApp de: ${contactName}`, 'info', 5000)
       }
 

@@ -172,7 +172,7 @@ export const SessionButton = ({
           type={toast.type}
           onClose={() => setToast(null)}
           autoHideDuration={3000}
-          className="fixed bottom-4 right-4 z-50"
+          className="!fixed !bottom-4 !left-1/2 !-translate-x-1/2 !z-50 !w-auto !max-w-[400px]"
         >
           {toast.message}
         </Toast>
