@@ -98,7 +98,11 @@ export const MessageItemComponent = ({ message }: { message: MessageItem }) => {
             </div>
           )
         }
-        {!isDateSeprator && messageString}
+        {!isDateSeprator && messageString && (
+          <div className={`${(isImage || isVideo || isDocument || isAudio || isSticker) ? 'mt-2' : ''}`}>
+            {messageString}
+          </div>
+        )}
 
         <div className={`text-xs mt-1 text-right ${isMyMessage ? '!text-blue-100' : '!text-gray-500'}`}>
           {!isDateSeprator && getTime({ date: timestamp })}

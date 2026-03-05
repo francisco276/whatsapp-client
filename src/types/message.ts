@@ -32,7 +32,7 @@ export type WMessage = {
   videoMessage?: {
     url: string
     gifPlayback: boolean
-    caption: string,
+    caption?: string,
     contextInfo: {
       isForwarded: boolean
       forwardingScore: number

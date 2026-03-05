@@ -104,6 +104,7 @@ export const getMessageAsString = (message: WMessage): MessageContent => {
   if (message.videoMessage) {
     messageObject = {
       ...messageObject,
+      text: message.videoMessage.caption || messageObject.text || '',
       url: message.videoMessage.url,
       isVideo: true,
       isGift: message.videoMessage.gifPlayback,
@@ -114,7 +115,7 @@ export const getMessageAsString = (message: WMessage): MessageContent => {
   if (message?.imageMessage) {
     messageObject = {
       ...messageObject,
-      text: message.imageMessage.caption,
+      text: message.imageMessage.caption || messageObject.text || '',
       url: message.imageMessage.url,
       isImage: true,
       isForwarded: message.imageMessage.contextInfo?.isForwarded
@@ -227,6 +228,7 @@ export const getMessageSize = (message: MessageItem): number => {
     if (isSticker || isImage || isVideo) aditionalSpace += 200
     if (isDocument) aditionalSpace += 50
     if (isAudio) aditionalSpace += 60
+    if (text && (isImage || isVideo || isDocument || isAudio || isSticker)) aditionalSpace += 8
 
     const lineHeight = text ? 24 : 1
     const lines = text.split(/\r\n|\n|\r/)
