@@ -48,25 +48,27 @@ export const formatPhoneToWhatsAppJID = (phoneNumber: string, countryShortName: 
 }
 
 export const jidToFormatedPhone = (jid: string = '') => {
-  if (!jid.endsWith('@s.whatsapp.net')) return null
-
   let raw = jid.replace(/:.*|@s\.whatsapp\.net/g, '')
 
-  // México 🇲🇽: remove the 1 after +52
-  if (raw.startsWith('521') && raw.length === 13) {
-    raw = '52' + raw.slice(3) // remove the '1'
+  if (raw.includes('@')) {
+    raw = raw.split('@')[0]
   }
 
-  // Argentina 🇦🇷: remove the 9 after +54
+  if (!raw || !/^\d+$/.test(raw)) return null
+
+  if (raw.startsWith('521') && raw.length === 13) {
+    raw = '52' + raw.slice(3)
+  }
+
   if (raw.startsWith('549') && raw.length >= 12) {
-    raw = '54' + raw.slice(3) // remove the '9'
+    raw = '54' + raw.slice(3)
   }
 
   const phone = parsePhoneNumberFromString('+' + raw)
 
   if (phone && phone.isValid()) {
-    return phone.formatInternational() // e.g., +52 55 1234 5678
+    return phone.formatInternational()
   }
 
-  return null
+  return '+' + raw.replace(/(\d{2})(\d{2})(\d{4})(\d+)/, '$1 $2 $3 $4')
 }
