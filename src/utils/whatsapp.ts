@@ -70,5 +70,5 @@ export const jidToFormatedPhone = (jid: string = '') => {
     return phone.formatInternational()
   }
 
-  return '+' + raw.replace(/(\d{2})(\d{2})(\d{4})(\d+)/, '$1 $2 $3 $4')
+  return '+' + raw.replace(/(\d{1,3})(?=(\d{4})+(?!\d))/g, '$1 ').trim()
 }
