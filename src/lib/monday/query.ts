@@ -1,5 +1,5 @@
 import { MondayRequest } from './request';
-import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName, getBoardColumns } from './queries'
+import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName, getBoardColumns, getItemName } from './queries'
 import { User, ColumnValue, BoardColumn } from '@/types/monday'
 
 /**
@@ -55,6 +55,18 @@ export class MondayQuery {
       {
         variables: {
           boardId
+        }
+      }
+    )
+  }
+
+  async getItemName(itemId: string | number) {
+    return this.requestor.request<{ items: { name: string }[] }>(
+      'getItemName',
+      getItemName,
+      {
+        variables: {
+          itemId
         }
       }
     )

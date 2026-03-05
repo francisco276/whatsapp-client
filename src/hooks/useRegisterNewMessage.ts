@@ -8,6 +8,7 @@ import { Chat } from '@/lib/services/chats'
 import { jidToFormatedPhone } from '@/utils/whatsapp'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useUserId } from '@/hooks/useUserId'
+import { useContext as useMondayContext } from '@/hooks/useContext'
 import { MondayApi } from '@/lib/monday/api'
 
 export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: string, chats?: Chat[] }) => {
@@ -17,11 +18,13 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   const setInitialData = unreadChatStore((state) => state.setInitialData)
   const userId = useUserId()
   const { config } = usePreferences({ userId })
+  const { data: mondayContext } = useMondayContext()
   const monday = useRef(new MondayApi())
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const activeChatRef = useRef<string | undefined>(chat)
   const configRef = useRef(config)
   const chatsRef = useRef<Chat[]>(chats ?? [])
+  const itemNameRef = useRef<string | null>(null)
 
   useEffect(() => {
     activeChatRef.current = chat
@@ -43,6 +46,18 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
   }, [])
 
   useEffect(() => {
+    if (!mondayContext?.itemId) return
+    monday.current.query.getItemName(mondayContext.itemId)
+      .then((res) => {
+        const data = res.data as { items: { name: string }[] }
+        if (data?.items?.[0]?.name) {
+          itemNameRef.current = data.items[0].name
+        }
+      })
+      .catch(() => {})
+  }, [mondayContext?.itemId])
+
+  useEffect(() => {
     console.log({ workspaceId, session})
     if (!workspaceId || !session) return
 
@@ -53,9 +68,10 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
       const isViewingThisChat = currentChat === id
 
       const chatEntry = chatsRef.current.find(c => c.id === id)
-      const contactName = chatEntry?.name || jidToFormatedPhone(id) || id.split('@')[0]
+      const contactPhone = chatEntry?.name || jidToFormatedPhone(id) || id.split('@')[0]
+      const displayName = itemNameRef.current || contactPhone
 
-      console.log('[Notify] chatId:', id, 'contact:', contactName, 'activeChat:', currentChat, 'isViewing:', isViewingThisChat, 'unreadCount:', unreadCount)
+      console.log('[Notify] chatId:', id, 'contact:', displayName, 'itemName:', itemNameRef.current, 'activeChat:', currentChat, 'isViewing:', isViewingThisChat, 'unreadCount:', unreadCount)
 
       if (unreadCount > 0 && !isViewingThisChat) {
         incrementUnreadChat(id)
@@ -66,7 +82,7 @@ export const useRegisterNewMessage = ({ workspaceId, chats }: { workspaceId: str
           audioRef.current.play().catch(e => console.log('Audio play failed:', e))
         }
 
-        monday.current.notice(`Nuevo mensaje de WhatsApp de: ${contactName}`, 'info', 5000)
+        monday.current.notice(`Nuevo mensaje de WhatsApp de: ${displayName}`, 'info', 5000)
       }
 
       if (unreadCount === 0) {

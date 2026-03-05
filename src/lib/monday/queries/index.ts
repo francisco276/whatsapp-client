@@ -69,3 +69,11 @@ export const getBoardColumns = `
     }
   }
 `
+
+export const getItemName = `
+  query ($itemId: ID!) {
+    items (ids: [$itemId]) {
+      name
+    }
+  }
+`
