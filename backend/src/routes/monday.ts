@@ -22,5 +22,26 @@ export default function MondayRouter (fastify: FastifyInstance, _: any, done: Fu
     },
     monday.register
   )
+
+  fastify.post(
+    '/upload-files',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          properties: {
+            workspaceId: { type: 'string' },
+            sessionId: { type: 'string' },
+            itemId: { type: 'string' },
+            columnId: { type: 'string' },
+            messageIds: { type: 'array', items: { type: 'number' } }
+          },
+          required: ['workspaceId', 'sessionId', 'itemId', 'columnId', 'messageIds']
+        }
+      }
+    },
+    monday.uploadFiles
+  )
+
   done()
 }

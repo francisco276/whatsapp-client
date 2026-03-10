@@ -90,3 +90,25 @@ export async function markMessagesAsRead ({ workspaceId, sessionId, readMessages
     throw new Error('Error to mark messages as read ')
   }
 }
+
+export async function uploadFilesToMonday ({ workspaceId, sessionId, itemId, columnId, messageIds }: {
+  workspaceId: string
+  sessionId: string
+  itemId: string
+  columnId: string
+  messageIds: number[]
+}) {
+  try {
+    const response = await api.post('monday/upload-files', {
+      workspaceId,
+      sessionId,
+      itemId,
+      columnId,
+      messageIds
+    }, { timeout: 0 })
+
+    return response.data
+  } catch {
+    throw new Error('Error uploading files to Monday.com')
+  }
+}

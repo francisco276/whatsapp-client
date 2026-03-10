@@ -3,7 +3,7 @@ import { Button, Loader, Tooltip } from '@vibe/core'
 import { Download } from '@vibe/icons'
 import { MondayApi } from '@/lib/monday/api'
 import { useContext as useMondayContext } from '@/hooks/useContext'
-import { getMessages } from '@/lib/services/messages'
+import { getMessages, uploadFilesToMonday } from '@/lib/services/messages'
 import { formatChatForExport } from '@/utils/export-chat'
 import { useChatId } from '@/hooks/useChat'
 import { useGetContact } from '@/hooks/useGetContact'
@@ -16,11 +16,20 @@ const monday = new MondayApi()
 
 type ColumnOption = { id: string; title: string }
 
+function hasMedia(msg: Message): boolean {
+  const m = msg.message
+  if (!m) return false
+  return !!(m.imageMessage || m.videoMessage || m.audioMessage || m.documentMessage || m.documentWithCaptionMessage || m.stickerMessage)
+}
+
 export const ChatExportButton = () => {
   const [isExporting, setIsExporting] = useState(false)
   const [exportResult, setExportResult] = useState<'success' | 'error' | null>(null)
+  const [exportDetail, setExportDetail] = useState('')
   const [textColumns, setTextColumns] = useState<ColumnOption[]>([])
+  const [fileColumns, setFileColumns] = useState<ColumnOption[]>([])
   const [selectedColumnId, setSelectedColumnId] = useState<string>('')
+  const [selectedFileColumnId, setSelectedFileColumnId] = useState<string>('')
   const [loadingColumns, setLoadingColumns] = useState(false)
   const [showPanel, setShowPanel] = useState(false)
 
@@ -45,6 +54,14 @@ export const ChatExportButton = () => {
           setTextColumns(txtCols)
           if (txtCols.length > 0) {
             setSelectedColumnId(txtCols[0].id)
+          }
+
+          const fileCols = boards[0].columns
+            .filter((c: BoardColumn) => c.type === 'file')
+            .map((c: BoardColumn) => ({ id: c.id, title: c.title }))
+          setFileColumns(fileCols)
+          if (fileCols.length > 0) {
+            setSelectedFileColumnId(fileCols[0].id)
           }
         }
       } catch (err) {
@@ -81,10 +98,11 @@ export const ChatExportButton = () => {
   }, [workspaceId, session, chatId])
 
   const handleExport = useCallback(async () => {
-    if (!mondayContext?.itemId || !mondayContext?.boardId) return
+    if (!mondayContext?.itemId || !mondayContext?.boardId || !workspaceId || !session) return
 
     setIsExporting(true)
     setExportResult(null)
+    setExportDetail('')
 
     try {
       const messages = await fetchAllMessages()
@@ -108,11 +126,39 @@ export const ChatExportButton = () => {
 
       await Promise.all(promises)
 
+      let fileResult = ''
+      if (selectedFileColumnId) {
+        const mediaMessages = messages.filter(hasMedia)
+        if (mediaMessages.length > 0) {
+          try {
+            const result = await uploadFilesToMonday({
+              workspaceId,
+              sessionId: session,
+              itemId: String(mondayContext.itemId),
+              columnId: selectedFileColumnId,
+              messageIds: mediaMessages.map(m => m.pkId)
+            })
+            const data = result?.data
+            if (data) {
+              fileResult = `${data.uploaded} archivo(s) subido(s)`
+              if (data.failed > 0) {
+                fileResult += `, ${data.failed} fallido(s)`
+              }
+            }
+          } catch (err) {
+            console.error('File upload failed:', err)
+            fileResult = 'Error al subir archivos'
+          }
+        }
+      }
+
       setExportResult('success')
+      setExportDetail(fileResult)
       setTimeout(() => {
         setExportResult(null)
+        setExportDetail('')
         setShowPanel(false)
-      }, 3000)
+      }, 4000)
     } catch (error) {
       console.error('Export failed:', error)
       setExportResult('error')
@@ -122,7 +168,7 @@ export const ChatExportButton = () => {
     } finally {
       setIsExporting(false)
     }
-  }, [mondayContext, fetchAllMessages, contact, chatId, selectedColumnId])
+  }, [mondayContext, fetchAllMessages, contact, chatId, selectedColumnId, selectedFileColumnId, workspaceId, session])
 
   if (!chatId) return null
 
@@ -156,6 +202,7 @@ export const ChatExportButton = () => {
             if (e.target === e.currentTarget && !isExporting) {
               setShowPanel(false)
               setExportResult(null)
+              setExportDetail('')
             }
           }}
         >
@@ -165,7 +212,7 @@ export const ChatExportButton = () => {
               borderRadius: 8,
               padding: '20px 24px',
               margin: 16,
-              width: 320,
+              width: 340,
               maxWidth: 'calc(100vw - 32px)',
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
               overflow: 'hidden',
@@ -183,9 +230,16 @@ export const ChatExportButton = () => {
                   <p style={{ margin: 0, fontSize: 14, color: '#676879' }}>Exportando...</p>
                 </div>
               ) : exportResult === 'success' ? (
-                <p style={{ margin: 0, fontSize: 14, color: '#258750', textAlign: 'center' }}>
-                  Exportado. Revisa las actualizaciones del elemento.
-                </p>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ margin: 0, fontSize: 14, color: '#258750' }}>
+                    Exportado. Revisa las actualizaciones del elemento.
+                  </p>
+                  {exportDetail && (
+                    <p style={{ margin: '6px 0 0 0', fontSize: 13, color: '#676879' }}>
+                      {exportDetail}
+                    </p>
+                  )}
+                </div>
               ) : exportResult === 'error' ? (
                 <p style={{ margin: 0, fontSize: 14, color: '#d83a52', textAlign: 'center' }}>
                   Error al exportar. Intenta de nuevo.
@@ -197,43 +251,76 @@ export const ChatExportButton = () => {
                       <Loader size={16} />
                       <p style={{ margin: 0, fontSize: 14, color: '#676879' }}>Cargando columnas...</p>
                     </div>
-                  ) : textColumns.length > 0 ? (
+                  ) : (
                     <>
                       <p style={{ margin: 0, fontSize: 13, color: '#676879', lineHeight: 1.5, textAlign: 'center' }}>
-                        Se publicará como actualización y se guardará en la columna seleccionada.
+                        {textColumns.length > 0 || fileColumns.length > 0
+                          ? 'Se publicará como actualización y se guardará en las columnas seleccionadas.'
+                          : 'Se publicará como actualización en el elemento actual.'
+                        }
                       </p>
-                      <div>
-                        <p style={{ margin: '0 0 4px 0', fontSize: 13, color: '#676879' }}>
-                          Columna de texto:
-                        </p>
-                        <select
-                          value={selectedColumnId}
-                          onChange={(e) => setSelectedColumnId(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '7px 10px',
-                            borderRadius: 4,
-                            border: '1px solid #c5c7d0',
-                            fontSize: 14,
-                            color: '#323338',
-                            backgroundColor: '#fff',
-                            outline: 'none',
-                            cursor: 'pointer',
-                            boxSizing: 'border-box',
-                          }}
-                        >
-                          {textColumns.map((col) => (
-                            <option key={col.id} value={col.id}>
-                              {col.title}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+
+                      {textColumns.length > 0 && (
+                        <div>
+                          <p style={{ margin: '0 0 4px 0', fontSize: 13, color: '#676879' }}>
+                            Columna de texto:
+                          </p>
+                          <select
+                            value={selectedColumnId}
+                            onChange={(e) => setSelectedColumnId(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '7px 10px',
+                              borderRadius: 4,
+                              border: '1px solid #c5c7d0',
+                              fontSize: 14,
+                              color: '#323338',
+                              backgroundColor: '#fff',
+                              outline: 'none',
+                              cursor: 'pointer',
+                              boxSizing: 'border-box',
+                            }}
+                          >
+                            {textColumns.map((col) => (
+                              <option key={col.id} value={col.id}>
+                                {col.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {fileColumns.length > 0 && (
+                        <div>
+                          <p style={{ margin: '0 0 4px 0', fontSize: 13, color: '#676879' }}>
+                            Columna de archivos:
+                          </p>
+                          <select
+                            value={selectedFileColumnId}
+                            onChange={(e) => setSelectedFileColumnId(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '7px 10px',
+                              borderRadius: 4,
+                              border: '1px solid #c5c7d0',
+                              fontSize: 14,
+                              color: '#323338',
+                              backgroundColor: '#fff',
+                              outline: 'none',
+                              cursor: 'pointer',
+                              boxSizing: 'border-box',
+                            }}
+                          >
+                            <option value="">No adjuntar archivos</option>
+                            {fileColumns.map((col) => (
+                              <option key={col.id} value={col.id}>
+                                {col.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </>
-                  ) : (
-                    <p style={{ margin: 0, fontSize: 13, color: '#676879', lineHeight: 1.5, textAlign: 'center' }}>
-                      Se publicará como actualización en el elemento actual.
-                    </p>
                   )}
 
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 4 }}>
@@ -243,6 +330,7 @@ export const ChatExportButton = () => {
                       onClick={() => {
                         setShowPanel(false)
                         setExportResult(null)
+                        setExportDetail('')
                       }}
                     >
                       Cancelar

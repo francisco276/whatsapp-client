@@ -150,6 +150,16 @@ export async function dispatchMondayNotifications (params: MondayNotificationPar
   }
 }
 
+export async function getMondayCredentials (workspaceId: string): Promise<{ accessToken: string } | undefined> {
+  const [credentials] = await db
+    .select()
+    .from(mondayCredentialsTable)
+    .where(eq(mondayCredentialsTable.workspaceId, workspaceId))
+    .limit(1)
+
+  return credentials
+}
+
 export async function registerMondayCredentials (workspaceId: string, accessToken: string): Promise<void> {
   await db
     .insert(mondayCredentialsTable)
