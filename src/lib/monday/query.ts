@@ -1,5 +1,5 @@
 import { MondayRequest } from './request';
-import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName, getBoardColumns, getItemName } from './queries'
+import { getPhoneColumnsByItemId, getAllColumnValuesFromItem, getUsers, getUsersWithName, getBoardColumns, getItemName, getBoardItemsWithPhoneColumn } from './queries'
 import { User, ColumnValue, BoardColumn } from '@/types/monday'
 
 /**
@@ -69,6 +69,24 @@ export class MondayQuery {
           itemId
         }
       }
+    )
+  }
+
+  async getBoardItemsWithPhoneColumn(boardId: string | number, columnId: string) {
+    return this.requestor.request<{
+      boards: {
+        items_page: {
+          items: {
+            id: string
+            name: string
+            column_values: { id: string; text: string; value: string; phone?: string }[]
+          }[]
+        }
+      }[]
+    }>(
+      'getBoardItemsWithPhoneColumn',
+      getBoardItemsWithPhoneColumn,
+      { variables: { boardId, columnId } }
     )
   }
 }

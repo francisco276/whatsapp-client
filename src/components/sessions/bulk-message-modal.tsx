@@ -1,9 +1,10 @@
-import { useState, useCallback, useContext, useEffect } from 'react'
+import { useState, useCallback, useContext, useEffect, useRef } from 'react'
 import { Button, Loader } from '@vibe/core'
 import { getChats, type Chat } from '@/lib/services/chats'
 import { api } from '@/lib/axios'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { SessionContext } from '@/components/providers/session/session-context'
+import { MondayApi } from '@/lib/monday/api'
 
 interface BulkResult {
   jid: string
@@ -16,6 +17,15 @@ interface Props {
   onClose: () => void
 }
 
+interface BoardContact {
+  itemId: string
+  name: string
+  phone: string
+  jid: string
+}
+
+type Tab = 'whatsapp' | 'board'
+
 function isGroup(jid: string) {
   return jid.endsWith('@g.us')
 }
@@ -25,13 +35,30 @@ function formatPhone(jid: string) {
   return raw.startsWith('+') ? raw : `+${raw}`
 }
 
+function phoneToJid(phone: string): string | null {
+  const digits = phone.replace(/\D/g, '')
+  if (digits.length < 7) return null
+  return `${digits}@s.whatsapp.net`
+}
+
+const monday = new MondayApi()
 
 export const BulkMessageModal = ({ onClose }: Props) => {
   const workspaceId = useWorkspaceId()
   const { session } = useContext(SessionContext)
 
+  const [tab, setTab] = useState<Tab>('whatsapp')
+
   const [chats, setChats] = useState<Chat[]>([])
   const [loadingChats, setLoadingChats] = useState(false)
+
+  const [boardContacts, setBoardContacts] = useState<BoardContact[]>([])
+  const [phoneColumns, setPhoneColumns] = useState<{ id: string; title: string }[]>([])
+  const [selectedColumn, setSelectedColumn] = useState<string>('')
+  const [loadingBoard, setLoadingBoard] = useState(false)
+  const [boardError, setBoardError] = useState<string | null>(null)
+  const boardIdRef = useRef<string | null>(null)
+
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [message, setMessage] = useState('')
@@ -51,10 +78,66 @@ export const BulkMessageModal = ({ onClose }: Props) => {
       .finally(() => setLoadingChats(false))
   }, [workspaceId, session])
 
-  const filtered = chats.filter((c) => {
-    const name = c.name || formatPhone(c.id)
-    return name.toLowerCase().includes(search.toLowerCase()) || c.id.includes(search)
-  })
+  useEffect(() => {
+    if (tab !== 'board') return
+    setLoadingBoard(true)
+    setBoardError(null)
+    monday.getContext().then(async (ctx: any) => {
+      const boardId = ctx?.data?.boardId
+      if (!boardId) {
+        setBoardError('No se encontró el tablero actual')
+        setLoadingBoard(false)
+        return
+      }
+      boardIdRef.current = String(boardId)
+
+      try {
+        const { data } = await monday.query.getBoardColumns(String(boardId))
+        const cols = data?.boards?.[0]?.columns ?? []
+        const phoneCols = cols.filter((c: any) => c.type === 'phone')
+        if (phoneCols.length === 0) {
+          setBoardError('No se encontraron columnas de tipo teléfono en este tablero')
+          setLoadingBoard(false)
+          return
+        }
+        setPhoneColumns(phoneCols)
+        setSelectedColumn(phoneCols[0].id)
+      } catch {
+        setBoardError('Error al cargar las columnas del tablero')
+      }
+      setLoadingBoard(false)
+    })
+  }, [tab])
+
+  useEffect(() => {
+    if (!selectedColumn || !boardIdRef.current) return
+    setLoadingBoard(true)
+    setBoardContacts([])
+    monday.query.getBoardItemsWithPhoneColumn(boardIdRef.current, selectedColumn)
+      .then(({ data }) => {
+        const items = data?.boards?.[0]?.items_page?.items ?? []
+        const contacts: BoardContact[] = []
+        for (const item of items) {
+          const cv = item.column_values?.[0]
+          const phone = cv?.phone || cv?.text || ''
+          if (!phone) continue
+          const jid = phoneToJid(phone)
+          if (!jid) continue
+          contacts.push({ itemId: String(item.id), name: item.name, phone, jid })
+        }
+        setBoardContacts(contacts)
+      })
+      .catch(() => setBoardError('Error al cargar los elementos del tablero'))
+      .finally(() => setLoadingBoard(false))
+  }, [selectedColumn])
+
+  const currentList: { id: string; name: string; subtitle: string }[] = tab === 'whatsapp'
+    ? chats.map((c) => ({ id: c.id, name: c.name || formatPhone(c.id), subtitle: formatPhone(c.id) }))
+    : boardContacts.map((b) => ({ id: b.jid, name: b.name, subtitle: b.phone }))
+
+  const filtered = currentList.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase()) || c.subtitle.includes(search)
+  )
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
@@ -66,7 +149,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
   }, [])
 
   const toggleAll = useCallback(() => {
-    if (selected.size === filtered.length) {
+    if (selected.size === filtered.length && filtered.length > 0) {
       setSelected(new Set())
     } else {
       setSelected(new Set(filtered.map((c) => c.id)))
@@ -84,8 +167,8 @@ export const BulkMessageModal = ({ onClose }: Props) => {
 
     for (let i = 0; i < jids.length; i++) {
       const jid = jids[i]
-      const chat = chats.find((c) => c.id === jid)
-      const name = chat?.name || formatPhone(jid)
+      const contact = currentList.find((c) => c.id === jid)
+      const name = contact?.name || formatPhone(jid)
 
       try {
         const payload = [{
@@ -107,10 +190,28 @@ export const BulkMessageModal = ({ onClose }: Props) => {
 
     setDone(true)
     setIsSending(false)
-  }, [workspaceId, session, message, selected, chats, delay])
+  }, [workspaceId, session, message, selected, currentList, delay])
+
+  const handleTabChange = (newTab: Tab) => {
+    setTab(newTab)
+    setSelected(new Set())
+    setSearch('')
+  }
 
   const succeeded = progress.filter((r) => r.success).length
   const failed = progress.filter((r) => !r.success).length
+
+  const tabStyle = (t: Tab): React.CSSProperties => ({
+    padding: '8px 16px',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: 'none',
+    borderBottom: tab === t ? '2px solid #0073ea' : '2px solid transparent',
+    background: 'none',
+    color: tab === t ? '#0073ea' : '#676879',
+    transition: 'color 0.15s',
+  })
 
   return (
     <div
@@ -139,13 +240,18 @@ export const BulkMessageModal = ({ onClose }: Props) => {
         boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
         overflow: 'hidden',
       }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #e6e9ef' }}>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#323338' }}>
+        <div style={{ padding: '16px 20px 0', borderBottom: '1px solid #e6e9ef' }}>
+          <p style={{ margin: '0 0 12px 0', fontWeight: 700, fontSize: 16, color: '#323338' }}>
             Mensajes masivos
           </p>
-          <p style={{ margin: '4px 0 0 0', fontSize: 13, color: '#676879' }}>
-            Envía un mensaje a múltiples contactos
-          </p>
+          <div style={{ display: 'flex', gap: 0 }}>
+            <button style={tabStyle('whatsapp')} onClick={() => handleTabChange('whatsapp')}>
+              Desde WhatsApp
+            </button>
+            <button style={tabStyle('board')} onClick={() => handleTabChange('board')}>
+              Desde tablero
+            </button>
+          </div>
         </div>
 
         {done ? (
@@ -243,79 +349,114 @@ export const BulkMessageModal = ({ onClose }: Props) => {
             </div>
 
             <div style={{ padding: '12px 20px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#323338' }}>
-                  Contactos ({selected.size} seleccionados)
+              {tab === 'board' && phoneColumns.length > 1 && (
+                <div style={{ marginBottom: 10 }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: 12, color: '#676879' }}>Columna de teléfono:</p>
+                  <select
+                    value={selectedColumn}
+                    onChange={(e) => { setSelectedColumn(e.target.value); setSelected(new Set()) }}
+                    style={{
+                      width: '100%',
+                      padding: '6px 10px',
+                      borderRadius: 4,
+                      border: '1px solid #c5c7d0',
+                      fontSize: 13,
+                      color: '#323338',
+                      outline: 'none',
+                    }}
+                  >
+                    {phoneColumns.map((col) => (
+                      <option key={col.id} value={col.id}>{col.title}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {boardError ? (
+                <p style={{ margin: 0, fontSize: 13, color: '#d83a52', padding: '12px 0' }}>
+                  {boardError}
                 </p>
-                <button
-                  onClick={toggleAll}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    fontSize: 12, color: '#0073ea', padding: '2px 6px',
-                  }}
-                >
-                  {selected.size === filtered.length && filtered.length > 0 ? 'Deseleccionar todos' : 'Seleccionar todos'}
-                </button>
-              </div>
-
-              <input
-                placeholder="Buscar contacto..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '7px 10px',
-                  borderRadius: 4,
-                  border: '1px solid #c5c7d0',
-                  fontSize: 13,
-                  color: '#323338',
-                  outline: 'none',
-                  marginBottom: 8,
-                  boxSizing: 'border-box',
-                }}
-              />
-
-              <div style={{ flex: 1, overflowY: 'auto', maxHeight: 200, border: '1px solid #e6e9ef', borderRadius: 4 }}>
-                {loadingChats ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
-                    <Loader size={20} />
-                  </div>
-                ) : filtered.length === 0 ? (
-                  <p style={{ margin: 0, padding: 16, fontSize: 13, color: '#676879', textAlign: 'center' }}>
-                    No se encontraron contactos
-                  </p>
-                ) : (
-                  filtered.map((chat) => (
-                    <div
-                      key={chat.id}
-                      onClick={() => toggleSelect(chat.id)}
+              ) : loadingBoard ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+                  <Loader size={20} />
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#323338' }}>
+                      Contactos ({selected.size} seleccionados)
+                    </p>
+                    <button
+                      onClick={toggleAll}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                        backgroundColor: selected.has(chat.id) ? '#e6f4ff' : 'transparent',
-                        borderBottom: '1px solid #f5f6f8',
-                        transition: 'background 0.1s',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontSize: 12, color: '#0073ea', padding: '2px 6px',
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        readOnly
-                        checked={selected.has(chat.id)}
-                        style={{ cursor: 'pointer', width: 14, height: 14 }}
-                      />
-                      <span style={{ fontSize: 13, color: '#323338', flex: 1 }}>
-                        {chat.name || formatPhone(chat.id)}
-                      </span>
-                      <span style={{ fontSize: 11, color: '#9699a6' }}>
-                        {formatPhone(chat.id)}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
+                      {selected.size === filtered.length && filtered.length > 0 ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                    </button>
+                  </div>
+
+                  <input
+                    placeholder="Buscar contacto..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      borderRadius: 4,
+                      border: '1px solid #c5c7d0',
+                      fontSize: 13,
+                      color: '#323338',
+                      outline: 'none',
+                      marginBottom: 8,
+                      boxSizing: 'border-box',
+                    }}
+                  />
+
+                  <div style={{ flex: 1, overflowY: 'auto', maxHeight: 200, border: '1px solid #e6e9ef', borderRadius: 4 }}>
+                    {(tab === 'whatsapp' ? loadingChats : loadingBoard) ? (
+                      <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+                        <Loader size={20} />
+                      </div>
+                    ) : filtered.length === 0 ? (
+                      <p style={{ margin: 0, padding: 16, fontSize: 13, color: '#676879', textAlign: 'center' }}>
+                        No se encontraron contactos
+                      </p>
+                    ) : (
+                      filtered.map((contact) => (
+                        <div
+                          key={contact.id}
+                          onClick={() => toggleSelect(contact.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            backgroundColor: selected.has(contact.id) ? '#e6f4ff' : 'transparent',
+                            borderBottom: '1px solid #f5f6f8',
+                            transition: 'background 0.1s',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            readOnly
+                            checked={selected.has(contact.id)}
+                            style={{ cursor: 'pointer', width: 14, height: 14 }}
+                          />
+                          <span style={{ fontSize: 13, color: '#323338', flex: 1 }}>
+                            {contact.name}
+                          </span>
+                          <span style={{ fontSize: 11, color: '#9699a6' }}>
+                            {contact.subtitle}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <div style={{ padding: '12px 20px', borderTop: '1px solid #e6e9ef', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

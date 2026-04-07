@@ -77,3 +77,25 @@ export const getItemName = `
     }
   }
 `
+
+export const getBoardItemsWithPhoneColumn = `
+  query ($boardId: ID!, $columnId: String!) {
+    boards (ids: [$boardId]) {
+      items_page (limit: 500) {
+        items {
+          id
+          name
+          column_values (ids: [$columnId]) {
+            id
+            text
+            value
+            ... on PhoneValue {
+              phone
+              country_short_name
+            }
+          }
+        }
+      }
+    }
+  }
+`
