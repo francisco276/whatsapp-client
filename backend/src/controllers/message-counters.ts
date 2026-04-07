@@ -156,9 +156,12 @@ export async function setLimit(request: FastifyRequest<{ Params: CounterParams, 
 
   try {
     await db
-      .update(workspacesTable)
-      .set({ messageLimit, updatedAt: new Date() })
-      .where(eq(workspacesTable.id, workspaceId))
+      .insert(workspacesTable)
+      .values({ id: workspaceId, name: workspaceId, messageLimit })
+      .onConflictDoUpdate({
+        target: workspacesTable.id,
+        set: { messageLimit, updatedAt: new Date() }
+      })
 
     return reply.send({
       success: true,
