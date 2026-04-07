@@ -106,7 +106,8 @@ export const BulkMessageModal = ({ onClose }: Props) => {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [message, setMessage] = useState('')
   const [attachment, setAttachment] = useState<AttachedFile | null>(null)
-  const [delay, setDelay] = useState(3)
+  const [delayMin, setDelayMin] = useState(3)
+  const [delayMax, setDelayMax] = useState(8)
   const [isSending, setIsSending] = useState(false)
   const [progress, setProgress] = useState<BulkResult[]>([])
   const [done, setDone] = useState(false)
@@ -217,19 +218,25 @@ export const BulkMessageModal = ({ onClose }: Props) => {
 
     const jids = Array.from(selected)
     const results: BulkResult[] = []
-    const whatsappMessage = buildWhatsAppMessage(message, attachment)
 
     for (let i = 0; i < jids.length; i++) {
       const jid = jids[i]
       const contact = currentList.find((c) => c.id === jid)
       const name = contact?.name || formatPhone(jid)
 
+      const personalizedText = message.replace(/\{nombre\}/gi, name)
+      const whatsappMessage = buildWhatsAppMessage(personalizedText, attachment)
+
       try {
+        const randomDelay = i === 0
+          ? 0
+          : (delayMin + Math.random() * (delayMax - delayMin)) * 1000
+
         const payload = [{
           jid,
           type: isGroup(jid) ? 'group' : 'number',
           message: whatsappMessage,
-          delay: i === 0 ? 0 : delay * 1000,
+          delay: Math.round(randomDelay),
           options: {}
         }]
 
@@ -244,7 +251,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
 
     setDone(true)
     setIsSending(false)
-  }, [workspaceId, session, message, attachment, selected, currentList, delay])
+  }, [workspaceId, session, message, attachment, selected, currentList, delayMin, delayMax])
 
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab)
@@ -383,6 +390,9 @@ export const BulkMessageModal = ({ onClose }: Props) => {
                   fontFamily: 'inherit',
                 }}
               />
+              <p style={{ margin: '4px 0 0 0', fontSize: 11, color: '#9699a6' }}>
+                Usa <strong style={{ color: '#676879' }}>{'{nombre}'}</strong> para personalizar con el nombre de cada contacto
+              </p>
 
               <div style={{ marginTop: 8 }}>
                 <input
@@ -451,21 +461,52 @@ export const BulkMessageModal = ({ onClose }: Props) => {
               </div>
 
               <div style={{ marginTop: 10 }}>
-                <p style={{ margin: '0 0 4px 0', fontSize: 13, color: '#676879' }}>
-                  Intervalo entre mensajes: <strong>{delay}s</strong>
+                <p style={{ margin: '0 0 6px 0', fontSize: 13, color: '#676879' }}>
+                  Intervalo aleatorio entre mensajes: <strong>{delayMin}s – {delayMax}s</strong>
                 </p>
-                <input
-                  type="range"
-                  min={1}
-                  max={30}
-                  value={delay}
-                  onChange={(e) => setDelay(Number(e.target.value))}
-                  style={{ width: '100%', cursor: 'pointer' }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 11, color: '#676879' }}>1s</span>
-                  <span style={{ fontSize: 11, color: '#676879' }}>30s</span>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 2px 0', fontSize: 11, color: '#9699a6' }}>Mínimo</p>
+                    <input
+                      type="range"
+                      min={1}
+                      max={59}
+                      value={delayMin}
+                      onChange={(e) => {
+                        const v = Number(e.target.value)
+                        setDelayMin(v)
+                        if (v >= delayMax) setDelayMax(Math.min(60, v + 1))
+                      }}
+                      style={{ width: '100%', cursor: 'pointer' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 10, color: '#9699a6' }}>1s</span>
+                      <span style={{ fontSize: 10, color: '#9699a6' }}>59s</span>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 2px 0', fontSize: 11, color: '#9699a6' }}>Máximo</p>
+                    <input
+                      type="range"
+                      min={2}
+                      max={60}
+                      value={delayMax}
+                      onChange={(e) => {
+                        const v = Number(e.target.value)
+                        setDelayMax(v)
+                        if (v <= delayMin) setDelayMin(Math.max(1, v - 1))
+                      }}
+                      style={{ width: '100%', cursor: 'pointer' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 10, color: '#9699a6' }}>2s</span>
+                      <span style={{ fontSize: 10, color: '#9699a6' }}>60s</span>
+                    </div>
+                  </div>
                 </div>
+                <p style={{ margin: '4px 0 0 0', fontSize: 11, color: '#9699a6' }}>
+                  Los intervalos aleatorios ayudan a evitar bloqueos por envío masivo
+                </p>
               </div>
             </div>
 
