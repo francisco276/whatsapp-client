@@ -2,7 +2,7 @@ import { ERROR_LOAD_SESSIONS } from '@/config/errors'
 import { Session } from '@/types'
 import { cn } from '@/utils/utils'
 import { Box, Flex, Heading, IconButton, Text } from '@vibe/core'
-import { ContentDirectory, NavigationChevronLeft, NavigationChevronRight, Settings } from '@vibe/icons'
+import { ContentDirectory, NavigationChevronLeft, NavigationChevronRight, Send, Settings } from '@vibe/icons'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { MondayApi } from '../lib/monday/api'
 import { AddSession } from './add-session'
@@ -13,6 +13,7 @@ import { SideBarList } from './skeletons/sidebar-list'
 import { Link } from 'wouter'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { BulkMessageModal } from './sessions/bulk-message-modal'
 
 type SessionSidebarProps = {
   type?: 'small' | 'full'
@@ -26,6 +27,7 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
   const workspaceId = useWorkspaceId()
   const { session: currentSession, setSession } = useContext(SessionContext)
   const [sessionsSidebarOpen, setSessionsSidebarOpen] = useState(true)
+  const [showBulkModal, setShowBulkModal] = useState(false)
   const { sentCount, setWorkspaceId, fetchCount } = useMessageCounterStore()
 
   useEffect(() => {
@@ -68,9 +70,12 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
             {
               !isSmallVersion && <Flex gap={10} className='ml-auto transition-all duration-300'>
                 {sessionsSidebarOpen && (
-                  <Link href="/templates">
-                    <IconButton size='small' kind='tertiary' color='fixed-light' icon={ContentDirectory}  />
-                  </Link>
+                  <>
+                    <Link href="/templates">
+                      <IconButton size='small' kind='tertiary' color='fixed-light' icon={ContentDirectory} tooltipProps={{ content: 'Plantillas' }} />
+                    </Link>
+                    <IconButton size='small' kind='tertiary' color='fixed-light' icon={Send} onClick={() => setShowBulkModal(true)} tooltipProps={{ content: 'Mensajes masivos' }} />
+                  </>
                   )
                 }
                 <IconButton size='small' kind='tertiary' color='fixed-light' icon={Settings} onClick={handleOpenModal} />
@@ -107,6 +112,10 @@ const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSide
           isToggle={isToggle}
         />}
       </Box>
+
+      {showBulkModal && (
+        <BulkMessageModal onClose={() => setShowBulkModal(false)} />
+      )}
     </Box>
   )
 }

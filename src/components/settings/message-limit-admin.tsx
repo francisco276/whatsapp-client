@@ -21,7 +21,7 @@ export const MessageLimitAdmin = () => {
   const [result, setResult] = useState<{ success: boolean, message: string } | null>(null)
 
   const workspaceId = useWorkspaceId()
-  const { messageLimit, fetchCount } = useMessageCounterStore()
+  const { messageLimit, fetchCount, applyNewLimit } = useMessageCounterStore()
 
   const handleUnlock = useCallback(() => {
     if (!password.trim()) {
@@ -48,11 +48,12 @@ export const MessageLimitAdmin = () => {
     const res = await setMessageLimit({ workspaceId, password, messageLimit: limit })
 
     if (res.success) {
-      setResult({ success: true, message: 'Límite actualizado correctamente' })
+      applyNewLimit(limit)
+      setResult({ success: true, message: `Límite actualizado a ${limit.toLocaleString()} mensajes` })
       fetchCount()
-      setTimeout(() => setResult(null), 3000)
+      setTimeout(() => setResult(null), 4000)
     } else {
-      setResult({ success: false, message: res.message || 'Error' })
+      setResult({ success: false, message: res.message || 'Error al guardar' })
       if (res.message === 'Contraseña incorrecta') {
         setIsUnlocked(false)
         setPassword('')
@@ -60,7 +61,7 @@ export const MessageLimitAdmin = () => {
     }
 
     setIsSaving(false)
-  }, [workspaceId, password, selectedLimit, customLimit, fetchCount])
+  }, [workspaceId, password, selectedLimit, customLimit, fetchCount, applyNewLimit])
 
   if (!isUnlocked) {
     return (

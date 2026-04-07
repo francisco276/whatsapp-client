@@ -11,6 +11,7 @@ interface MessageCounterState {
   setWorkspaceId: (workspaceId: string) => void
   fetchCount: () => Promise<void>
   incrementSentCount: () => Promise<void>
+  applyNewLimit: (messageLimit: number) => void
 }
 
 export const useMessageCounterStore = create<MessageCounterState>()((set, get) => ({
@@ -63,5 +64,9 @@ export const useMessageCounterStore = create<MessageCounterState>()((set, get) =
     } catch {
       set({ sentCount: sentCount })
     }
+  },
+
+  applyNewLimit: (messageLimit: number) => {
+    set({ messageLimit })
   }
 }))
