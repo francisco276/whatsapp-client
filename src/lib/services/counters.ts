@@ -65,6 +65,10 @@ export const incrementCounter = async ({ workspaceId }: { workspaceId: string })
 export const setMessageLimit = async ({ workspaceId, password, messageLimit }: { workspaceId: string, password: string, messageLimit: number }): Promise<{ success: boolean, message?: string }> => {
   try {
     const { data: response } = await api.post(`${ROUTE}/${workspaceId}/set-limit`, { password, messageLimit })
+    if (response.success) {
+      const currentLocal = getLocalCounter(workspaceId)
+      setLocalCounter(workspaceId, { ...currentLocal, messageLimit })
+    }
     return { success: response.success }
   } catch (error: any) {
     const message = error?.response?.data?.message || 'Error al configurar el límite'

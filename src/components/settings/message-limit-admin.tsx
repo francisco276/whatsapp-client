@@ -33,7 +33,7 @@ export const MessageLimitAdmin = () => {
   const [result, setResult] = useState<{ success: boolean, message: string } | null>(null)
 
   const currentWorkspaceId = useWorkspaceId()
-  const { applyNewLimit } = useMessageCounterStore()
+  const { applyNewLimit, fetchCount } = useMessageCounterStore()
 
   const handleUnlock = useCallback(() => {
     if (!password.trim()) {
@@ -63,6 +63,7 @@ export const MessageLimitAdmin = () => {
     if (res.success) {
       if (accountId === currentWorkspaceId) {
         applyNewLimit(limit)
+        fetchCount()
       }
       setResult({ success: true, message: `Cuenta ${accountId} actualizada a ${limit.toLocaleString()} mensajes/mes` })
       setTimeout(() => setResult(null), 5000)
@@ -75,7 +76,7 @@ export const MessageLimitAdmin = () => {
     }
 
     setIsSaving(false)
-  }, [targetAccountId, currentWorkspaceId, password, selectedLimit, customLimit, applyNewLimit])
+  }, [targetAccountId, currentWorkspaceId, password, selectedLimit, customLimit, applyNewLimit, fetchCount])
 
   if (!isUnlocked) {
     return (
