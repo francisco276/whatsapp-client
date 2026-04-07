@@ -6,6 +6,13 @@ import { useWorkspaceId } from '@/hooks/useWorkspaceId'
 import { SessionContext } from '@/components/providers/session/session-context'
 import { MondayApi } from '@/lib/monday/api'
 
+interface AttachedFile {
+  name: string
+  mimetype: string
+  dataUri: string
+  size: number
+}
+
 interface BulkResult {
   jid: string
   name: string
@@ -41,6 +48,42 @@ function phoneToJid(phone: string): string | null {
   return `${digits}@s.whatsapp.net`
 }
 
+function readFileAsDataUri(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function buildWhatsAppMessage(text: string, attachment: AttachedFile | null): any {
+  if (!attachment) return { text }
+
+  const base = {
+    caption: text,
+    mimetype: attachment.mimetype,
+    fileName: attachment.name,
+  }
+
+  if (attachment.mimetype.startsWith('image/')) {
+    return { image: { url: attachment.dataUri }, ...base }
+  }
+  if (attachment.mimetype.startsWith('video/')) {
+    return { video: { url: attachment.dataUri }, ...base }
+  }
+  if (attachment.mimetype.startsWith('audio/')) {
+    return { audio: { url: attachment.dataUri }, mimetype: attachment.mimetype, ptt: false }
+  }
+  return { document: { url: attachment.dataUri }, ...base }
+}
+
 const monday = new MondayApi()
 
 export const BulkMessageModal = ({ onClose }: Props) => {
@@ -62,10 +105,20 @@ export const BulkMessageModal = ({ onClose }: Props) => {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [message, setMessage] = useState('')
+  const [attachment, setAttachment] = useState<AttachedFile | null>(null)
   const [delay, setDelay] = useState(3)
   const [isSending, setIsSending] = useState(false)
   const [progress, setProgress] = useState<BulkResult[]>([])
   const [done, setDone] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const dataUri = await readFileAsDataUri(file)
+    setAttachment({ name: file.name, mimetype: file.type, dataUri, size: file.size })
+    e.target.value = ''
+  }, [])
 
   useEffect(() => {
     if (!workspaceId || !session) return
@@ -157,13 +210,14 @@ export const BulkMessageModal = ({ onClose }: Props) => {
   }, [filtered, selected.size])
 
   const handleSend = useCallback(async () => {
-    if (!workspaceId || !session || !message.trim() || selected.size === 0) return
+    if (!workspaceId || !session || (!message.trim() && !attachment) || selected.size === 0) return
 
     setIsSending(true)
     setDone(false)
 
     const jids = Array.from(selected)
     const results: BulkResult[] = []
+    const whatsappMessage = buildWhatsAppMessage(message, attachment)
 
     for (let i = 0; i < jids.length; i++) {
       const jid = jids[i]
@@ -174,7 +228,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
         const payload = [{
           jid,
           type: isGroup(jid) ? 'group' : 'number',
-          message: { text: message },
+          message: whatsappMessage,
           delay: i === 0 ? 0 : delay * 1000,
           options: {}
         }]
@@ -190,7 +244,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
 
     setDone(true)
     setIsSending(false)
-  }, [workspaceId, session, message, selected, currentList, delay])
+  }, [workspaceId, session, message, attachment, selected, currentList, delay])
 
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab)
@@ -312,10 +366,10 @@ export const BulkMessageModal = ({ onClose }: Props) => {
                 Mensaje
               </p>
               <textarea
-                placeholder="Escribe el mensaje a enviar..."
+                placeholder={attachment ? 'Escribe un pie de foto (opcional)...' : 'Escribe el mensaje a enviar...'}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                rows={4}
+                rows={3}
                 style={{
                   width: '100%',
                   padding: '8px 10px',
@@ -329,6 +383,73 @@ export const BulkMessageModal = ({ onClose }: Props) => {
                   fontFamily: 'inherit',
                 }}
               />
+
+              <div style={{ marginTop: 8 }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
+                {attachment ? (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 12px',
+                    borderRadius: 4,
+                    border: '1px solid #c5c7d0',
+                    backgroundColor: '#f8f9fb',
+                  }}>
+                    <span style={{ fontSize: 18 }}>
+                      {attachment.mimetype.startsWith('image/') ? '🖼️'
+                        : attachment.mimetype.startsWith('video/') ? '🎬'
+                        : attachment.mimetype.startsWith('audio/') ? '🎵'
+                        : '📄'}
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#323338', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {attachment.name}
+                      </p>
+                      <p style={{ margin: 0, fontSize: 11, color: '#9699a6' }}>
+                        {formatFileSize(attachment.size)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setAttachment(null)}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontSize: 16, color: '#9699a6', padding: '0 4px', lineHeight: 1,
+                      }}
+                      title="Quitar archivo"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '6px 12px',
+                      borderRadius: 4,
+                      border: '1px dashed #c5c7d0',
+                      background: 'none',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      color: '#676879',
+                      width: '100%',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    📎 Adjuntar imagen, video o archivo
+                  </button>
+                )}
+              </div>
+
               <div style={{ marginTop: 10 }}>
                 <p style={{ margin: '0 0 4px 0', fontSize: 13, color: '#676879' }}>
                   Intervalo entre mensajes: <strong>{delay}s</strong>
@@ -464,7 +585,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
               <Button
                 size="small"
                 onClick={handleSend}
-                disabled={selected.size === 0 || !message.trim()}
+                disabled={selected.size === 0 || (!message.trim() && !attachment)}
               >
                 Enviar a {selected.size} contacto{selected.size !== 1 ? 's' : ''}
               </Button>
