@@ -21,7 +21,7 @@ export const MessageLimitAdmin = () => {
   const [result, setResult] = useState<{ success: boolean, message: string } | null>(null)
 
   const workspaceId = useWorkspaceId()
-  const { messageLimit, fetchCount, applyNewLimit } = useMessageCounterStore()
+  const { messageLimit, applyNewLimit } = useMessageCounterStore()
 
   const handleUnlock = useCallback(() => {
     if (!password.trim()) {
@@ -50,7 +50,6 @@ export const MessageLimitAdmin = () => {
     if (res.success) {
       applyNewLimit(limit)
       setResult({ success: true, message: `Límite actualizado a ${limit.toLocaleString()} mensajes` })
-      fetchCount()
       setTimeout(() => setResult(null), 4000)
     } else {
       setResult({ success: false, message: res.message || 'Error al guardar' })
@@ -61,7 +60,7 @@ export const MessageLimitAdmin = () => {
     }
 
     setIsSaving(false)
-  }, [workspaceId, password, selectedLimit, customLimit, fetchCount, applyNewLimit])
+  }, [workspaceId, password, selectedLimit, customLimit, applyNewLimit])
 
   if (!isUnlocked) {
     return (
