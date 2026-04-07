@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react'
 import { Button, Loader } from '@vibe/core'
 import { SettingBox } from './setting-box'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
-import { useBoardId } from '@/hooks/useBoardId'
 import { setMessageLimit } from '@/lib/services/counters'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
@@ -27,17 +26,14 @@ export const MessageLimitAdmin = () => {
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
-  const [targetWorkspaceId, setTargetWorkspaceId] = useState('')
+  const [targetAccountId, setTargetAccountId] = useState('')
   const [selectedLimit, setSelectedLimit] = useState<number | null>(null)
   const [customLimit, setCustomLimit] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [result, setResult] = useState<{ success: boolean, message: string } | null>(null)
 
   const currentWorkspaceId = useWorkspaceId()
-  const currentBoardId = useBoardId()
   const { applyNewLimit } = useMessageCounterStore()
-
-  const effectiveId = currentBoardId || currentWorkspaceId
 
   const handleUnlock = useCallback(() => {
     if (!password.trim()) {
@@ -46,12 +42,12 @@ export const MessageLimitAdmin = () => {
     }
     setPasswordError('')
     setIsUnlocked(true)
-    setTargetWorkspaceId(effectiveId || '')
-  }, [password, effectiveId])
+    setTargetAccountId(currentWorkspaceId || '')
+  }, [password, currentWorkspaceId])
 
   const handleSave = useCallback(async () => {
-    const wsId = targetWorkspaceId.trim() || effectiveId
-    if (!wsId) return
+    const accountId = targetAccountId.trim() || currentWorkspaceId
+    if (!accountId) return
 
     const limit = selectedLimit === -1 ? parseInt(customLimit) : selectedLimit
     if (!limit || limit <= 0) {
@@ -62,13 +58,13 @@ export const MessageLimitAdmin = () => {
     setIsSaving(true)
     setResult(null)
 
-    const res = await setMessageLimit({ workspaceId: wsId, password, messageLimit: limit })
+    const res = await setMessageLimit({ workspaceId: accountId, password, messageLimit: limit })
 
     if (res.success) {
-      if (wsId === effectiveId) {
+      if (accountId === currentWorkspaceId) {
         applyNewLimit(limit)
       }
-      setResult({ success: true, message: `Límite del board ${wsId} actualizado a ${limit.toLocaleString()} mensajes` })
+      setResult({ success: true, message: `Cuenta ${accountId} actualizada a ${limit.toLocaleString()} mensajes/mes` })
       setTimeout(() => setResult(null), 5000)
     } else {
       setResult({ success: false, message: res.message || 'Error al guardar' })
@@ -79,7 +75,7 @@ export const MessageLimitAdmin = () => {
     }
 
     setIsSaving(false)
-  }, [targetWorkspaceId, effectiveId, password, selectedLimit, customLimit, applyNewLimit])
+  }, [targetAccountId, currentWorkspaceId, password, selectedLimit, customLimit, applyNewLimit])
 
   if (!isUnlocked) {
     return (
@@ -122,17 +118,17 @@ export const MessageLimitAdmin = () => {
       <div style={{ marginTop: 12 }}>
         <div style={{ marginBottom: 12 }}>
           <p style={{ margin: '0 0 4px 0', fontSize: 12, color: '#676879', fontWeight: 600 }}>
-            WORKSPACE ID DEL CLIENTE
+            ID DE CUENTA DEL CLIENTE
           </p>
           <input
             type="text"
-            placeholder={`Board actual: ${effectiveId}`}
-            value={targetWorkspaceId}
-            onChange={(e) => setTargetWorkspaceId(e.target.value)}
+            placeholder={`Cuenta actual: ${currentWorkspaceId}`}
+            value={targetAccountId}
+            onChange={(e) => setTargetAccountId(e.target.value)}
             style={inputStyle}
           />
           <p style={{ margin: '4px 0 0 0', fontSize: 11, color: '#9699a6' }}>
-            Board ID del cliente (deja vacío para usar el board actual: {effectiveId})
+            Deja vacío para usar la cuenta actual ({currentWorkspaceId})
           </p>
         </div>
 
