@@ -3,6 +3,7 @@ import { Loader } from '@vibe/core'
 import { SettingBox } from './setting-box'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { useBoardId } from '@/hooks/useBoardId'
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -11,14 +12,16 @@ const MONTH_NAMES = [
 
 export const MessageUsage = () => {
   const workspaceId = useWorkspaceId()
+  const boardId = useBoardId()
   const { sentCount, messageLimit, year, month, isLoading, setWorkspaceId, fetchCount } = useMessageCounterStore()
 
   useEffect(() => {
-    if (workspaceId) {
-      setWorkspaceId(workspaceId)
+    const counterId = boardId || workspaceId
+    if (counterId) {
+      setWorkspaceId(counterId)
       fetchCount()
     }
-  }, [workspaceId])
+  }, [boardId, workspaceId, setWorkspaceId, fetchCount])
 
   const limit = messageLimit || 1000
   const percentage = Math.min((sentCount / limit) * 100, 100)

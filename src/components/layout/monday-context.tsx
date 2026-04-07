@@ -3,6 +3,7 @@ import { FullLoader } from '@/components/loading/full-loading'
 import { Error } from '../error'
 import { ERROR_LOAD_CONTEXT } from '@/config/errors'
 import { WorkspaceProvider } from '../providers/workspace/workspace-provider'
+import { BoardProvider } from '../providers/board/board-provider'
 import { UserProvider } from '../providers/user/user-provider'
 
 type MondayContextProps = {
@@ -20,13 +21,15 @@ export default function MondayContext({ children }: MondayContextProps) {
     return <Error title={ERROR_LOAD_CONTEXT.title} errorMessage={ERROR_LOAD_CONTEXT.title} />
   }
 
-  const { accountId: workspaceId, userId } = context
+  const { accountId: workspaceId, boardId, userId } = context
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>
-      <UserProvider userId={userId}>
-        {children}
-      </UserProvider>
+      <BoardProvider boardId={boardId || workspaceId}>
+        <UserProvider userId={userId}>
+          {children}
+        </UserProvider>
+      </BoardProvider>
     </WorkspaceProvider>
   )
 }

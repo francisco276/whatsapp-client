@@ -27,6 +27,11 @@ export async function get(request: FastifyRequest<{ Params: CounterParams }>, re
   const { year, month } = getCurrentMonthYear()
 
   try {
+    await db
+      .insert(workspacesTable)
+      .values({ id: workspaceId, name: workspaceId })
+      .onConflictDoNothing()
+
     const [workspace] = await db
       .select({ messageLimit: workspacesTable.messageLimit })
       .from(workspacesTable)
@@ -68,6 +73,11 @@ export async function increment(request: FastifyRequest<{ Params: CounterParams 
   const { year, month } = getCurrentMonthYear()
 
   try {
+    await db
+      .insert(workspacesTable)
+      .values({ id: workspaceId, name: workspaceId })
+      .onConflictDoNothing()
+
     const [workspace] = await db
       .select({ messageLimit: workspacesTable.messageLimit })
       .from(workspacesTable)

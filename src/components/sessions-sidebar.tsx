@@ -13,6 +13,7 @@ import { SideBarList } from './skeletons/sidebar-list'
 import { Link } from 'wouter'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { useBoardId } from '@/hooks/useBoardId'
 import { BulkMessageModal } from './sessions/bulk-message-modal'
 
 type SessionSidebarProps = {
@@ -25,17 +26,19 @@ type SessionSidebarProps = {
 const SessionSidebar = ({ sessions, loading, type = 'full', error }: SessionSidebarProps) => {
   const monday = new MondayApi()
   const workspaceId = useWorkspaceId()
+  const boardId = useBoardId()
   const { session: currentSession, setSession } = useContext(SessionContext)
   const [sessionsSidebarOpen, setSessionsSidebarOpen] = useState(true)
   const [showBulkModal, setShowBulkModal] = useState(false)
   const { sentCount, setWorkspaceId, fetchCount } = useMessageCounterStore()
 
   useEffect(() => {
-    if (workspaceId) {
-      setWorkspaceId(workspaceId)
+    const counterId = boardId || workspaceId
+    if (counterId) {
+      setWorkspaceId(counterId)
       fetchCount()
     }
-  }, [workspaceId, setWorkspaceId, fetchCount])
+  }, [boardId, workspaceId, setWorkspaceId, fetchCount])
 
   useEffect(() => {
     if (!currentSession && sessions.length > 0 && !loading && !error) {

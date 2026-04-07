@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { Button, Loader } from '@vibe/core'
 import { SettingBox } from './setting-box'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { useBoardId } from '@/hooks/useBoardId'
 import { setMessageLimit } from '@/lib/services/counters'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
@@ -33,7 +34,10 @@ export const MessageLimitAdmin = () => {
   const [result, setResult] = useState<{ success: boolean, message: string } | null>(null)
 
   const currentWorkspaceId = useWorkspaceId()
+  const currentBoardId = useBoardId()
   const { applyNewLimit } = useMessageCounterStore()
+
+  const effectiveId = currentBoardId || currentWorkspaceId
 
   const handleUnlock = useCallback(() => {
     if (!password.trim()) {
@@ -42,11 +46,11 @@ export const MessageLimitAdmin = () => {
     }
     setPasswordError('')
     setIsUnlocked(true)
-    setTargetWorkspaceId(currentWorkspaceId || '')
-  }, [password, currentWorkspaceId])
+    setTargetWorkspaceId(effectiveId || '')
+  }, [password, effectiveId])
 
   const handleSave = useCallback(async () => {
-    const wsId = targetWorkspaceId.trim() || currentWorkspaceId
+    const wsId = targetWorkspaceId.trim() || effectiveId
     if (!wsId) return
 
     const limit = selectedLimit === -1 ? parseInt(customLimit) : selectedLimit
@@ -61,10 +65,10 @@ export const MessageLimitAdmin = () => {
     const res = await setMessageLimit({ workspaceId: wsId, password, messageLimit: limit })
 
     if (res.success) {
-      if (wsId === currentWorkspaceId) {
+      if (wsId === effectiveId) {
         applyNewLimit(limit)
       }
-      setResult({ success: true, message: `Límite de workspace ${wsId} actualizado a ${limit.toLocaleString()} mensajes` })
+      setResult({ success: true, message: `Límite del board ${wsId} actualizado a ${limit.toLocaleString()} mensajes` })
       setTimeout(() => setResult(null), 5000)
     } else {
       setResult({ success: false, message: res.message || 'Error al guardar' })
@@ -75,7 +79,7 @@ export const MessageLimitAdmin = () => {
     }
 
     setIsSaving(false)
-  }, [targetWorkspaceId, currentWorkspaceId, password, selectedLimit, customLimit, applyNewLimit])
+  }, [targetWorkspaceId, effectiveId, password, selectedLimit, customLimit, applyNewLimit])
 
   if (!isUnlocked) {
     return (
@@ -122,13 +126,13 @@ export const MessageLimitAdmin = () => {
           </p>
           <input
             type="text"
-            placeholder={`Workspace actual: ${currentWorkspaceId}`}
+            placeholder={`Board actual: ${effectiveId}`}
             value={targetWorkspaceId}
             onChange={(e) => setTargetWorkspaceId(e.target.value)}
             style={inputStyle}
           />
           <p style={{ margin: '4px 0 0 0', fontSize: 11, color: '#9699a6' }}>
-            Deja vacío para usar el workspace actual ({currentWorkspaceId})
+            Board ID del cliente (deja vacío para usar el board actual: {effectiveId})
           </p>
         </div>
 

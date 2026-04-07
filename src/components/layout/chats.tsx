@@ -4,6 +4,7 @@ import { ChatProvider } from "@/components/providers/chat/chat-provider"
 import { useRegisterNewMessage } from '@/hooks/useRegisterNewMessage'
 import { useMondayRegistration } from '@/hooks/useMondayRegistration'
 import { useWorkspaceId } from '@/hooks/useWorkspaceId'
+import { useBoardId } from '@/hooks/useBoardId'
 import { getChats } from '@/lib/services/chats'
 import { useQuery } from '@tanstack/react-query'
 import { useContext, useEffect } from 'react'
@@ -21,15 +22,17 @@ type ChatsProps = {
 
 export default function Chats({ enableSidebar = true, chatId, emptyComponent: EmptyComponent }: ChatsProps) {
   const workspaceId = useWorkspaceId()
+  const boardId = useBoardId()
   const { session } = useContext(SessionContext)
   const { setWorkspaceId, fetchCount } = useMessageCounterStore()
 
   useEffect(() => {
-    if (workspaceId) {
-      setWorkspaceId(workspaceId)
+    const counterId = boardId || workspaceId
+    if (counterId) {
+      setWorkspaceId(counterId)
       fetchCount()
     }
-  }, [workspaceId, setWorkspaceId, fetchCount])
+  }, [boardId, workspaceId, setWorkspaceId, fetchCount])
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['getChats', session],
