@@ -6,9 +6,8 @@ import { setMessageLimit } from '@/lib/services/counters'
 import { useMessageCounterStore } from '@/stores/messageCounterStore'
 
 const PACKAGES = [
-  { label: 'Básico', value: 500 },
-  { label: 'Estándar', value: 1000 },
-  { label: 'Premium', value: 5000 },
+  { label: 'Estándar', value: 5000 },
+  { label: 'Premium', value: 25000 },
 ]
 
 const inputStyle: React.CSSProperties = {

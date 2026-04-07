@@ -16,7 +16,7 @@ interface MessageCounterState {
 
 export const useMessageCounterStore = create<MessageCounterState>()((set, get) => ({
   sentCount: 0,
-  messageLimit: 1000,
+  messageLimit: 5000,
   year: new Date().getFullYear(),
   month: new Date().getMonth() + 1,
   isLoading: false,

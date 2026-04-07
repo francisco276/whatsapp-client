@@ -23,7 +23,7 @@ const getLocalCounter = (workspaceId: string): CounterData => {
     }
   } catch {
   }
-  return { sentCount: 0, messageLimit: 1000, year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+  return { sentCount: 0, messageLimit: 5000, year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
 }
 
 const setLocalCounter = (workspaceId: string, data: CounterData): void => {

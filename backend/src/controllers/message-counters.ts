@@ -54,7 +54,7 @@ export async function get(request: FastifyRequest<{ Params: CounterParams }>, re
       success: true,
       data: {
         sentCount: counter?.sentCount ?? 0,
-        messageLimit: workspace?.messageLimit ?? 1000,
+        messageLimit: workspace?.messageLimit ?? 5000,
         year,
         month
       }
@@ -84,7 +84,7 @@ export async function increment(request: FastifyRequest<{ Params: CounterParams 
       .where(eq(workspacesTable.id, workspaceId))
       .limit(1)
 
-    const messageLimit = workspace?.messageLimit ?? 1000
+    const messageLimit = workspace?.messageLimit ?? 5000
 
     const [currentCounter] = await db
       .select()
