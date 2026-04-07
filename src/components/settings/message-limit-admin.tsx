@@ -11,17 +11,29 @@ const PACKAGES = [
   { label: 'Premium', value: 5000 },
 ]
 
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '7px 10px',
+  borderRadius: 4,
+  border: '1px solid #c5c7d0',
+  fontSize: 14,
+  color: '#323338',
+  outline: 'none',
+  boxSizing: 'border-box',
+}
+
 export const MessageLimitAdmin = () => {
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [targetWorkspaceId, setTargetWorkspaceId] = useState('')
   const [selectedLimit, setSelectedLimit] = useState<number | null>(null)
   const [customLimit, setCustomLimit] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [result, setResult] = useState<{ success: boolean, message: string } | null>(null)
 
-  const workspaceId = useWorkspaceId()
-  const { messageLimit, applyNewLimit } = useMessageCounterStore()
+  const currentWorkspaceId = useWorkspaceId()
+  const { applyNewLimit } = useMessageCounterStore()
 
   const handleUnlock = useCallback(() => {
     if (!password.trim()) {
@@ -30,11 +42,12 @@ export const MessageLimitAdmin = () => {
     }
     setPasswordError('')
     setIsUnlocked(true)
-    setSelectedLimit(messageLimit)
-  }, [password, messageLimit])
+    setTargetWorkspaceId(currentWorkspaceId || '')
+  }, [password, currentWorkspaceId])
 
   const handleSave = useCallback(async () => {
-    if (!workspaceId) return
+    const wsId = targetWorkspaceId.trim() || currentWorkspaceId
+    if (!wsId) return
 
     const limit = selectedLimit === -1 ? parseInt(customLimit) : selectedLimit
     if (!limit || limit <= 0) {
@@ -45,12 +58,14 @@ export const MessageLimitAdmin = () => {
     setIsSaving(true)
     setResult(null)
 
-    const res = await setMessageLimit({ workspaceId, password, messageLimit: limit })
+    const res = await setMessageLimit({ workspaceId: wsId, password, messageLimit: limit })
 
     if (res.success) {
-      applyNewLimit(limit)
-      setResult({ success: true, message: `Límite actualizado a ${limit.toLocaleString()} mensajes` })
-      setTimeout(() => setResult(null), 4000)
+      if (wsId === currentWorkspaceId) {
+        applyNewLimit(limit)
+      }
+      setResult({ success: true, message: `Límite de workspace ${wsId} actualizado a ${limit.toLocaleString()} mensajes` })
+      setTimeout(() => setResult(null), 5000)
     } else {
       setResult({ success: false, message: res.message || 'Error al guardar' })
       if (res.message === 'Contraseña incorrecta') {
@@ -60,7 +75,7 @@ export const MessageLimitAdmin = () => {
     }
 
     setIsSaving(false)
-  }, [workspaceId, password, selectedLimit, customLimit, applyNewLimit])
+  }, [targetWorkspaceId, currentWorkspaceId, password, selectedLimit, customLimit, applyNewLimit])
 
   if (!isUnlocked) {
     return (
@@ -101,9 +116,21 @@ export const MessageLimitAdmin = () => {
   return (
     <SettingBox title="Administración de paquetes">
       <div style={{ marginTop: 12 }}>
-        <p style={{ margin: '0 0 12px 0', fontSize: 13, color: '#676879' }}>
-          Límite actual: <strong>{messageLimit.toLocaleString()} mensajes/mes</strong>
-        </p>
+        <div style={{ marginBottom: 12 }}>
+          <p style={{ margin: '0 0 4px 0', fontSize: 12, color: '#676879', fontWeight: 600 }}>
+            WORKSPACE ID DEL CLIENTE
+          </p>
+          <input
+            type="text"
+            placeholder={`Workspace actual: ${currentWorkspaceId}`}
+            value={targetWorkspaceId}
+            onChange={(e) => setTargetWorkspaceId(e.target.value)}
+            style={inputStyle}
+          />
+          <p style={{ margin: '4px 0 0 0', fontSize: 11, color: '#9699a6' }}>
+            Deja vacío para usar el workspace actual ({currentWorkspaceId})
+          </p>
+        </div>
 
         <p style={{ margin: '0 0 8px 0', fontSize: 13, color: '#676879' }}>
           Selecciona un paquete:
@@ -155,16 +182,7 @@ export const MessageLimitAdmin = () => {
               value={customLimit}
               onChange={(e) => setCustomLimit(e.target.value)}
               min={1}
-              style={{
-                width: '100%',
-                padding: '7px 10px',
-                borderRadius: 4,
-                border: '1px solid #c5c7d0',
-                fontSize: 14,
-                color: '#323338',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={inputStyle}
             />
           </div>
         )}
