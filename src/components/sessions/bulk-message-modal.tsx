@@ -240,10 +240,16 @@ export const BulkMessageModal = ({ onClose }: Props) => {
           options: {}
         }]
 
-        await api.post(`${workspaceId}/${session}/messages/send/bulk`, payload, { timeout: 0 })
-        results.push({ jid, name, success: true })
-      } catch {
-        results.push({ jid, name, success: false, error: 'Error al enviar' })
+        const res = await api.post(`${workspaceId}/${session}/messages/send/bulk`, payload, { timeout: 0 })
+        const resErrors = res.data?.errors
+        if (resErrors && resErrors.length > 0) {
+          results.push({ jid, name, success: false, error: resErrors[0]?.error || 'Error al enviar' })
+        } else {
+          results.push({ jid, name, success: true })
+        }
+      } catch (err: any) {
+        const errorMsg = err?.response?.data?.errors?.[0]?.error || 'Error al enviar'
+        results.push({ jid, name, success: false, error: errorMsg })
       }
 
       setProgress([...results])

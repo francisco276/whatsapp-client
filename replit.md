@@ -4,6 +4,8 @@
 A React-based frontend application for integrating Monday.com with WhatsApp messaging. This project is built with Vite, React 18, TypeScript, and Tailwind CSS, using the Monday.com Vibe design system.
 
 ## Recent Changes
+- 2026-04-14: Fixed bulk messaging sendBulk — now uses `validJid` (returns normalized JID from WhatsApp) instead of `jidExists` + original JID; calls `ensureConnected` before loop; converts data URI attachments to Buffer (Baileys doesn't accept data: URIs); improved error messages propagated to frontend
+- 2026-04-14: Improved file upload error propagation — frontend now shows actual backend error (e.g. "Monday API token no configurado") instead of always showing "Error al subir archivos"
 - 2026-03-10: File upload to Monday.com - export button now supports uploading WhatsApp media (images, videos, documents, audio) to a Monday.com file column; backend endpoint POST /api/v1/monday/upload-files with workspace authorization, server-side message lookup, and sanitized GraphQL mutation; frontend file column selector in export modal
 - 2026-02-24: Soft delete for WhatsApp messages - messages are no longer permanently deleted when removed from WhatsApp; `deletedAt` timestamp column added to messages table; messages remain accessible in the app
 - 2026-02-24: Improved notification contact display - notifications now show contact name + formatted phone number (e.g., "Juan Pérez (+5215532143112)") instead of raw JID

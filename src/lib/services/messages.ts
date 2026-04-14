@@ -108,7 +108,8 @@ export async function uploadFilesToMonday ({ workspaceId, sessionId, itemId, col
     }, { timeout: 0 })
 
     return response.data
-  } catch {
-    throw new Error('Error uploading files to Monday.com')
+  } catch (error: any) {
+    const message = error?.response?.data?.message || 'Error al subir archivos a Monday.com'
+    throw new Error(message)
   }
 }

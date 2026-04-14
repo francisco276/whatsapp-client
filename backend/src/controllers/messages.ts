@@ -196,6 +196,20 @@ interface BulkResults { index: number, result: WAMessage | undefined }
 interface BulkErrors { index: number, error: string }
 interface MessageBulk { jid: string, type: 'number' | 'group' | undefined, message: any, options: any, delay: number }
 
+function processMessageMedia (message: any): any {
+  const mediaTypes = ['image', 'video', 'document', 'audio']
+  for (const type of mediaTypes) {
+    if (typeof message[type]?.url === 'string' && message[type].url.startsWith('data:')) {
+      const parts = (message[type].url as string).split(',')
+      const base64Data = parts[1]
+      if (!base64Data) continue
+      const buffer = Buffer.from(base64Data, 'base64')
+      return { ...message, [type]: buffer }
+    }
+  }
+  return message
+}
+
 export const sendBulk: RouteHandler = async (req, res) => {
   const { session } = req
   const results: BulkResults[] = []
@@ -203,21 +217,28 @@ export const sendBulk: RouteHandler = async (req, res) => {
 
   const messages = req.body as MessageBulk[]
 
+  try {
+    await session.ensureConnected()
+  } catch {
+    // session may still be usable, continue
+  }
+
   for (const [index, { jid, type = 'number', delay = 1000, message, options }] of messages.entries()) {
     try {
-      const exists = await session.jidExists(jid, type)
-      if (!exists) {
-        errors.push({ index, error: 'JID does not exist' })
+      const validJid = await session.validJid(jid, type)
+      if (!validJid) {
+        errors.push({ index, error: 'Número no encontrado en WhatsApp' })
         continue
       }
 
       if (index > 0) await delayMs(delay)
 
-      const result = await session.session?.sendMessage(jid, message, options)
+      const processedMessage = processMessageMedia(message)
+      const result = await session.session?.sendMessage(validJid, processedMessage, options)
       results.push({ index, result })
     } catch (e) {
-      const message = 'An error occurred during message send'
-      errors.push({ index, error: message })
+      const errMsg = e instanceof Error ? e.message : 'An error occurred during message send'
+      errors.push({ index, error: errMsg })
     }
   }
 

@@ -147,7 +147,7 @@ export const ChatExportButton = () => {
             }
           } catch (err) {
             console.error('File upload failed:', err)
-            fileResult = 'Error al subir archivos'
+            fileResult = err instanceof Error ? err.message : 'Error al subir archivos'
           }
         }
       }
