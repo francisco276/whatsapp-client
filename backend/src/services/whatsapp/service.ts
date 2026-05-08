@@ -160,14 +160,24 @@ class WhatsAppService {
           this.updateWaConnection(update.isNewLogin === true ? WAStatus.Authenticated : WAStatus.Connected)
           this.retries = 0
           callback()
+          resolve(undefined)
+          return
         }
 
         if (connection === 'close') {
           this.handleConnectionClose(createdBy, insert, callback).catch(() => console.log('Error on handle connextion'))
+          return
         }
-        if (connection === 'connecting') this.updateWaConnection(WAStatus.PullingWAData)
 
-        this.handleConnectionUpdate().then(resolve).catch(reject)
+        if (connection === 'connecting') {
+          this.updateWaConnection(WAStatus.PullingWAData)
+          return
+        }
+
+        // connection is undefined — check for QR or other data
+        this.handleConnectionUpdate().then((qr) => {
+          if (qr !== undefined) resolve(qr)
+        }).catch(reject)
       })
     })
 
