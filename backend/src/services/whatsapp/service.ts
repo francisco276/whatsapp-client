@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, isLidUser } from 'baileys'
+import makeWASocket, { DisconnectReason, isLidUser, fetchLatestBaileysVersion } from 'baileys'
 import type { WASocket, ConnectionState } from 'baileys'
 import type { Boom } from '@hapi/boom'
 import { toDataURL } from 'qrcode'
@@ -119,10 +119,14 @@ class WhatsAppService {
   async addSession (createdBy: string, insert?: boolean, callback: () => void = () => { }): Promise<any> {
     const { state, saveCreds } = await useSession(this.sessionId, this.workspaceId)
 
+    const { version } = await fetchLatestBaileysVersion().catch(() => ({
+      version: [2, 3000, 1030761119] as [number, number, number]
+    }))
+
     this.socket = makeWASocket({
       browser: ['Monday', 'Monday App', 'Monday Integration'],
       auth: state,
-      version: [2, 3000, 1030761119],
+      version,
       syncFullHistory: true,
       generateHighQualityLinkPreview: true,
       connectTimeoutMs: undefined,
