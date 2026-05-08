@@ -20,7 +20,7 @@ export const AddSession = ({ isToggle, disabled, onSessionCreated }: { isToggle:
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [toast, setToast] = useState({ type: '', message: '', })
-  const { data, isIdle, mutate, isPending: isLoading, isError, reset } = useMutation({
+  const { data, mutate, isPending: isLoading, isError, reset } = useMutation({
     mutationKey: ['AddSession'],
     mutationFn: addSession,
     onSuccess: (data) => {
@@ -45,9 +45,7 @@ export const AddSession = ({ isToggle, disabled, onSessionCreated }: { isToggle:
     setQrCode(null)
     setIsOpen(true)
     reset()
-    if (isIdle) {
-      mutate({ workspaceId, sessionId })
-    }
+    mutate({ workspaceId, sessionId })
 
     if (!workspaceId) return
     const socketConnection = new SocketClient({ workspaceId, sessionId })

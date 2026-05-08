@@ -151,6 +151,27 @@ class WhatsAppService {
     }).onConflictDoNothing()
 
     const qrPromise = new Promise((resolve, reject) => {
+      let settled = false
+
+      const done = (value?: any) => {
+        if (settled) return
+        settled = true
+        clearTimeout(qrTimeout)
+        resolve(value)
+      }
+
+      const fail = (error: Error) => {
+        if (settled) return
+        settled = true
+        clearTimeout(qrTimeout)
+        reject(error)
+      }
+
+      // Safety net: reject if QR not generated within 60 seconds
+      const qrTimeout = setTimeout(() => {
+        fail(new Error('QR generation timed out. Please try again.'))
+      }, 60000)
+
       this.socket?.ev.on('connection.update', (update) => {
         this.connectionState = update
         const { connection } = update
@@ -160,12 +181,16 @@ class WhatsAppService {
           this.updateWaConnection(update.isNewLogin === true ? WAStatus.Authenticated : WAStatus.Connected)
           this.retries = 0
           callback()
-          resolve(undefined)
+          done(undefined)
           return
         }
 
         if (connection === 'close') {
           this.handleConnectionClose(createdBy, insert, callback).catch(() => console.log('Error on handle connextion'))
+          // For new session creation, fail immediately on close so user can retry
+          if (insert === true) {
+            fail(new Error('WhatsApp connection closed. Please try again.'))
+          }
           return
         }
 
@@ -176,8 +201,8 @@ class WhatsAppService {
 
         // connection is undefined — check for QR or other data
         this.handleConnectionUpdate().then((qr) => {
-          if (qr !== undefined) resolve(qr)
-        }).catch(reject)
+          if (qr !== undefined) done(qr)
+        }).catch(fail)
       })
     })
 
