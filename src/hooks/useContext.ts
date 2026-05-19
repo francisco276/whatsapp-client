@@ -28,7 +28,8 @@ export const useContext = () => {
         userId: context?.data?.user.id,
         theme: context?.data?.theme,
         version: `${context?.data?.appVersion?.versionData?.major}.${context?.data?.appVersion?.versionData?.minor}`,
-        accountId: context?.data?.account.id
+        accountId: context?.data?.account.id,
+        isAdmin: context?.data?.user?.is_admin === true || context?.data?.user?.account_tier === 'admin'
       } as AppContext
   }
 

@@ -12,6 +12,7 @@ export type AppContext = {
   version: string
   theme: string
   accountId: string
+  isAdmin: boolean
 }
 
 export type MondayError = {

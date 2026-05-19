@@ -16,6 +16,14 @@ export const addWorkspace = async ({ workspaceId, name }: { workspaceId: string,
   }
 }
 
+export const joinWorkspace = async ({ workspaceId, isAdmin }: { workspaceId: string, isAdmin: boolean }) => {
+  try {
+    await api.post(`${ROUTE}/join`, { workspaceId, isAdmin })
+  } catch {
+    // Non-critical — silently ignore errors
+  }
+}
+
 export const getWorkspace = async ({ workspaceId }: { workspaceId: string }) => {
   try {
     const response: { ok?: boolean, data: { data?: string, name?: string, error?: string } } = await api.get(`${ROUTE}/${workspaceId}`)
