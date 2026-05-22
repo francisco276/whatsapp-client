@@ -24,6 +24,11 @@ export const validate = async (request: FastifyRequest, reply: FastifyReply): Pr
     await request.jwtVerify()
   } catch (error) {
     if (error instanceof Error) {
+      const origin = request.headers.origin
+      if (origin) {
+        void reply.header('Access-Control-Allow-Origin', origin)
+        void reply.header('Access-Control-Allow-Credentials', 'true')
+      }
       const validateError = new AppError({ message: error.message, statusCode: 401, code: 'AUTHORIZATION_ERROR', name: 'AuthorizationError' })
       await handleError(validateError, reply)
     }
