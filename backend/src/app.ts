@@ -18,10 +18,9 @@ app.register(fastifyMultipart, {
 
 app.register(JWT, JWTConfig)
 app.register(cors, {
-  origin: (origin, cb) => { cb(null, origin ?? '*') },
+  origin: true,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 })
 
 app.register(Routes, { prefix: 'api/v1' })
