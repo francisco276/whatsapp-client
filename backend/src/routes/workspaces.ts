@@ -5,6 +5,7 @@ export default function defineRoutes (fastify: FastifyInstance, _: any, done: Fu
   fastify.addHook('onRequest', fastify.authenticate)
   fastify.get('/:workspaceId', workspaces.find)
   fastify.post('/add', workspaces.add)
+  fastify.post('/join', workspaces.join)
   fastify.delete('/:workspaceId', workspaces.del)
   done()
 }
