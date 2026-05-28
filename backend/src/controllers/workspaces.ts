@@ -45,9 +45,9 @@ export const join: RouteHandler = async (req, res) => {
       return await sendSuccessResponse(res, null, 'No admin privileges to sync')
     }
 
-    const workspace = await WorkspaceManager.getWorkspace(workspaceId).catch(() => undefined)
+    let workspace = await WorkspaceManager.getWorkspace(workspaceId).catch(() => undefined)
     if (workspace === null || workspace === undefined) {
-      return await sendSuccessResponse(res, null, 'Workspace not found')
+      workspace = await WorkspaceManager.createWorkspace({ id: workspaceId, name: workspaceId, userId })
     }
 
     const [existing] = await db
