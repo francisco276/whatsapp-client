@@ -19,20 +19,42 @@ export default function Workspace({ children }: WorkspaceProps) {
   const userId = context?.userId ?? ''
   const isAdmin = context?.isAdmin ?? false
 
-  const { isSuccess: tokenSuccess } = useQuery({
+  const { isSuccess: tokenSuccess, isError: tokenError } = useQuery({
     queryKey: ['getToken', workspaceId, userId],
-    queryFn: () => getToken({ workspaceId, userId }),
+    queryFn: async () => {
+      console.log('[WS] Obteniendo token...', { workspaceId, userId })
+      const result = await getToken({ workspaceId, userId })
+      console.log('[WS] Token obtenido OK')
+      return result
+    },
     enabled: !!workspaceId && !!userId,
     retry: 1,
   })
 
-  const { isSuccess: joinDone, isLoading: joinLoading } = useQuery({
+  const { isSuccess: joinDone, isLoading: joinLoading, isError: joinError } = useQuery({
     queryKey: ['joinWorkspace', workspaceId, userId],
-    queryFn: () => joinWorkspace({ workspaceId, isAdmin }),
+    queryFn: async () => {
+      console.log('[WS] Llamando joinWorkspace...', { workspaceId, isAdmin })
+      await joinWorkspace({ workspaceId, isAdmin })
+      console.log('[WS] joinWorkspace completado')
+      return true
+    },
     enabled: tokenSuccess && isAdmin && !!workspaceId,
   })
 
   const readyToFetch = isAdmin ? joinDone : tokenSuccess
+
+  console.log('[WS] Estado:', {
+    workspaceId,
+    userId,
+    isAdmin,
+    tokenSuccess,
+    tokenError,
+    joinDone,
+    joinLoading,
+    joinError,
+    readyToFetch,
+  })
 
   const {
     data: workspace,
@@ -40,7 +62,12 @@ export default function Workspace({ children }: WorkspaceProps) {
     isLoading: workspaceLoading,
   } = useQuery({
     queryKey: ['getWorkspace', workspaceId],
-    queryFn: () => getWorkspace({ workspaceId }),
+    queryFn: async () => {
+      console.log('[WS] Cargando workspace...', { workspaceId })
+      const result = await getWorkspace({ workspaceId })
+      console.log('[WS] Workspace resultado:', result)
+      return result
+    },
     enabled: !!workspaceId && readyToFetch,
     retry: 2,
   })

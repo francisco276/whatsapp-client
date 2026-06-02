@@ -17,9 +17,16 @@ export const WithAuthorization = ({ children }: WithAuthorizationProps) => {
 
   const { data: isValidUser, isLoading, isFetched } = useQuery({
     queryKey: ['authorized', workspaceId, userId],
-    queryFn: () => getIfAuthorizationUserExist({ workspaceId, userId }),
+    queryFn: async () => {
+      console.log('[AUTH] Verificando autorización...', { workspaceId, userId })
+      const result = await getIfAuthorizationUserExist({ workspaceId, userId })
+      console.log('[AUTH] Resultado autorización:', result)
+      return result
+    },
     enabled: !!workspaceId && !!userId
   })
+
+  console.log('[AUTH] Estado:', { workspaceId, userId, isValidUser, isLoading, isFetched })
 
   if (!isFetched || isLoading) {
     return <FullLoader
