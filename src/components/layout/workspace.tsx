@@ -39,10 +39,10 @@ export default function Workspace({ children }: WorkspaceProps) {
       console.log('[WS] joinWorkspace completado')
       return true
     },
-    enabled: tokenSuccess && isAdmin && !!workspaceId,
+    enabled: tokenSuccess && !!workspaceId && !!userId,
   })
 
-  const readyToFetch = isAdmin ? joinDone : tokenSuccess
+  const readyToFetch = joinDone
 
   console.log('[WS] Estado:', {
     workspaceId,

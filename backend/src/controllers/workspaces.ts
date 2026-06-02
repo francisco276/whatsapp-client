@@ -38,36 +38,40 @@ export const add: RouteHandler = async (req, res) => {
 
 export const join: RouteHandler = async (req, res) => {
   const { user: { userId } } = req
-  const { workspaceId, isAdmin } = req.body as { workspaceId: string, isAdmin: boolean }
+  const { workspaceId } = req.body as { workspaceId: string, isAdmin: boolean }
 
   try {
-    if (!isAdmin) {
-      return await sendSuccessResponse(res, null, 'No admin privileges to sync')
-    }
-
+    // Auto-create workspace if it doesn't exist
     let workspace = await WorkspaceManager.getWorkspace(workspaceId).catch(() => undefined)
     if (workspace === null || workspace === undefined) {
       workspace = await WorkspaceManager.createWorkspace({ id: workspaceId, name: workspaceId, userId })
     }
 
+    // Check if this user already has a record
     const [existing] = await db
       .select()
       .from(authorizationTable)
       .where(and(eq(authorizationTable.workspaceId, workspaceId), eq(authorizationTable.userId, userId)))
 
-    if (existing?.role === 'admin') {
-      return await sendSuccessResponse(res, null, 'Already admin')
+    if (existing) {
+      return await sendSuccessResponse(res, null, 'Already registered')
     }
 
-    await db
-      .insert(authorizationTable)
-      .values({ userId, workspaceId, role: 'admin' })
-      .onConflictDoUpdate({
-        target: [authorizationTable.workspaceId, authorizationTable.userId],
-        set: { role: 'admin' }
-      })
+    // Check if the workspace has any admin at all (bootstrap logic)
+    const [existingAdmin] = await db
+      .select()
+      .from(authorizationTable)
+      .where(and(eq(authorizationTable.workspaceId, workspaceId), eq(authorizationTable.role, 'admin')))
 
-    await sendSuccessResponse(res, null, 'Admin role assigned successfully')
+    if (!existingAdmin) {
+      // No admin exists yet — first user becomes admin (bootstrap)
+      await db
+        .insert(authorizationTable)
+        .values({ userId, workspaceId, role: 'admin' })
+      return await sendSuccessResponse(res, null, 'Bootstrap admin assigned')
+    }
+
+    await sendSuccessResponse(res, null, 'No auto-join — contact admin')
   } catch (error) {
     await handleError(error, res)
   }
