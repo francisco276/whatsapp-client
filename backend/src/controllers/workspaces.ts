@@ -41,13 +41,14 @@ export const join: RouteHandler = async (req, res) => {
   const { workspaceId } = req.body as { workspaceId: string, isAdmin: boolean }
 
   try {
-    // Auto-create workspace if it doesn't exist
-    let workspace = await WorkspaceManager.getWorkspace(workspaceId).catch(() => undefined)
+    // Auto-create workspace if it doesn't exist (createWorkspace also inserts caller as admin)
+    const workspace = await WorkspaceManager.getWorkspace(workspaceId).catch(() => undefined)
     if (workspace === null || workspace === undefined) {
-      workspace = await WorkspaceManager.createWorkspace({ id: workspaceId, name: workspaceId, userId })
+      await WorkspaceManager.createWorkspace({ id: workspaceId, name: workspaceId, userId })
+      return await sendSuccessResponse(res, null, 'Workspace created and admin assigned')
     }
 
-    // Check if this user already has a record
+    // Check if this user already has a record — never modify an existing record here
     const [existing] = await db
       .select()
       .from(authorizationTable)
@@ -57,20 +58,20 @@ export const join: RouteHandler = async (req, res) => {
       return await sendSuccessResponse(res, null, 'Already registered')
     }
 
-    // Check if the workspace has any admin at all (bootstrap logic)
+    // No record for this user — only auto-assign admin if the workspace has NO admins yet
     const [existingAdmin] = await db
       .select()
       .from(authorizationTable)
       .where(and(eq(authorizationTable.workspaceId, workspaceId), eq(authorizationTable.role, 'admin')))
 
     if (!existingAdmin) {
-      // No admin exists yet — first user becomes admin (bootstrap)
       await db
         .insert(authorizationTable)
         .values({ userId, workspaceId, role: 'admin' })
       return await sendSuccessResponse(res, null, 'Bootstrap admin assigned')
     }
 
+    // Workspace already has an admin — user must be added manually
     await sendSuccessResponse(res, null, 'No auto-join — contact admin')
   } catch (error) {
     await handleError(error, res)
