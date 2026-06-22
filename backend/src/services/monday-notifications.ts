@@ -80,7 +80,8 @@ async function sendMondayNotification (accessToken: string, userId: string, targ
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: accessToken
+        'Authorization': accessToken,
+        'API-Version': '2024-10'
       },
       body: JSON.stringify({
         query: CREATE_NOTIFICATION_MUTATION,
@@ -92,10 +93,21 @@ async function sendMondayNotification (accessToken: string, userId: string, targ
       })
     })
 
-    const result = await response.json() as { errors?: Array<{ message: string }> }
+    const rawText = await response.text()
+    console.log(`[MondayNotifications] Response status: ${response.status}, body: ${rawText}`)
+
+    let result: { errors?: Array<{ message: string }> }
+    try {
+      result = JSON.parse(rawText)
+    } catch {
+      console.error('[MondayNotifications] Failed to parse JSON response')
+      return
+    }
 
     if (result.errors !== undefined && result.errors.length > 0) {
       console.error('[MondayNotifications] API error:', result.errors)
+    } else {
+      console.log(`[MondayNotifications] Notification sent to user ${userId}, target ${targetId}`)
     }
   } catch (e) {
     console.error('[MondayNotifications] Failed to send notification:', e)

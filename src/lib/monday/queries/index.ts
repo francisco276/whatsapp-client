@@ -79,9 +79,10 @@ export const getItemName = `
 `
 
 export const getBoardItemsWithPhoneColumn = `
-  query ($boardId: ID!, $columnId: String!) {
+  query ($boardId: ID!, $columnId: String!, $cursor: String) {
     boards (ids: [$boardId]) {
-      items_page (limit: 500) {
+      items_page (limit: 500, cursor: $cursor) {
+        cursor
         items {
           id
           name

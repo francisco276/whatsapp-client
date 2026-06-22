@@ -1,0 +1,16 @@
+Lo revisé contra el código real. Replit acierta en la priorización general (los buckets están bien), pero tiene errores concretos en los diagnósticos — y esos importan porque te mandarían a buscar cosas que no existen. Te lo desgloso honesto:
+Donde Replit se equivoca o le falta
+#5 — Mal diagnóstico (pero el bucket es correcto). Replit dice que el frontend "manda delay: 1000 fijo". Eso es falso — lo verifiqué: el frontend SÍ calcula y manda el intervalo configurado ((min + random*(max-min)) * 1000). El bug real es otro: el frontend manda un mensaje por request, y el backend solo aplica delayMs(delay) con if (index > 0) dentro de un mismo batch → con 1 mensaje por request, index siempre es 0 y el delay nunca se ejecuta, más que el front nunca espera del lado cliente. Si hubieras seguido a Replit, habrías buscado un "1000 hardcodeado" que no está. Ya lo arreglé correctamente (espera client-side).
+#7 — Incompleto. Replit dice "lo más probable es que el token no esté guardado". El token es necesario pero no suficiente. Encontré dos cosas más: (a) cada usuario necesita un target registrado (mondayUserTargetsTable), y (b) la sospecha fuerte: create_notification usa target_type: Project pasándole un boardId como target_id, pero Project espera el ID de un item, no de un board → monday probablemente lo rechaza aun con token. Por eso insistí en mirar el log [MondayNotifications] API error en Grafana antes de "solo guardar el token".
+#6 — Vago, y ya está resuelto. Replit lo deja en "hay algo en la sincronización… requiere depurar el store" (medio, 1-2 días). Yo ya encontré la causa exacta: la fila de chatTable dependía de que Baileys emitiera chats.upsert, cosa que no hace para chats salientes que tú inicias, y el emitEvent que había solo pega al websocket, no a la DB. Ya lo arreglé. No son 1-2 días, ya está hecho.
+#1 — Sobreestimado. Replit dice "3-5 días, rediseñar el sistema de templates + nuevo motor de sustitución en backend". No hay motor en backend — la sustitución de {nombre} ocurre en el frontend (message.replace(...)); el backend recibe el texto ya armado. El trabajo real es: traer todas las columnas del board (ya existe getBoardColumns) en vez de solo la de teléfono, armar un mapa por contacto y generalizar el replace. Es frontend, ~1 día, no 3-5 días de backend.
+Donde Replit acierta
+
+#8 (límite 500): correcto, items_page(limit:500), hay que paginar con cursor. 2-4 h, de acuerdo.
+#3 (tracking): correcto, messagesTable.status ya existe, falta la vista. Medio.
+#2 (filtros): sí, mayormente UI. Pero comparte prerequisito con #1 (cargar todas las columnas) → conviene hacerlos juntos.
+#4 (bandeja unificada): correcto, es el más complejo. De acuerdo.
+
+Orden corregido
+#5 ✅ hecho → #6 ✅ hecho → #7 (validar log, luego fix del target) → #8 (paginación) → #1+#2 juntos (cargar columnas una vez resuelve ambos) → #3 (tracking) → #4 (bandeja, el grande).
+Resumen: la estructura de prioridades de Replit es razonable, pero en #5, #6, #7 y #1 sus causas raíz o estimaciones están mal — y dos de esos (#5, #6) ya los resolví con el código real en la mano, no con suposiciones. ¿Seguimos con #7 (lo validas en el log y te dejo el fix) o arranco #1+#2 que es lo que más mueve la aguja para Fernanda?

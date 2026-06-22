@@ -111,6 +111,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
   const [isSending, setIsSending] = useState(false)
   const [progress, setProgress] = useState<BulkResult[]>([])
   const [done, setDone] = useState(false)
+  const [sendingList, setSendingList] = useState<{ jid: string; name: string }[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,6 +219,11 @@ export const BulkMessageModal = ({ onClose }: Props) => {
 
     const jids = Array.from(selected)
     const results: BulkResult[] = []
+    const fullList = jids.map((jid) => {
+      const contact = currentList.find((c) => c.id === jid)
+      return { jid, name: contact?.name || formatPhone(jid) }
+    })
+    setSendingList(fullList)
 
     for (let i = 0; i < jids.length; i++) {
       const jid = jids[i]
@@ -228,15 +234,16 @@ export const BulkMessageModal = ({ onClose }: Props) => {
       const whatsappMessage = buildWhatsAppMessage(personalizedText, attachment)
 
       try {
-        const randomDelay = i === 0
-          ? 0
-          : (delayMin + Math.random() * (delayMax - delayMin)) * 1000
+        if (i > 0) {
+          const randomDelay = Math.round((delayMin + Math.random() * (delayMax - delayMin)) * 1000)
+          await new Promise<void>((resolve) => setTimeout(resolve, randomDelay))
+        }
 
         const payload = [{
           jid,
           type: isGroup(jid) ? 'group' : 'number',
           message: whatsappMessage,
-          delay: Math.round(randomDelay),
+          delay: 0,
           options: {}
         }]
 
@@ -352,7 +359,7 @@ export const BulkMessageModal = ({ onClose }: Props) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <Loader size={20} />
               <p style={{ margin: 0, fontSize: 14, color: '#676879' }}>
-                Enviando {progress.length} de {selected.size}...
+                Enviando {progress.length} de {sendingList.length}...
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -368,6 +375,26 @@ export const BulkMessageModal = ({ onClose }: Props) => {
                 }}>
                   <span style={{ fontSize: 14 }}>{r.success ? '✓' : '✗'}</span>
                   <span style={{ fontSize: 13, color: '#323338' }}>{r.name}</span>
+                </div>
+              ))}
+              {sendingList.filter((s) => !progress.find((p) => p.jid === s.jid)).map((s, idx) => (
+                <div key={s.jid} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '6px 10px',
+                  borderRadius: 4,
+                  backgroundColor: '#f8f9fb',
+                  border: '1px solid #e6e9ef',
+                  opacity: 0.6
+                }}>
+                  <span style={{ fontSize: 14 }}>{idx === 0 ? '⏳' : '·'}</span>
+                  <span style={{ fontSize: 13, color: '#676879' }}>{s.name}</span>
+                  {idx === 0 && (
+                    <span style={{ fontSize: 11, color: '#9699a6', marginLeft: 'auto' }}>
+                      {delayMin}–{delayMax}s
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

@@ -73,20 +73,34 @@ export class MondayQuery {
   }
 
   async getBoardItemsWithPhoneColumn(boardId: string | number, columnId: string) {
-    return this.requestor.request<{
-      boards: {
-        items_page: {
-          items: {
-            id: string
-            name: string
-            column_values: { id: string; text: string; value: string; phone?: string }[]
-          }[]
-        }
-      }[]
-    }>(
-      'getBoardItemsWithPhoneColumn',
-      getBoardItemsWithPhoneColumn,
-      { variables: { boardId, columnId } }
-    )
+    type Item = { id: string; name: string; column_values: { id: string; text: string; value: string; phone?: string }[] }
+    type PageData = { boards: { items_page: { cursor: string | null; items: Item[] } }[] }
+
+    const allItems: Item[] = []
+    let cursor: string | null = null
+
+    do {
+      const response = await this.requestor.request<PageData>(
+        'getBoardItemsWithPhoneColumn',
+        getBoardItemsWithPhoneColumn,
+        { variables: { boardId, columnId, cursor: cursor ?? undefined } }
+      )
+      const pageData = response.data as PageData
+      const page = pageData?.boards?.[0]?.items_page
+      if (!page) break
+      allItems.push(...page.items)
+      cursor = page.cursor ?? null
+    } while (cursor !== null)
+
+    return {
+      data: {
+        boards: [{
+          items_page: {
+            cursor: null,
+            items: allItems
+          }
+        }]
+      } as PageData
+    }
   }
 }
