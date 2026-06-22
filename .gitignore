@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Build outputs
+dist/
+dist-aws-*/
+backend/dist/
+*.zip
+*.tar
+*.tar.gz
+
+# Vite cache
+.vite/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Replit internals
+.agents/
+.config/
+.replit
+replit.nix
+
+# Agent session assets (screenshots, attachments)
+attached_assets/
+
+# Backend lives in its own repo (simplifica-Whatsapp-server)
+backend/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
