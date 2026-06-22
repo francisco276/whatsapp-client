@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "==> Creando rama v2 del frontend..."
-git checkout -b v2
+echo "==> Cambiando a rama v2 del frontend..."
+git checkout v2 2>/dev/null || git checkout -b v2
 
 echo "==> Pusheando rama v2 a GitHub..."
 git push origin v2
