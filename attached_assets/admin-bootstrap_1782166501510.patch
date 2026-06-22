@@ -1,0 +1,85 @@
+--- a/src/controllers/workspaces.ts
++++ b/src/controllers/workspaces.ts
+@@ -38,17 +38,30 @@
+ 
+ export const join: RouteHandler = async (req, res) => {
+   const { user: { userId } } = req
+-  const { workspaceId } = req.body as { workspaceId: string, isAdmin: boolean }
++  // `isAdmin` is the monday account-admin flag sent by the frontend (context.user.isAdmin).
++  const { workspaceId, isAdmin = false } = req.body as { workspaceId: string, isAdmin?: boolean }
+ 
+   try {
+-    // Auto-create workspace if it doesn't exist (createWorkspace also inserts caller as admin)
++    // 1. Ensure the workspace exists. Creating it must NOT, by itself, grant admin:
++    //    admin is decided solely by the monday `isAdmin` flag in step 2. This is the fix
++    //    for the "first user to open hijacks the workspace" bug.
+     const workspace = await WorkspaceManager.getWorkspace(workspaceId).catch(() => undefined)
+     if (workspace === null || workspace === undefined) {
+-      await WorkspaceManager.createWorkspace({ id: workspaceId, name: workspaceId, userId })
+-      return await sendSuccessResponse(res, null, 'Workspace created and admin assigned')
++      await WorkspaceManager.createWorkspace({ id: workspaceId, name: workspaceId, userId, grantAdmin: false })
+     }
+ 
+-    // Check if this user already has a record — never modify an existing record here
++    // 2. Any monday account admin becomes an app admin. Idempotent and additive:
++    //    onConflictDoNothing means it only inserts when the user has NO record yet, so it
++    //    never deletes, never downgrades, and never overrides a role an admin set manually.
++    if (isAdmin === true) {
++      await db
++        .insert(authorizationTable)
++        .values({ userId, workspaceId, role: 'admin' })
++        .onConflictDoNothing({ target: [authorizationTable.workspaceId, authorizationTable.userId] })
++      return await sendSuccessResponse(res, null, 'Admin access granted')
++    }
++
++    // 3. Non-admin caller: if they already have a record, leave it exactly as-is.
+     const [existing] = await db
+       .select()
+       .from(authorizationTable)
+@@ -58,20 +71,17 @@
+       return await sendSuccessResponse(res, null, 'Already registered')
+     }
+ 
+-    // No record for this user — only auto-assign admin if the workspace has NO admins yet
++    // 4. Non-admin without a record: never auto-grant admin. If no admin exists yet, the
++    //    workspace stays pending until a real monday admin opens it (step 2 handles that).
+     const [existingAdmin] = await db
+       .select()
+       .from(authorizationTable)
+       .where(and(eq(authorizationTable.workspaceId, workspaceId), eq(authorizationTable.role, 'admin')))
+ 
+     if (!existingAdmin) {
+-      await db
+-        .insert(authorizationTable)
+-        .values({ userId, workspaceId, role: 'admin' })
+-      return await sendSuccessResponse(res, null, 'Bootstrap admin assigned')
++      return await sendSuccessResponse(res, null, 'Workspace pending: waiting for an admin to set it up')
+     }
+ 
+-    // Workspace already has an admin — user must be added manually
+     await sendSuccessResponse(res, null, 'No auto-join — contact admin')
+   } catch (error) {
+     await handleError(error, res)
+--- a/src/services/WorkspacesManager.ts
++++ b/src/services/WorkspacesManager.ts
+@@ -19,9 +19,18 @@
+     }
+   }
+ 
+-  public static async createWorkspace ({ id, name, userId }: { id: string, name: string, userId: string }): Promise<Workspace> {
++  public static async createWorkspace ({ id, name, userId, grantAdmin = true }: { id: string, name: string, userId: string, grantAdmin?: boolean }): Promise<Workspace> {
+     const [workspaceDb] = await db.insert(workspacesTable).values({ id, name }).returning()
+-    await db.insert(authorizationTable).values({ userId, workspaceId: id, role: 'admin' })
++
++    // Only grant admin on creation when explicitly allowed (e.g. the `add` flow). The `join`
++    // flow passes grantAdmin: false and decides admin via the monday isAdmin flag instead,
++    // so simply opening the app can never make a non-admin the owner of the workspace.
++    if (grantAdmin) {
++      await db
++        .insert(authorizationTable)
++        .values({ userId, workspaceId: id, role: 'admin' })
++        .onConflictDoNothing({ target: [authorizationTable.workspaceId, authorizationTable.userId] })
++    }
+ 
+     const workspace = new Workspace(workspaceDb)
+ 
