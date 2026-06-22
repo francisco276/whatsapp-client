@@ -16,11 +16,22 @@ cd "$TMPDIR"
 git checkout -b v2 origin/main
 
 echo "==> Copiando todos los archivos del backend..."
-rsync -av \
-  --exclude='.git' \
-  --exclude='node_modules' \
-  --exclude='dist' \
-  "$BACKEND_SRC/" "$TMPDIR/"
+cd "$BACKEND_SRC"
+find . \
+  -not -path './.git/*' \
+  -not -path './node_modules/*' \
+  -not -path './dist/*' \
+  -not -name '.git' \
+  | while read -r item; do
+    dest="$TMPDIR/$item"
+    if [ -d "$BACKEND_SRC/$item" ]; then
+      mkdir -p "$dest"
+    else
+      mkdir -p "$(dirname "$dest")"
+      cp "$BACKEND_SRC/$item" "$dest"
+    fi
+  done
+cd "$TMPDIR"
 
 echo "==> Archivos modificados:"
 git status
